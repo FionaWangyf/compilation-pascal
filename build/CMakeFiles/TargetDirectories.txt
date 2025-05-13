@@ -1,0 +1,12 @@
+/com/build/CMakeFiles/rebuild_cache.dir
+/com/build/CMakeFiles/edit_cache.dir
+/com/build/CMakeFiles/test.dir
+/com/build/CMakeFiles/pascc.dir
+/com/build/test/bison_test/CMakeFiles/rebuild_cache.dir
+/com/build/test/bison_test/CMakeFiles/edit_cache.dir
+/com/build/test/bison_test/CMakeFiles/test.dir
+/com/build/test/bison_test/CMakeFiles/BISON_TEST.dir
+/com/build/test/ir_test/CMakeFiles/rebuild_cache.dir
+/com/build/test/ir_test/CMakeFiles/edit_cache.dir
+/com/build/test/ir_test/CMakeFiles/test.dir
+/com/build/test/ir_test/CMakeFiles/IR_TEST.dir
