@@ -6,7 +6,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/com/src/ast/stmt.cpp" "/com/build/CMakeFiles/pascc.dir/src/ast/stmt.cpp.o"
   "/com/src/ast/stmt_test.cpp" "/com/build/CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o"
-  "/com/src/builder/c/c_builder.cpp" "/com/build/CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
+  "/com/src/builder/builder.cpp" "/com/build/CMakeFiles/pascc.dir/src/builder/builder.cpp.o"
   "/com/src/common/log/log.cpp" "/com/build/CMakeFiles/pascc.dir/src/common/log/log.cpp.o"
   "/com/src/common/setting/settings.cpp" "/com/build/CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"
   "/com/src/common/thpool/thpool.cpp" "/com/build/CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o"

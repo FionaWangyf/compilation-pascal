@@ -214,32 +214,32 @@ src/ast/stmt_test.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s
 .PHONY : src/ast/stmt_test.cpp.s
 
-src/builder/c/c_builder.o: src/builder/c/c_builder.cpp.o
+src/builder/builder.o: src/builder/builder.cpp.o
 
-.PHONY : src/builder/c/c_builder.o
+.PHONY : src/builder/builder.o
 
 # target to build an object file
-src/builder/c/c_builder.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o
-.PHONY : src/builder/c/c_builder.cpp.o
+src/builder/builder.cpp.o:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/builder.cpp.o
+.PHONY : src/builder/builder.cpp.o
 
-src/builder/c/c_builder.i: src/builder/c/c_builder.cpp.i
+src/builder/builder.i: src/builder/builder.cpp.i
 
-.PHONY : src/builder/c/c_builder.i
+.PHONY : src/builder/builder.i
 
 # target to preprocess a source file
-src/builder/c/c_builder.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i
-.PHONY : src/builder/c/c_builder.cpp.i
+src/builder/builder.cpp.i:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/builder.cpp.i
+.PHONY : src/builder/builder.cpp.i
 
-src/builder/c/c_builder.s: src/builder/c/c_builder.cpp.s
+src/builder/builder.s: src/builder/builder.cpp.s
 
-.PHONY : src/builder/c/c_builder.s
+.PHONY : src/builder/builder.s
 
 # target to generate assembly for a file
-src/builder/c/c_builder.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s
-.PHONY : src/builder/c/c_builder.cpp.s
+src/builder/builder.cpp.s:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/builder.cpp.s
+.PHONY : src/builder/builder.cpp.s
 
 src/common/log/log.o: src/common/log/log.cpp.o
 
@@ -529,9 +529,9 @@ help:
 	@echo "... src/ast/stmt_test.o"
 	@echo "... src/ast/stmt_test.i"
 	@echo "... src/ast/stmt_test.s"
-	@echo "... src/builder/c/c_builder.o"
-	@echo "... src/builder/c/c_builder.i"
-	@echo "... src/builder/c/c_builder.s"
+	@echo "... src/builder/builder.o"
+	@echo "... src/builder/builder.i"
+	@echo "... src/builder/builder.s"
 	@echo "... src/common/log/log.o"
 	@echo "... src/common/log/log.i"
 	@echo "... src/common/log/log.s"

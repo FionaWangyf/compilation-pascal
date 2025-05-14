@@ -15,10 +15,10 @@
 #include "ast/stmt.hpp"
 #include "ir/ir_gen.hpp"
 #include "common/setting/settings.hpp"
-#include "builder/c/c_builder.hpp"
+#include "builder/builder.hpp"
 #include "opt/const_expr.hpp"
 #include "parser/yacc_pascal.hpp"
-#include "builder/c/c_builder.hpp"
+#include "builder/builder.hpp"
 
 int code_parse(const char *code, ProgramStmt **program_stmt);
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     std::ofstream output_file(G_SETTINGS.output_file);
     LOG_DEBUG("Start generating target code...");
     LOG_INFO("Generating C code...");
-    std::unique_ptr<builder::c::CBuilder> builder = std::make_unique<builder::c::CBuilder>();
+    std::unique_ptr<builder::Builder> builder = std::make_unique<builder::Builder>();
     builder->build(ir);
     builder->output(output_file);
     LOG_DEBUG("Generating target code done.");

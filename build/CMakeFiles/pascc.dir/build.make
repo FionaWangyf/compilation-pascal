@@ -83,18 +83,18 @@ CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/ast/stmt_test.cpp -o CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s
 
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: CMakeFiles/pascc.dir/flags.make
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/builder/c/c_builder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o -c /com/src/builder/c/c_builder.cpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: CMakeFiles/pascc.dir/flags.make
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/builder/builder.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/pascc.dir/src/builder/builder.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/builder/builder.cpp.o -c /com/src/builder/builder.cpp
 
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/builder/c/c_builder.cpp > CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i
+CMakeFiles/pascc.dir/src/builder/builder.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/builder/builder.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/builder/builder.cpp > CMakeFiles/pascc.dir/src/builder/builder.cpp.i
 
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/builder/c/c_builder.cpp -o CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s
+CMakeFiles/pascc.dir/src/builder/builder.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/builder/builder.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/builder/builder.cpp -o CMakeFiles/pascc.dir/src/builder/builder.cpp.s
 
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: ../src/common/log/log.cpp
@@ -230,7 +230,7 @@ CMakeFiles/pascc.dir/src/token/token.cpp.s: cmake_force
 pascc_OBJECTS = \
 "CMakeFiles/pascc.dir/src/ast/stmt.cpp.o" \
 "CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o" \
-"CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o" \
+"CMakeFiles/pascc.dir/src/builder/builder.cpp.o" \
 "CMakeFiles/pascc.dir/src/common/log/log.cpp.o" \
 "CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o" \
 "CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o" \
@@ -247,7 +247,7 @@ pascc_EXTERNAL_OBJECTS =
 
 ../bin/pascc: CMakeFiles/pascc.dir/src/ast/stmt.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o
-../bin/pascc: CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o
+../bin/pascc: CMakeFiles/pascc.dir/src/builder/builder.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/common/log/log.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o

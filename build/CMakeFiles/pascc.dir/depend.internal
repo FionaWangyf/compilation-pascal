@@ -9,16 +9,15 @@ CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o
  ../src/ast/stmt.hpp
  ../src/ast/stmt_test.hpp
  /com/src/ast/stmt_test.cpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o
  ../src/ast/stmt.hpp
  ../src/ast/visitor.hpp
  ../src/builder/builder.hpp
- ../src/builder/c/c_builder.hpp
  ../src/common/log/log.hpp
  ../src/common/setting/settings.hpp
  ../src/ir/ir.hpp
  ../src/ir/ir_gen.hpp
- /com/src/builder/c/c_builder.cpp
+ /com/src/builder/builder.cpp
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o
  ../src/common/log/log.hpp
  /com/src/common/log/log.cpp
@@ -43,10 +42,9 @@ CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o
  /com/src/ir/ir_gen.cpp
 CMakeFiles/pascc.dir/src/main.cpp.o
  ../src/ast/visitor.hpp
- ../src/builder/builder.hpp
  ../src/ir/ir.hpp
  /com/src/ast/stmt.hpp
- /com/src/builder/c/c_builder.hpp
+ /com/src/builder/builder.hpp
  /com/src/common/log/log.hpp
  /com/src/common/setting/settings.hpp
  /com/src/common/thpool/thpool.hpp

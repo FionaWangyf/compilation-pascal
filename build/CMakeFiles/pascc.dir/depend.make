@@ -9,15 +9,14 @@ CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt.hpp
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.hpp
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
 
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/ast/visitor.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/builder/builder.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/builder/c/c_builder.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/common/log/log.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/common/setting/settings.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/ir/ir.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/ir/ir_gen.hpp
-CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/builder/c/c_builder.cpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ast/stmt.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ast/visitor.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/builder/builder.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/common/log/log.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/common/setting/settings.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ir/ir.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ir/ir_gen.hpp
+CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/builder/builder.cpp
 
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: ../src/common/log/log.hpp
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: ../src/common/log/log.cpp
@@ -42,10 +41,9 @@ CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ir/ir_gen.hpp
 CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ir/ir_gen.cpp
 
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ast/visitor.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/builder/builder.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ir/ir.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/builder/c/c_builder.hpp
+CMakeFiles/pascc.dir/src/main.cpp.o: ../src/builder/builder.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/common/log/log.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/common/setting/settings.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/common/thpool/thpool.hpp
