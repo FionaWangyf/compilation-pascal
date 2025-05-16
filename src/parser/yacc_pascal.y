@@ -6,6 +6,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
+#include <type_traits>
 
 #include "common/log/log.hpp"
 #include "common/setting/settings.hpp"
@@ -14,229 +16,293 @@
 #include "yacc_pascal.hpp"
 #include "lex_pascal.hpp"
 
-bool hadError = false; // 错误标志
+namespace {
+    bool hadError = false; // 错误标志
 
-RelExprStmt::RelExprType get_rel_expr_type(long long op) {
-    if(op == 0){
-        return RelExprStmt::RelExprType::Equal;
-    } else if(op == 1){
-        return RelExprStmt::RelExprType::NotEqual;
-    } else if(op == 2){
-        return RelExprStmt::RelExprType::Less;
-    } else if(op == 3){
-        return RelExprStmt::RelExprType::LessEqual;
-    } else if(op == 4){
-        return RelExprStmt::RelExprType::Greater;
-    } else if(op == 5){
-        return RelExprStmt::RelExprType::GreaterEqual;
-    } else if(op == 6){
-        return RelExprStmt::RelExprType::In;
-    } else {
-        return RelExprStmt::RelExprType::NULL_TYPE;
-    }
-}
-
-AddExprStmt::AddExprType get_add_expr_type(long long op) {
-    if(op == 0){
-        return AddExprStmt::AddExprType::Plus;
-    } else if(op == 1){
-        return AddExprStmt::AddExprType::Minus;
-    } else if(op == 2){
-        return AddExprStmt::AddExprType::Or;
-    } else {
-        return AddExprStmt::AddExprType::NULL_TYPE;
-    }
-}
-
-MulExprStmt::MulExprType get_mul_expr_type(long long op) {
-    if(op == 0){
-        return MulExprStmt::MulExprType::Mul;
-    } else if(op == 1){
-        return MulExprStmt::MulExprType::Div;
-    } else if(op == 2){
-        return MulExprStmt::MulExprType::Mod;
-    } else if(op == 3){
-        return MulExprStmt::MulExprType::And;
-    } else if(op == 4){
-        return MulExprStmt::MulExprType::AndThen;
-    } else {
-        return MulExprStmt::MulExprType::NULL_TYPE;
+    // 辅助函数：将数值标识符映射到枚举类型
+    // 处理运算符类型转换的统一逻辑
+    template<typename EnumType, typename MapType>
+    EnumType get_operator_type(long long op, const MapType& typeMap) {
+        auto it = typeMap.find(op);
+        if (it != typeMap.end()) {
+            return it->second;
+        }
+        return static_cast<EnumType>(0); // NULL_TYPE 通常是0
     }
 
+    // 关系运算符映射表
+    const std::map<long long, RelExprStmt::RelExprType> relExprTypeMap = {
+        {0, RelExprStmt::RelExprType::Equal},
+        {1, RelExprStmt::RelExprType::NotEqual},
+        {2, RelExprStmt::RelExprType::Less},
+        {3, RelExprStmt::RelExprType::LessEqual},
+        {4, RelExprStmt::RelExprType::Greater},
+        {5, RelExprStmt::RelExprType::GreaterEqual},
+        {6, RelExprStmt::RelExprType::In}
+    };
+
+    // 加法级运算符映射表
+    const std::map<long long, AddExprStmt::AddExprType> addExprTypeMap = {
+        {0, AddExprStmt::AddExprType::Plus},
+        {1, AddExprStmt::AddExprType::Minus},
+        {2, AddExprStmt::AddExprType::Or}
+    };
+
+    // 乘法级运算符映射表
+    const std::map<long long, MulExprStmt::MulExprType> mulExprTypeMap = {
+        {0, MulExprStmt::MulExprType::Mul},
+        {1, MulExprStmt::MulExprType::Div},
+        {2, MulExprStmt::MulExprType::Mod},
+        {3, MulExprStmt::MulExprType::And},
+        {4, MulExprStmt::MulExprType::AndThen}
+    };
+
+    // 获取各类运算符类型的函数
+    RelExprStmt::RelExprType get_rel_expr_type(long long op) {
+        return get_operator_type<RelExprStmt::RelExprType>(op, relExprTypeMap);
+    }
+
+    AddExprStmt::AddExprType get_add_expr_type(long long op) {
+        return get_operator_type<AddExprStmt::AddExprType>(op, addExprTypeMap);
+    }
+
+    MulExprStmt::MulExprType get_mul_expr_type(long long op) {
+        return get_operator_type<MulExprStmt::MulExprType>(op, mulExprTypeMap);
+    }
+
+    // 填充数值节点的统一函数
+    template<typename T>
+    void fill_number_stmt(std::unique_ptr<NumberStmt>& num_value, T val) {
+        num_value->is_signed = true;
+        num_value->is_real = std::is_same<T, double>::value;
+        num_value->is_char = std::is_same<T, char>::value;
+        num_value->is_unsigned = false;
+
+        if constexpr (std::is_same<T, long long>::value) {
+            num_value->int_val = val;
+        } else if constexpr (std::is_same<T, double>::value) {
+            num_value->real_val = val;
+        } else if constexpr (std::is_same<T, char>::value) {
+            num_value->char_val = val;
+            LOG_DEBUG("DEBUG fill_number_stmt -> char_val: %c", val);
+        }
+    }
+
+    // 节点创建辅助函数
+    template<typename T, typename... Args>
+    T* create_node(Args&&... args) {
+        return new T(std::forward<Args>(args)...);
+    }
+
+    // 将一个值添加到列表中的辅助函数
+    template<typename T>
+    void add_to_list(std::vector<T*>* list, T* item) {
+        if (!list) {
+            list = new std::vector<T*>();
+        }
+        list->emplace_back(item);
+    }
+
+    // 将列表中的所有项转移到所有者中的辅助函数
+    template<typename Owner, typename T>
+    void transfer_list_to_owner(Owner* owner, std::vector<T*>* list, std::vector<std::unique_ptr<T>> Owner::* container) {
+        if (list) {
+            for (auto item : *list) {
+                (owner->*container).emplace_back(std::unique_ptr<T>(item));
+            }
+            delete list;
+        }
+    }
+
+    // 值节点工厂
+    class ValueNodeFactory {
+    public:
+        static ValueStmt* create_integer(long long val) {
+            ValueStmt* value = new ValueStmt();
+            value->type = ValueStmt::ValueType::Number;
+            value->number = std::make_unique<NumberStmt>();
+            fill_number_stmt(value->number, val);
+            return value;
+        }
+
+        static ValueStmt* create_real(const char* str) {
+            ValueStmt* value = new ValueStmt();
+            value->type = ValueStmt::ValueType::Number;
+            value->number = std::make_unique<NumberStmt>();
+            double val = atof(str);
+            fill_number_stmt(value->number, val);
+            value->number->literal = std::string(str);
+            return value;
+        }
+
+        static ValueStmt* create_char(char val) {
+            ValueStmt* value = new ValueStmt();
+            value->type = ValueStmt::ValueType::Number;
+            value->number = std::make_unique<NumberStmt>();
+            fill_number_stmt(value->number, val);
+            return value;
+        }
+
+        static ValueStmt* create_string(const char* str) {
+            ValueStmt* value = new ValueStmt();
+            value->type = ValueStmt::ValueType::Str;
+            value->str = std::make_unique<StrStmt>();
+            value->str->val = std::string(str).substr(1, std::string(str).length() - 2);
+            return value;
+        }
+    };
+
+    // 表达式节点工厂
+    class ExprNodeFactory {
+    public:
+        static ExprStmt* create_from_simple_expr(AddExprStmt* simple_expr) {
+            ExprStmt* expr = new ExprStmt();
+            expr->rel_expr = std::make_unique<RelExprStmt>();
+            RelExprStmt::Term term;
+            term.type = RelExprStmt::RelExprType::NULL_TYPE;
+            term.add_expr = std::unique_ptr<AddExprStmt>(simple_expr);
+            expr->rel_expr->terms.emplace_back(std::move(term));
+            return expr;
+        }
+
+        static AddExprStmt* create_from_term(MulExprStmt* term) {
+            AddExprStmt* add_expr = new AddExprStmt();
+            AddExprStmt::Term term_struct;
+            term_struct.type = AddExprStmt::AddExprType::NULL_TYPE;
+            term_struct.mul_expr = std::unique_ptr<MulExprStmt>(term);
+            add_expr->terms.emplace_back(std::move(term_struct));
+            return add_expr;
+        }
+
+        static MulExprStmt* create_from_factor(UnaryExprStmt* factor) {
+            MulExprStmt* mul_expr = new MulExprStmt();
+            MulExprStmt::Term term;
+            term.type = MulExprStmt::MulExprType::NULL_TYPE;
+            term.unary_expr = std::unique_ptr<UnaryExprStmt>(factor);
+            mul_expr->terms.emplace_back(std::move(term));
+            return mul_expr;
+        }
+    };
+
+    // 创建一元表达式的函数
+    UnaryExprStmt* create_unary_expr(PrimaryExprStmt::PrimaryExprType type) {
+        UnaryExprStmt* unary = new UnaryExprStmt();
+        unary->primary_expr = std::make_unique<PrimaryExprStmt>();
+        unary->primary_expr->type = type;
+        return unary;
+    }
+
+    // 报告语法错误
+    void syntax_error(YYLTYPE *llocp, const char *msg) {
+        LOG_ERROR("[Syntax Error] at line %d, column %d: %s", llocp->first_line, llocp->first_column, msg);
+        hadError = true;
+        exit(1);
+    }
+
+    // 获取错误位置的辅助函数
+    void get_error_location(const char* code_str, YYLTYPE *llocp, std::string &error_note, std::string &msg, bool have_expected) {
+        std::string code(code_str);
+        std::istringstream stream(code);
+        std::string line;
+        int current_line = 1;
+        msg += "\t";
+        
+        while (std::getline(stream, line)) {
+            if (current_line == llocp->first_line) {
+                // 打印到错误开始之前的部分
+                msg += line.substr(0, llocp->first_column);
+                // 错误部分使用红色高亮显示
+                error_note = line.substr(llocp->first_column, llocp->last_column - llocp->first_column + 1);
+                msg += "\033[31m";
+                msg += error_note;
+                msg += "\033[0m";
+                // 打印错误之后的部分
+                if (llocp->last_column < line.size()) {
+                    msg += line.substr(llocp->last_column + 1);
+                }
+                // 添加箭头
+                msg += "\n\t";
+                if (have_expected) {
+                    for (int i = 0; i < llocp->first_column; ++i) {
+                        msg += " ";
+                    }
+                    for (int i = llocp->first_column; i <= llocp->last_column; ++i) {
+                        msg += "\033[1;37m^\033[0m";
+                    }
+                } else {
+                    for (int i = 0; i < llocp->first_column; ++i) {
+                        msg += "\033[1;37m^\033[0m";
+                    }
+                }
+                break; // 已找到错误行，跳出循环
+            }
+            ++current_line;
+        }
+    }
+
+    // 日志辅助宏
+    #define LOG_RULE(rule) LOG_DEBUG("DEBUG " rule)
+    #define LOG_ERROR_RULE(rule) LOG_DEBUG("ERROR " rule)
+    #define HANDLE_ERROR(result, cleanup_code) \
+        { \
+            cleanup_code; \
+            LOG_ERROR_RULE(result); \
+            yyerrok; \
+        }
 }
 
-// std::unique_ptr<RelExprStmt> new_rel_expr_stmt(RelExprStmt::RelExprType type) {
-//     std::unique_ptr<RelExprStmt> rel_expr = std::make_unique<RelExprStmt>();
-//     rel_expr->type = type;
-//     if(type == RelExprStmt::RelExprType::NULL_TYPE){
-//         rel_expr->add_expr = nullptr;
-//     }
-//     return rel_expr;
-// }
-
-
-// std::unique_ptr<AddExprStmt> new_add_expr_stmt(AddExprStmt::AddExprType type) {
-//     std::unique_ptr<AddExprStmt> add_expr = std::make_unique<AddExprStmt>();
-//     add_expr->type = type;
-//     if(type == AddExprStmt::AddExprType::NULL_TYPE){
-//         add_expr->add_expr = nullptr;
-//     }
-//     return add_expr;
-// }
-
-
-// std::unique_ptr<MulExprStmt> new_mul_expr_stmt(MulExprStmt::MulExprType type) {
-//     std::unique_ptr<MulExprStmt> mul_expr = std::make_unique<MulExprStmt>();
-//     mul_expr->type = type;
-//     if(type == MulExprStmt::MulExprType::NULL_TYPE){
-//         mul_expr->mul_expr = nullptr;
-//     }
-//     return mul_expr;
-// }
-
-
-// std::unique_ptr<UnaryExprStmt> new_unary_expr_stmt(UnaryExprStmt::UnaryExprType type) {
-//     std::unique_ptr<UnaryExprStmt> unary_expr = std::make_unique<UnaryExprStmt>();
-//     unary_expr->type = type;
-//     return unary_expr;
-// }
-
-
-// std::unique_ptr<PrimaryExprStmt> new_primary_expr_stmt(PrimaryExprStmt::PrimaryExprType type) {
-//     std::unique_ptr<PrimaryExprStmt> primary_expr = std::make_unique<PrimaryExprStmt>();
-//     primary_expr->type = type;
-//     return primary_expr;
-// }
-
-// std::unique_ptr<ValueStmt> new_value_stmt(ValueStmt::ValueType type) {
-//     std::unique_ptr<ValueStmt> value = std::make_unique<ValueStmt>();
-//     value->type = type;
-//     return value;
-// }
-
-NumberStmt * new_number_stmt(char char_val);
-NumberStmt * new_number_stmt(double real_val);
-NumberStmt * new_number_stmt(long long int_val);
-
-void fill_number_stmt(std::unique_ptr<NumberStmt> &num_value, long long int_val){
-    num_value->is_signed = true;
-    num_value->is_real = false;
-    num_value->is_char = false;
-    num_value->is_unsigned = false;
-    num_value->int_val = int_val;
-}
-
-void fill_number_stmt(std::unique_ptr<NumberStmt> &num_value, double real_val){
-    num_value->is_signed = true;
-    num_value->is_real = true;
-    num_value->is_char = false;
-    num_value->is_unsigned = false;
-    num_value->real_val = real_val;
-}
-
-void fill_number_stmt(std::unique_ptr<NumberStmt> &num_value, char char_val){
-    num_value->is_signed = true;
-    num_value->is_real = false;
-    num_value->is_char = true;
-    num_value->is_unsigned = false;
-    num_value->char_val = char_val;
-    LOG_DEBUG("DEBUG fill_number_stmt -> char_val: %c", char_val);
-}
-
-void fill_number_stmt(NumberStmt* num_value, long long int_val){
-    num_value->is_signed = true;
-    num_value->is_real = false;
-    num_value->is_char = false;
-    num_value->is_unsigned = false;
-    num_value->int_val = int_val;
-    LOG_DEBUG("DEBUG fill_number_stmt -> int_val: %lld", int_val);
-}
-
-void fill_number_stmt(NumberStmt* num_value, double real_val){
-    num_value->is_signed = true;
-    num_value->is_real = true;
-    num_value->is_char = false;
-    num_value->is_unsigned = false;
-    num_value->real_val = real_val;
-}
-
-void fill_number_stmt(NumberStmt* num_value, char char_val){
-    num_value->is_signed = true;
-    num_value->is_real = false;
-    num_value->is_char = true;
-    num_value->is_unsigned = false;
-    num_value->char_val = char_val;
-}
-
-// std::unique_ptr<PrimaryExprStmt> bridge_primary_to_unary(std::unique_ptr<UnaryExprStmt> unary_expr){
-//     std::unique_ptr<PrimaryExprStmt> primary_expr = std::make_unique<PrimaryExprStmt>();
-//     primary_expr->type = PrimaryExprStmt::PrimaryExprType::Parentheses;
-//     primary_expr->expr = std::make_unique<ExprStmt>();
-//     primary_expr->expr->rel_expr = std::make_unique<RelExprStmt>();
-//     primary_expr->expr->rel_expr->type = RelExprStmt::RelExprType::NULL_TYPE;
-//     primary_expr->expr->rel_expr->add_expr = std::make_unique<AddExprStmt>();
-//     primary_expr->expr->rel_expr->add_expr->type = AddExprStmt::AddExprType::NULL_TYPE;
-//     primary_expr->expr->rel_expr->add_expr->mul_expr = std::make_unique<MulExprStmt>();
-//     primary_expr->expr->rel_expr->add_expr->mul_expr->type = MulExprStmt::MulExprType::NULL_TYPE;
-//     primary_expr->expr->rel_expr->add_expr->mul_expr->unary_expr = std::move(unary_expr);
-//     return primary_expr;
-// }
-
-
-void syntax_error(YYLTYPE *llocp, const char *msg){
-    LOG_ERROR("[Syntax Error] at line %d, column %d: %s", llocp->first_line, llocp->first_column, msg);
-    exit(1);
-}
-
+// 枚举类，定义编译器正在处理的语法规则类型
 enum class CurrentRule {
-    ProgramStruct,
-    ProgramHead,
-    ProgramBody,
-    IdList,
-    ConstDeclarations,
-    ConstDeclaration,
-    ConstValue,
-    VarDeclarations,
-    VarDeclaration,
-    Type,
-    BasicType,
-    PeriodList,
-    SubprogramDeclarations,
-    Subprogram,
-    SubprogramHead,
-    FormalParameter,
-    ParameterList,
-    Parameter,
-    VarParameter,
-    ValueParameter,
-    SubprogramBody,
-    CompoundStatement,
-    StatementList,
-    Statement,
-    ProcedureCall,
-    VariableList,
-    Variable,
-    IdVarpart,
-    ExpressionList,
-    ArrayIndexExpression,
-    BracketExpressionList,
-    Expression,
-    SimpleExpression,
-    Term,
-    Factor,
+    ProgramStruct,     // 整个程序结构，包括程序头和程序体
+    ProgramHead,       // 程序头部分，包含程序名和可能的文件参数
+    ProgramBody,       // 程序主体，包含常量定义、变量声明、函数/过程声明和主程序语句
+    IdList,            // 标识符列表，用于多个变量或参数的声明
+    ConstDeclarations, // 常量声明部分
+    ConstDeclaration,  // 单个常量的声明
+    ConstValue,        // 常量值（可以是数字、字符、字符串等）
+    VarDeclarations,   // 变量声明部分
+    VarDeclaration,    // 单个或一组变量的声明
+    Type,              // 类型定义
+    BasicType,         // 基本类型
+    PeriodList,        // 数组维度范围列表
+    SubprogramDeclarations, // 子程序（函数和过程）声明部分
+    Subprogram,        // 单个子程序（函数或过程）的声明
+    SubprogramHead,    // 子程序头部，包含名称、参数和返回类型
+    FormalParameter,   // 形式参数部分
+    ParameterList,     // 参数列表
+    Parameter,         // 单个参数或参数组
+    VarParameter,      // 引用传递参数
+    ValueParameter,    // 值传递参数
+    SubprogramBody,    // 子程序体，包含局部声明和语句
+    CompoundStatement, // 复合语句块
+    StatementList,     // 语句列表，多个语句用分号分隔
+    Statement,         // 单个语句（赋值、条件、循环等）
+    ProcedureCall,     // 过程调用
+    VariableList,      // 变量列表，用于输入/输出语句
+    Variable,          // 变量引用，可以是简单变量或数组元素
+    IdVarpart,         // 变量引用的附加部分，如数组下标
+    ExpressionList,    // 表达式列表，用于函数调用或数组索引
+    ArrayIndexExpression, // 数组索引表达式
+    BracketExpressionList, // 方括号表达式列表，用于多维数组
+    Expression,        // 完整表达式，可能包含关系运算
+    SimpleExpression,  // 简单表达式，包含加法级运算符
+    Term,              // 项，包含乘法级运算符
+    Factor,            // 因子，表达式的基本构建块
 };
+
+// 跟踪编译器当前正在处理的语法规则
 static CurrentRule current_rule = CurrentRule::ProgramStruct;
 
 void resetErrorFlag() {
-        hadError = false; // 重置错误标志，为下一次解析准备
-    }
+    hadError = false; // 重置错误标志，为下一次解析准备
+}
+
 int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg);
 
 %}
 
 
 // 定义Token
-
 %token 
     CONST
     PROGRAM
@@ -287,12 +353,9 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 
 %define api.pure full
 %define parse.error custom
-/* %define parse.error verbose */
-/** 启用位置标识 **/
 %locations
 %define parse.trace
 %lex-param { yyscan_t scanner }
-/** 这些定义了在yyparse函数中的参数 **/
 %parse-param { const char * code_str }
 %parse-param { ProgramStmt ** program}
 %parse-param { void * scanner }
@@ -402,8 +465,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 %type <add_expr>            simple_expression
 %type <mul_expr>            term
 %type <unary_expr>          factor
-/* %type <stmt_list>           else_part */
-/* %type <expr_list>           id_random */
+
 // 对丢弃的符号进行析构
 %destructor {} <program_struct> <boolean> <number> <charactor> <basic_type>
 %destructor { free($$); } IDENTIFIER <string> <real>
@@ -430,167 +492,147 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 %nonassoc ELSE
 
 %%
-// TODO 此处书写文法规则
-/*
-* no : 1.1
-* rule  :  programstruct -> program_head ‘;’ program_body '.'
-* node :  ProgramStmt * program_struct
-* son  :  ProgramHeadStmt * program_head ProgramBodyStmt * program_body
-* error : 程序定义出错 请检查是否符合规范
-*/
+// 语法规则定义部分
+
+// 1.1 程序结构
 programstruct : program_head  ';'  program_body '.'
     {
         current_rule = CurrentRule::ProgramStruct;
-        ProgramStmt * program_struct = new ProgramStmt();
+        ProgramStmt * program_struct = create_node<ProgramStmt>();
         program_struct->head = std::unique_ptr<ProgramHeadStmt>($1);
         program_struct->body = std::unique_ptr<ProgramBodyStmt>($3);
-        LOG_DEBUG("DEBUG programstruct -> program_head ';' program_body '.'");
+        LOG_RULE("programstruct -> program_head ';' program_body '.'");
         *program = program_struct;
         $$ = nullptr; // 防止报错
     }
     | error  ';'  program_body '.'
     {
-        ProgramStmt * program_struct = new ProgramStmt();
-        *program = program_struct;
+        *program = create_node<ProgramStmt>();
         delete $3;
         $$ = nullptr;
-        LOG_DEBUG("ERROR programstruct -> error ';' program_body '.'");
-        // yyerror(&yylloc, "code_str", program, scanner, "程序头定义出错，请检查。");
+        LOG_ERROR_RULE("programstruct -> error ';' program_body '.'");
     }
     | program_head  ';'  error
     {
-        ProgramStmt * program_struct = new ProgramStmt();
-        *program = program_struct;
+        *program = create_node<ProgramStmt>();
         delete $1;
         $$ = nullptr;
-        LOG_DEBUG("ERROR programstruct -> program_head ';' error");
-        // yyerror(&yylloc, "code_str", program, scanner, "程序体定义出错，请检查。");
+        LOG_ERROR_RULE("programstruct -> program_head ';' error");
     }
     | error  ';'  error
     {
-        ProgramStmt * program_struct = new ProgramStmt();
-        *program = program_struct;
+        *program = create_node<ProgramStmt>();
         $$ = nullptr;
-        LOG_DEBUG("ERROR programstruct -> error ';' error");
-        // yyerror(&yylloc, "code_str", program, scanner, "程序头、程序体定义出错，请检查。");
+        LOG_ERROR_RULE("programstruct -> error ';' error");
     }
-    /* | error
-    {
-        ProgramStmt * program_struct = new ProgramStmt();
-        *program = program_struct;
-        $$ = nullptr;
-        LOG_DEBUG("ERROR programstruct -> error");
-    } */
     ;
 
-/*
-* no : 1.2
-* rule  :  program_head -> "program" IDENTIFIER '(' idlist ')' | "program" IDENTIFIER
-* node :  ProgramHeadStmt * program_head
-* son  :  char * std::vector<std::string>
-* error : 程序头定义出错 请检查是否符合规范
-*/
+// 1.2 程序头
 program_head : PROGRAM IDENTIFIER '(' idlist ')'
     {
         current_rule = CurrentRule::ProgramHead;
-        $$ = new ProgramHeadStmt();
+        $$ = create_node<ProgramHeadStmt>();
         $$->id_list = *$4;
         delete $4;
         free($2);
-        LOG_DEBUG("DEBUG program_head -> PROGRAM IDENTIFIER '(' idlist ')'");
+        LOG_RULE("program_head -> PROGRAM IDENTIFIER '(' idlist ')'");
     }
     | PROGRAM IDENTIFIER
     {
         current_rule = CurrentRule::ProgramHead;
-        $$ = new ProgramHeadStmt();
+        $$ = create_node<ProgramHeadStmt>();
         $$->id_list.emplace_back(std::string($2));
-        LOG_DEBUG("DEBUG program_head -> PROGRAM IDENTIFIER");
+        LOG_RULE("program_head -> PROGRAM IDENTIFIER");
         free($2);
     }
     | PROGRAM error
     {
         $$ = nullptr;
-        LOG_DEBUG("ERROR program_head -> PROGRAM error");
-        // yyerror(&yylloc, "code_str", program, scanner, "程序名定义出错，请检查。");
+        LOG_ERROR_RULE("program_head -> PROGRAM error");
         yyerrok;
     }
     ;
 
-
-/*
-* no : 1.3
-* rule  :  program_body -> const_declarations var_declarations subprogram_declarations compound_statement
-* node :  ProgramBodyStmt * program_body
-* son  :  ConstDeclStmt * const_decl std::vector<VarDeclStmt *> var_decl  std::vector<FuncDeclStmt *>  func_decl  std::vector<BaseStmt *>  comp_stmt
-* error : 程序体定义出错 请检查是否符合规范
-*/
+// 1.3 程序体
 program_body : const_declarations var_declarations subprogram_declarations compound_statement
     {
         current_rule = CurrentRule::ProgramBody;
-        ProgramBodyStmt* program_body = new ProgramBodyStmt();
-        if($1 != nullptr) {program_body->const_decl = std::unique_ptr<ConstDeclStmt>($1);}
-        if($2 != nullptr){
-            for(auto var_decl : *$2){
+        ProgramBodyStmt* program_body = create_node<ProgramBodyStmt>();
+        
+        // 处理常量声明
+        if($1 != nullptr) {
+            program_body->const_decl = std::unique_ptr<ConstDeclStmt>($1);
+        }
+        
+        // 处理变量声明
+        if($2 != nullptr) {
+            for(auto var_decl : *$2) {
                 program_body->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(var_decl));
             }
             delete $2;
         }
-        if($3 != nullptr){
-            for(auto func_decl : *$3){
+        
+        // 处理子程序声明
+        if($3 != nullptr) {
+            for(auto func_decl : *$3) {
                 program_body->func_decl.emplace_back(std::unique_ptr<FuncDeclStmt>(func_decl));
             }
             delete $3;
         }
-        if($4 != nullptr){
-            for(auto stmt : *$4){
+        
+        // 处理复合语句
+        if($4 != nullptr) {
+            for(auto stmt : *$4) {
                 program_body->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
             delete $4;
         }
+        
         $$ = program_body;
-        LOG_DEBUG("DEBUG program_body -> const_declarations var_declarations subprogram_declarations compound_statement");
+        LOG_RULE("program_body -> const_declarations var_declarations subprogram_declarations compound_statement");
     }
     | error_recovery const_declarations var_declarations subprogram_declarations compound_statement
     {
-        if($2 != nullptr) {delete $2;}
-        if($3 != nullptr){
-            for(auto var_decl : *$3){
+        // 清理分配的资源
+        auto cleanup = [](auto* ptr) {
+            if (ptr) delete ptr;
+        };
+        
+        cleanup($2);
+        
+        if($3 != nullptr) {
+            for(auto var_decl : *$3) {
                 delete var_decl;
             }
             delete $3;
         }
-        if($4 != nullptr){
-            for(auto func_decl : *$4){
+        
+        if($4 != nullptr) {
+            for(auto func_decl : *$4) {
                 delete func_decl;
             }
             delete $4;
         }
-        if($5 != nullptr){
-            for(auto stmt : *$5){
+        
+        if($5 != nullptr) {
+            for(auto stmt : *$5) {
                 delete stmt;
             }
             delete $5;
         }
+        
         $$ = nullptr;
-        LOG_DEBUG("DEBUG program_body -> error_recovery const_declarations var_declarations subprogram_declarations compound_statement");
+        LOG_RULE("program_body -> error_recovery const_declarations var_declarations subprogram_declarations compound_statement");
     }
     ;
 
-    
-
-/*
-* no : 1.4
-* rule  :  idlist -> IDENTIFIER | idlist ',' IDENTIFIER
-* node :  std::vector<std::string> * id_list
-* son  :  string
-* error : 标识符定义错误 请检查是否符合规范
-*/
+// 1.4 标识符列表
 idlist : IDENTIFIER
     {
         current_rule = CurrentRule::IdList;
-        $$ = new std::vector<std::string>();
+        $$ = create_node<std::vector<std::string>>();
         $$->emplace_back(std::string($1));
-        LOG_DEBUG("DEBUG idlist -> IDENTIFIER");
+        LOG_RULE("idlist -> IDENTIFIER");
         free($1);
     }
     | idlist ',' IDENTIFIER
@@ -598,63 +640,56 @@ idlist : IDENTIFIER
         current_rule = CurrentRule::IdList;
         $1->emplace_back(std::string($3));
         $$ = $1;
-        LOG_DEBUG("DEBUG idlist -> idlist ',' IDENTIFIER");
+        LOG_RULE("idlist -> idlist ',' IDENTIFIER");
         free($3);
     }
     ;
 
-/*
-* no : 1.5
-* rule  :  const_declarations -> empty | "const" const_declaration ';'
-* node :  ConstDeclStmt * const_decls
-* son  :  std::vector<std::pair<std::string, ValueStmt *> *> *
-* error : 常量定义出错 请检查是否符合规范
-*/
+// 1.5 常量声明
 const_declarations : /*empty*/
     {
         current_rule = CurrentRule::ConstDeclarations;
         $$ = nullptr;
-        LOG_DEBUG("DEBUG const_declarations -> empty");
+        LOG_RULE("const_declarations -> empty");
     }
     | CONST const_declaration ';' 
     {
         current_rule = CurrentRule::ConstDeclarations;
-        ConstDeclStmt * const_decls = new ConstDeclStmt();
-        for(auto kv_pair : *$2){
+        ConstDeclStmt * const_decls = create_node<ConstDeclStmt>();
+        
+        // 将声明列表中的键值对转移到常量声明对象中
+        for(auto kv_pair : *$2) {
             const_decls->pairs.emplace_back(std::make_pair(kv_pair->first, kv_pair->second));
             delete kv_pair;
         }
-        // 疑似内存泄漏
+        
         delete $2;
         $$ = const_decls;
-        for(auto &t: const_decls->pairs){
+        
+        // 日志输出声明的常量信息
+        for(auto &t: const_decls->pairs) {
             LOG_INFO("Get Const Type:%d, pointer %p", t.second->type, t.second.get());
             if(t.second->str) {
-                LOG_INFO("Get string:%s",t.second->str->val.c_str());
+                LOG_INFO("Get string:%s", t.second->str->val.c_str());
             }
         }
-        LOG_DEBUG("DEBUG const_declarations -> CONST const_declaration ';' const_declarations");
+        
+        LOG_RULE("const_declarations -> CONST const_declaration ';' const_declarations");
     }
     | CONST error ';'
     {
         $$ = nullptr;
-        LOG_DEBUG("ERROR const_declarations -> CONST error ;");
+        LOG_ERROR_RULE("const_declarations -> CONST error ;");
         yyerrok;
     }
     ;
 
-
-/*
-* no : 1.6
-* rule  :  const_declaration -> IDENTIFIER = const_value | const_declaration ; IDENTIFIER = const_value
-* node :  std::vector<std::pair<std::string, ValueStmt *> *> *
-* son  :  char *   ValueStmt *
-*/
+// 1.6 常量声明列表
 const_declaration : IDENTIFIER '=' const_value
     {
         current_rule = CurrentRule::ConstDeclaration;
-        std::vector<std::pair<std::string, ValueStmt *> *> * const_decls = new std::vector<std::pair<std::string, ValueStmt *> *>();
-        std::pair<std::string, ValueStmt *> * kv_pair = new std::pair<std::string, ValueStmt *>($1, $3);
+        auto const_decls = create_node<std::vector<std::pair<std::string, ValueStmt *>*>>();
+        auto kv_pair = create_node<std::pair<std::string, ValueStmt *>>($1, $3);
         const_decls->emplace_back(kv_pair);
         free($1);
         $$ = const_decls;
@@ -662,1248 +697,945 @@ const_declaration : IDENTIFIER '=' const_value
     | const_declaration ';' IDENTIFIER '=' const_value
     {
         current_rule = CurrentRule::ConstDeclaration;
-        $1->emplace_back(new std::pair<std::string, ValueStmt *>($3, $5));
+        $1->emplace_back(create_node<std::pair<std::string, ValueStmt *>>($3, $5));
         free($3);
-        $$ = $1; // 不需要删除
+        $$ = $1;
     }
-    |  error ';' IDENTIFIER '=' const_value
+    | error ';' IDENTIFIER '=' const_value
     {
+        HANDLE_ERROR("const_declaration -> error ';' IDENTIFIER = const_value", 
+                    { free($3); delete $5; });
         $$ = nullptr;
-        LOG_DEBUG("ERROR const_declaration -> error ';' IDENTIFIER = const_value");
-        free($3);
-        delete $5;
-        yyerrok;
     }
     ;
 
-
-/*
-* no : 1.7
-* rule  :  const_value -> INTEGER | REAL | CHAR | '-' INTEGER | '-' REAL | '+' INTEGER | '+' REAL | ' CHAR '
-* node :  ValueStmt * num_value
-* son  :  long long | double | char
-* error : 常量 请检查是否为合法常量
-*/
+// 1.7 常量值
 const_value: INTEGER
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(num_value->number, $1);
-        $$ = num_value;
+        $$ = ValueNodeFactory::create_integer($1);
     }
     | '+' INTEGER
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(num_value->number, $2);
-        $$ = num_value;
+        $$ = ValueNodeFactory::create_integer($2);
     }
     | '-' INTEGER
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(num_value->number, ($2) * -1);
-        $$ = num_value;
+        $$ = ValueNodeFactory::create_integer(-$2);
     }
     | REAL
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        double val = atof($1);
-        fill_number_stmt(num_value->number, val);
-        num_value->number->literal = std::string($1);
+        $$ = ValueNodeFactory::create_real($1);
         free($1);
-        $$ = num_value;
     }
     | '+' REAL
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        double val = atof($2);
-        fill_number_stmt(num_value->number, val);
-        num_value->number->literal = std::string($2);
+        $$ = ValueNodeFactory::create_real($2);
         free($2);
-        $$ = num_value;
     }
     | '-' REAL
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        double val = atof($2);
-        fill_number_stmt(num_value->number, val);
-        num_value->number->literal = std::string($2);
+        ValueStmt* value = ValueNodeFactory::create_real($2);
+        // 处理负号：将实数值设为负数
+        value->number->real_val *= -1;
         free($2);
-        $$ = num_value;
+        $$ = value;
     }
     | CHAR
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Number;
-        num_value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(num_value->number, $1);
-        LOG_DEBUG("DEBUG const_value -> CHAR, value: %c", $1);
-        $$ = num_value;
+        $$ = ValueNodeFactory::create_char($1);
+        LOG_RULE("const_value -> CHAR, value: %c");
     }
     | STRING 
     {
-        ValueStmt * num_value = new ValueStmt();
-        num_value->type = ValueStmt::ValueType::Str;
-        num_value->str = std::make_unique<StrStmt>();
-        num_value->str->val = std::string($1).substr(1, std::string($1).length() - 2);
+        $$ = ValueNodeFactory::create_string($1);
         free($1);
-        $$ = num_value;
     }
     ;
 
-
-/*
-* no : 2.1
-* rule : var_declarations -> empty | "var" var_declaration ';' 
-* node : std::vector<VarDeclStmt *> * var_decls
-* son  : VarDeclStmt *
-* error : 变量定义出错 请检查是否符合规范
-*/
+// 2.1 变量声明
 var_declarations : /*empty*/
     {
         $$ = nullptr;
-        LOG_DEBUG("DEBUG var_declarations -> empty");
+        LOG_RULE("var_declarations -> empty");
     }
     | VAR var_declaration ';'
     {
         current_rule = CurrentRule::VarDeclarations;
         $$ = $2;
-        LOG_DEBUG("DEBUG var_declarations -> VAR var_declaration ';'");
+        LOG_RULE("var_declarations -> VAR var_declaration ';'");
     }
     | VAR error ';'
     {
         $$ = nullptr;
-        LOG_DEBUG("ERROR var_declarations -> VAR error ;");
+        LOG_ERROR_RULE("var_declarations -> VAR error ;");
         yyerrok;
     }
     ;
 
-/*
-* no : 2.2
-* rule  : var_declaration -> idlist ':' type | var_declaration ';' idlist ':' type
-* node :  std::vector<VarDeclStmt *> * var_decls
-* son  :  VarDeclStmt *
-* error : 变量定义出错 请检查是否符合规范
-*/
+// 2.2 变量声明列表
 var_declaration : idlist ':' type
     {
         current_rule = CurrentRule::VarDeclaration;
-        std::vector<VarDeclStmt *> * var_decls = new std::vector<VarDeclStmt *>();
-        VarDeclStmt * var_decl = new VarDeclStmt();
+        auto var_decls = create_node<std::vector<VarDeclStmt *>>();
+        auto var_decl = create_node<VarDeclStmt>();
+        
+        // 将标识符列表中的所有标识符复制到变量声明中
         var_decl->id.insert(var_decl->id.end(), $1->begin(), $1->end());
-        // deal with type
+        
+        // 处理类型信息
         var_decl->basic_type = $3->basic_type;
         var_decl->data_type = $3->data_type;
         var_decl->array_range = std::move($3->array_range);
+        
         delete $1;
         delete $3;
         var_decls->emplace_back(var_decl);
         $$ = var_decls;
-        LOG_DEBUG("DEBUG var_declaration -> idlist ':' type");
+        LOG_RULE("var_declaration -> idlist ':' type");
     }
     | var_declaration ';' idlist ':' type
     {
         current_rule = CurrentRule::VarDeclaration;
-        VarDeclStmt * var_decl = new VarDeclStmt();
+        auto var_decl = create_node<VarDeclStmt>();
+        
+        // 将标识符列表中的所有标识符复制到变量声明中
         var_decl->id.insert(var_decl->id.end(), $3->begin(), $3->end());
-        // deal with type
+        
+        // 处理类型信息
         var_decl->basic_type = $5->basic_type;
         var_decl->data_type = $5->data_type;
         var_decl->array_range = std::move($5->array_range);
+        
         delete $3;
         delete $5;
         $1->emplace_back(var_decl);
         $$ = $1;
-        LOG_DEBUG("DEBUG var_declaration -> var_declaration ';' idlist ':' type");
+        LOG_RULE("var_declaration -> var_declaration ';' idlist ':' type");
     }
     | error ';' idlist ':' type
     {
+        HANDLE_ERROR("var_declaration -> error ';' idlist ':' type",
+                    { delete $3; delete $5; });
         $$ = nullptr;
-        LOG_DEBUG("ERROR var_declaration -> error ';' idlist ':' type");
-        delete $3;
-        delete $5;
-        yyerrok;
     }
     ;
 
-/*
-* no : 2.3
-* rule  : type -> basic_type | ARRAY '[' period_list ']' OF basic_type 
-* node : VarDeclStmt * type_stmt
-* son  : BasicType | DataType
-* error : 类型定义出错 请检查是否符合规范
-*/
+// 2.3 类型定义
 type : basic_type
     {
         current_rule = CurrentRule::Type;
-        VarDeclStmt * type_stmt = new VarDeclStmt();
-        // TODO 处理type_size
+        auto type_stmt = create_node<VarDeclStmt>();
         type_stmt->data_type = DataType::BasicType;
         type_stmt->basic_type = $1;
         $$ = type_stmt;
-        LOG_DEBUG("DEBUG type -> basic_type");
+        LOG_RULE("type -> basic_type");
     }
     | ARRAY '[' period_list ']' OF basic_type
     {
         current_rule = CurrentRule::Type;
-        VarDeclStmt * type_stmt = new VarDeclStmt();
+        auto type_stmt = create_node<VarDeclStmt>();
         type_stmt->data_type = DataType::ArrayType;
         type_stmt->basic_type = $6;
-        for(auto period : *$3){
+        
+        // 转移数组范围信息
+        for(auto period : *$3) {
             type_stmt->array_range.emplace_back(std::unique_ptr<PeriodStmt>(period));
         }
+        
         delete $3;
         $$ = type_stmt;
-        LOG_DEBUG("DEBUG type -> ARRAY '[' period_list ']' OF basic_type");
+        LOG_RULE("type -> ARRAY '[' period_list ']' OF basic_type");
     };
 
-
-/*
-* no : 2.4
-* rule  : basic_type -> INTEGER_KW | REAL_KW | BOOLEAN_KW | CHAR_KW
-* node :  BasicType
-*/
+// 2.4 基本类型
 basic_type: INTEGER_KW
-        {
-            $$ = BasicType::INT;
-            LOG_DEBUG("DEBUG basic_type -> INTEGER_KW");
-        }
-        | REAL_KW
-        {
-            $$ = BasicType::REAL;
-            LOG_DEBUG("DEBUG basic_type -> REAL_KW");
-        }
-        | BOOLEAN_KW
-        {
-            $$ = BasicType::BOOLEAN;
-            LOG_DEBUG("DEBUG basic_type -> BOOLEAN_KW");
-        }
-        | CHAR_KW
-        {
-            $$ = BasicType::CHAR;
-            LOG_DEBUG("DEBUG basic_type -> CHAR_KW");
-        }
+    {
+        $$ = BasicType::INT;
+        LOG_RULE("basic_type -> INTEGER_KW");
+    }
+    | REAL_KW
+    {
+        $$ = BasicType::REAL;
+        LOG_RULE("basic_type -> REAL_KW");
+    }
+    | BOOLEAN_KW
+    {
+        $$ = BasicType::BOOLEAN;
+        LOG_RULE("basic_type -> BOOLEAN_KW");
+    }
+    | CHAR_KW
+    {
+        $$ = BasicType::CHAR;
+        LOG_RULE("basic_type -> CHAR_KW");
+    }
+    ;
 
-
-/*
-* no : 2.5
-* rule  : period_list -> INTEGER '..' INTEGER | period_list ',' INTEGER '..' INTEGER
-* node :  std::vector<PeriodStmt *>*
-* son  :  PeriodStmt *
-* error :
-*/
+// 2.5 周期列表（数组索引范围）
 period_list: INTEGER DOUBLE_DOT INTEGER
-        {
-            $$ = new std::vector<PeriodStmt *>();
-            PeriodStmt * period = new PeriodStmt();
-            period->begin = $1;
-            period->end = $3;
-            $$->emplace_back(period);
-            // debug
-            LOG_DEBUG("DEBUG period_list -> INTEGER '..' INTEGER");
-        }
-        | period_list ',' INTEGER DOUBLE_DOT INTEGER
-        {
-            PeriodStmt * period = new PeriodStmt();
-            period->begin = $3;
-            period->end = $5;
-            $1->emplace_back(period);
-            $$ = $1;
-            // debug
-            LOG_DEBUG("DEBUG period_list -> period_list ',' INTEGER '..' INTEGER");
-        };
-/*
-* no : 2.6
-* rule  :  subprogram_declarations -> empty | subprogram_declarations subprogram ';'
-* node :  std::vector<FuncDeclStmt *> * func_decl_list
-* son  :  FuncDeclStmt *
-* error : 子函数定义出错 请检查是否符合规范
-*/
+    {
+        auto period_list = create_node<std::vector<PeriodStmt *>>();
+        auto period = create_node<PeriodStmt>();
+        period->begin = $1;
+        period->end = $3;
+        period_list->emplace_back(period);
+        $$ = period_list;
+        LOG_RULE("period_list -> INTEGER '..' INTEGER");
+    }
+    | period_list ',' INTEGER DOUBLE_DOT INTEGER
+    {
+        auto period = create_node<PeriodStmt>();
+        period->begin = $3;
+        period->end = $5;
+        $1->emplace_back(period);
+        $$ = $1;
+        LOG_RULE("period_list -> period_list ',' INTEGER '..' INTEGER");
+    };
+
+// 2.6 子程序声明列表
 subprogram_declarations : /*empty*/
-        {
-            $$ = nullptr;
-            LOG_DEBUG("DEBUG subprogram_declarations -> empty");
+    {
+        $$ = nullptr;
+        LOG_RULE("subprogram_declarations -> empty");
+    }
+    | subprogram_declarations subprogram ';'
+    {
+        current_rule = CurrentRule::SubprogramDeclarations;
+        if($1 == nullptr) {
+            auto func_decl_list = create_node<std::vector<FuncDeclStmt *>>();
+            func_decl_list->emplace_back($2);    
+            $$ = func_decl_list;
+        } else {
+            $1->emplace_back($2);
+            $$ = $1;
         }
-        | subprogram_declarations subprogram ';'
-        {
-            current_rule = CurrentRule::SubprogramDeclarations;
-            if($1 == nullptr){
-                std::vector<FuncDeclStmt *> * func_decl_list = new std::vector<FuncDeclStmt *>();
-                func_decl_list->emplace_back($2);    
-                $$ = func_decl_list;
-            }else{
-                $1->emplace_back($2);
-                $$ = $1;
-            }
-            LOG_DEBUG("DEBUG subprogram_declarations -> subprogram_declarations subprogram ';'");
-        }
-        ;
+        LOG_RULE("subprogram_declarations -> subprogram_declarations subprogram ';'");
+    }
+    ;
 
-
-/*
-* no : 2.7
-* rule  :  subprogram -> subprogram_head ';' subprogram_body
-* node :  FuncDeclStmt * func_decl
-* son  :  FuncHeadDeclStmt * func_head FuncBodyDeclStmt * func_body
-* error : 子函数定义出错 请检查是否符合规范
-*/
+// 2.7 子程序
 subprogram : subprogram_head ';' subprogram_body
-        {
-            current_rule = CurrentRule::Subprogram;
-            FuncDeclStmt * subprogram = new FuncDeclStmt();
-            subprogram->header = std::unique_ptr<FuncHeadDeclStmt>($1);
-            subprogram->body = std::unique_ptr<FuncBodyDeclStmt>($3);
-            $$ = subprogram;
-            LOG_DEBUG("DEBUG subprogram -> subprogram_head ';' subprogram_body");
-        }
-        ;
+    {
+        current_rule = CurrentRule::Subprogram;
+        auto subprogram = create_node<FuncDeclStmt>();
+        subprogram->header = std::unique_ptr<FuncHeadDeclStmt>($1);
+        subprogram->body = std::unique_ptr<FuncBodyDeclStmt>($3);
+        $$ = subprogram;
+        LOG_RULE("subprogram -> subprogram_head ';' subprogram_body");
+    }
+    ;
 
-
-/*
-* no : 2.8
-* rule  :  subprogram_head -> PROCEDURE IDENTIFIER formal_parameter | FUNCTION IDENTIFIER formal_parameter ':' basic_type
-* node :  FuncHeadDeclStmt * func_head
-* son  :  std::string func_name;  BasicType ret_type; std::vector<std::unique_ptr<VarDeclStmt>> args;
-* error : 子函数头定义出错 请检查是否符合规范
-*/
+// 2.8 子程序头
 subprogram_head: PROCEDURE IDENTIFIER formal_parameter
-        {
-            current_rule = CurrentRule::SubprogramHead;
-            FuncHeadDeclStmt * sub_head = new FuncHeadDeclStmt();
-            sub_head->func_name = std::string($2);
-            sub_head->ret_type = BasicType::VOID;
-            if($3 != nullptr){
-                for(auto formal_parameter : *$3){
-                    sub_head->args.emplace_back(std::unique_ptr<VarDeclStmt>(formal_parameter));
-                }
-                delete $3;
+    {
+        current_rule = CurrentRule::SubprogramHead;
+        auto sub_head = create_node<FuncHeadDeclStmt>();
+        sub_head->func_name = std::string($2);
+        sub_head->ret_type = BasicType::VOID;
+        
+        // 处理形式参数
+        if($3 != nullptr) {
+            for(auto formal_parameter : *$3) {
+                sub_head->args.emplace_back(std::unique_ptr<VarDeclStmt>(formal_parameter));
             }
-            $$ = sub_head;
-            free($2);
-            LOG_DEBUG("DEBUG subprogram_head -> PROGRAM IDENTIFIER formal_parameter");
+            delete $3;
         }
-        | FUNCTION IDENTIFIER formal_parameter ':' basic_type
-        {
-            current_rule = CurrentRule::SubprogramHead;
-            FuncHeadDeclStmt * sub_head = new FuncHeadDeclStmt();
-            sub_head->func_name = std::string($2);
-            sub_head->ret_type = $5;
-            if($3 != nullptr){
-                for(auto formal_parameter : *$3){
-                    sub_head->args.emplace_back(std::unique_ptr<VarDeclStmt>(formal_parameter));
-                }
-                delete $3;
+        
+        $$ = sub_head;
+        free($2);
+        LOG_RULE("subprogram_head -> PROGRAM IDENTIFIER formal_parameter");
+    }
+    | FUNCTION IDENTIFIER formal_parameter ':' basic_type
+    {
+        current_rule = CurrentRule::SubprogramHead;
+        auto sub_head = create_node<FuncHeadDeclStmt>();
+        sub_head->func_name = std::string($2);
+        sub_head->ret_type = $5;
+        
+        // 处理形式参数
+        if($3 != nullptr) {
+            for(auto formal_parameter : *$3) {
+                sub_head->args.emplace_back(std::unique_ptr<VarDeclStmt>(formal_parameter));
             }
-            $$ = sub_head;
-            free($2);
-            LOG_DEBUG("DEBUG subprogram_head -> FUNCTION IDENTIFIER formal_parameter ':' basic_type");
+            delete $3;
         }
-        | FUNCTION error
-        {
-            $$ = nullptr;
-            LOG_DEBUG("ERROR subprogram_head -> FUNCTION error");
-            // yyerror(&yylloc, "code_str", program, scanner, "子程序头中标识符定义出错，请检查。");
-            yyerrok;
-        }
-        | PROCEDURE error
-        {
-            $$ = nullptr;
-            LOG_DEBUG("ERROR subprogram_head -> PROCEDURE error");
-            // yyerror(&yylloc, "code_str", program, scanner, "子程序头中标识符定义出错，请检查。");
-            yyerrok;
-        };
+        
+        $$ = sub_head;
+        free($2);
+        LOG_RULE("subprogram_head -> FUNCTION IDENTIFIER formal_parameter ':' basic_type");
+    }
+    | FUNCTION error
+    {
+        $$ = nullptr;
+        LOG_ERROR_RULE("subprogram_head -> FUNCTION error");
+        yyerrok;
+    }
+    | PROCEDURE error
+    {
+        $$ = nullptr;
+        LOG_ERROR_RULE("subprogram_head -> PROCEDURE error");
+        yyerrok;
+    };
 
-/*
-* no : 2.9
-* rule  :  formal_parameter -> empty | '(' parameter_list ')'
-* node :  std::vector<VarDeclStmt *>*
-* son  :  VarDeclStmt *
-* error : 参数定义出错 请检查是否符合规范
-*/
+// 2.9 形式参数
 formal_parameter : /* empty */
-        {
-            $$ = nullptr;
-            LOG_DEBUG("DEBUG formal_parameter -> empty");
-        }
-        | '(' parameter_list ')'
-        {
-            current_rule = CurrentRule::FormalParameter;
-            $$ = $2;
-            LOG_DEBUG("DEBUG formal_parameter -> '(' parameter_list ')'");
-        };
+    {
+        $$ = nullptr;
+        LOG_RULE("formal_parameter -> empty");
+    }
+    | '(' parameter_list ')'
+    {
+        current_rule = CurrentRule::FormalParameter;
+        $$ = $2;
+        LOG_RULE("formal_parameter -> '(' parameter_list ')'");
+    };
 
-
-
-/*
-* no : 2.10
-* rule  : parameter_list -> parameter | parameter_list ';' parameter
-* node :  std::vector<VarDeclStmt *>*
-* son  :  VarDeclStmt*
-* error :
-*/
+// 2.10 参数列表
 parameter_list :/* empty */
     {
         $$ = nullptr;
-        LOG_DEBUG("DEBUG parameter_list -> empty");
+        LOG_RULE("parameter_list -> empty");
     }
-    |parameter
+    | parameter
     {
-        $$ = new std::vector<VarDeclStmt *>();
-        $$->emplace_back($1);
-        LOG_DEBUG("DEBUG parameter_list -> parameter");
+        auto param_list = create_node<std::vector<VarDeclStmt *>>();
+        param_list->emplace_back($1);
+        $$ = param_list;
+        LOG_RULE("parameter_list -> parameter");
     }
     | parameter_list ';' parameter
     {
         $1->emplace_back($3);
         $$ = $1;
-        LOG_DEBUG("DEBUG parameter_list -> parameter_list ';' parameter");
+        LOG_RULE("parameter_list -> parameter_list ';' parameter");
     };
 
-/*
-* no : 3.1
-* rule  : parameter -> var_parameter | value_parameter
-* node :  VarDeclStmt*
-* son  :  VarDeclStmt*
-* error : 
-*/
+// 3.1 参数
 parameter: var_parameter
-        {
-            $$ = $1;
-            $$->is_var = true;
-            LOG_DEBUG("DEBUG parameter -> var_parameter");
-        }
-        | value_parameter
-        {
-            $$ = $1;
-            $$->is_var = false;
-            LOG_DEBUG("DEBUG parameter -> value_parameter");
-        }
-        ;
-/*
-* no : 3.2
-* rule  : var_parameter -> VAR value_parameter
-* node :  VarDeclStmt*
-* son  :  VarDeclStmt*
-* error :
-*/
-var_parameter: VAR value_parameter
-        {
-            $$ = $2;
-            LOG_DEBUG("DEBUG var_parameter -> VAR value_parameter");
-        }
-        ;
+    {
+        $$ = $1;
+        $$->is_var = true;
+        LOG_RULE("parameter -> var_parameter");
+    }
+    | value_parameter
+    {
+        $$ = $1;
+        $$->is_var = false;
+        LOG_RULE("parameter -> value_parameter");
+    }
+    ;
 
-/*
-* no : 3.3
-* rule  : value_parameter -> idlist ':' basic_type
-* node :  VarDeclStmt*
-* son  :  std::vector<std::string> *, BasicType
-* error :
-*/
+// 3.2 变量参数
+var_parameter: VAR value_parameter
+    {
+        $$ = $2;
+        LOG_RULE("var_parameter -> VAR value_parameter");
+    }
+    ;
+
+// 3.3 值参数
 value_parameter: idlist ':' basic_type
-        {
-            VarDeclStmt* var_decl = new VarDeclStmt();
-            var_decl->id.insert(var_decl->id.end(), $1->begin(), $1->end());
-            var_decl->data_type = DataType::BasicType;
-            var_decl-> basic_type = $3;
-            var_decl->is_var = false;
-            // 疑似内存泄漏
-            delete $1;
-            $$ = var_decl;
-            LOG_DEBUG("DEBUG value_parameter -> idlist ':' basic_type");
-        };
-/*
-* no : 3.4
-* rule  :  subprogram_body -> const_declarations var_declarations compound_statement
-* node :  FuncBodyDeclStmt * func_body
-* son  :  std::unique_ptr<ConstDeclStmt> const_decl; std::vector<std::unique_ptr<VarDeclStmt>> var_decl;  std::vector<std::unique_ptr<BaseStmt>> comp_stmt;   
-* error : 子函数体定义出错 请检查是否符合规范
-*/
+    {
+        auto var_decl = create_node<VarDeclStmt>();
+        var_decl->id.insert(var_decl->id.end(), $1->begin(), $1->end());
+        var_decl->data_type = DataType::BasicType;
+        var_decl->basic_type = $3;
+        var_decl->is_var = false;
+        delete $1;
+        $$ = var_decl;
+        LOG_RULE("value_parameter -> idlist ':' basic_type");
+    };
+
+// 3.4 子程序体
 subprogram_body : const_declarations var_declarations compound_statement
     {
         current_rule = CurrentRule::SubprogramBody;
-        FuncBodyDeclStmt * func_body = new FuncBodyDeclStmt();
-        if($1 != nullptr) func_body->const_decl = std::unique_ptr<ConstDeclStmt>($1);
-        if($2 != nullptr){
-            for(auto var_decl : *$2){
+        auto func_body = create_node<FuncBodyDeclStmt>();
+        
+        // 处理常量声明
+        if($1 != nullptr) {
+            func_body->const_decl = std::unique_ptr<ConstDeclStmt>($1);
+        }
+        
+        // 处理变量声明
+        if($2 != nullptr) {
+            for(auto var_decl : *$2) {
                 func_body->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(var_decl));
             }
             delete $2;
         }
-        if($3 != nullptr){
-            for(auto stmt : *$3){
+        
+        // 处理复合语句
+        if($3 != nullptr) {
+            for(auto stmt : *$3) {
                 func_body->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
             delete $3;
         }
+        
         $$ = func_body;
-        LOG_DEBUG("DEBUG subprogram_body -> const_declarations var_declarations compound_statement");
+        LOG_RULE("subprogram_body -> const_declarations var_declarations compound_statement");
     }
     ;
-/*
-* no : 3.5
-* rule  :  compound_statement -> BEGIN_TOKEN statement_list END
-* node :  std::vector<BaseStmt *> * stmt_list
-* son  :  BaseStmt *
-* error : 复合语句定义出错 请检查是否符合规范
-*/
+
+// 3.5 复合语句
 compound_statement : BEGIN_TOKEN statement_list END
     {
         current_rule = CurrentRule::CompoundStatement;
         $$ = $2;
-        LOG_DEBUG("DEBUG compound_statement -> BEGIN_TOKEN statement_list END");
-    }
-    ;
-/*
-* no : 3.6
-* rule  :  statement_list -> statement | statement_list ';' statement
-* node :  std::vector<BaseStmt *> * stmt_list
-* son  :  BaseStmt *
-* error : 语句定义出错 请检查是否符合规范
-*/
-statement_list : statement
-    {
-        $$ = $1;
-        LOG_DEBUG("DEBUG statement_list -> statement");
-    }
-    | statement_list ';' statement
-    {
-        // copy the vector
-        current_rule = CurrentRule::StatementList;
-        if($3 != nullptr){
-            for(auto stmt : *$3){
-                if($1 != nullptr){
-                    $1->emplace_back(stmt);
-                }
-                else{
-                    std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-                    stmt_list->emplace_back(stmt);
-                    $1 = stmt_list;
-                }
-            }
-        }
-        $$ = $1;
-        delete $3;
-        LOG_DEBUG("DEBUG statement_list -> statement_list ';' statement");
-    }
-    | error ';' statement
-    {
-        if($3 != nullptr){
-            for(auto kv_pair : *$3){
-                delete kv_pair;
-            }
-        }
-        delete $3;
-        $$ = nullptr;
-        LOG_DEBUG("ERROR statement_list -> error ';' statement");
-        // yyerror(&yylloc, "code_str", program, scanner, "语句定义出错，请检查。");
-        yyerrok;
-    }
-    | statement_list ';' error
-    {
-        if($1 != nullptr){
-            for(auto kv_pair : *$1){
-                delete kv_pair;
-            }
-        }
-        delete $1;
-        $$ = nullptr;
-        LOG_DEBUG("ERROR statement_list -> statement_list ';' error");
-        // yyerror(&yylloc, "code_str", program, scanner, "语句定义出错，请检查。");
-        yyerrok;
+        LOG_RULE("compound_statement -> BEGIN_TOKEN statement_list END");
     }
     ;
 
-/*
-* no : 4.1
-* rule  :  statement -> empty | variable ASSIGNOP expression |
-* IDENTIFIER ASSIGNOP expression | procedure_call | compound_statement | 
-* IF expression THEN statement else_part | FOR IDENTIFIER ASSIGNOP expression TO expression DO statement | 
-* READ '(' variable_list ')' | WRITE '(' expression_list ')' 
-* node :   std::vector<BaseStmt *> *
-* son :  Stmt *
-* error : 函数体定义出错 请检查是否符合规范
-*/
+// 3.6 语句列表
+statement_list : statement
+    {
+        $$ = $1;
+        LOG_RULE("statement_list -> statement");
+    }
+    | statement_list ';' statement
+    {
+        current_rule = CurrentRule::StatementList;
+        
+        // 如果有语句要添加，则处理
+        if($3 != nullptr) {
+            // 将第三个参数中的语句添加到结果列表中
+            if($1 != nullptr) {
+                for(auto stmt : *$3) {
+                    $1->emplace_back(stmt);
+                }
+            } else {
+                // 如果结果列表为空，则直接使用第三个参数
+                $1 = $3; 
+                $3 = nullptr; // 避免被删除
+            }
+        }
+        
+        $$ = $1;
+        delete $3; // 如果$3已经被处理过，这里实际上删除的是nullptr
+        LOG_RULE("statement_list -> statement_list ';' statement");
+    }
+    | error ';' statement
+    {
+        HANDLE_ERROR("statement_list -> error ';' statement",
+                    {
+                        if($3 != nullptr) {
+                            for(auto item : *$3) {
+                                delete item;
+                            }
+                            delete $3;
+                        }
+                    });
+        $$ = nullptr;
+    }
+    | statement_list ';' error
+    {
+        HANDLE_ERROR("statement_list -> statement_list ';' error",
+                    {
+                        if($1 != nullptr) {
+                            for(auto item : *$1) {
+                                delete item;
+                            }
+                            delete $1;
+                        }
+                    });
+        $$ = nullptr;
+    }
+    ;
+
+// 4.1 语句
 statement : /*empty*/
     {
         $$ = nullptr;
-        LOG_DEBUG("DEBUG statement -> empty");
+        LOG_RULE("statement -> empty");
     }
     | variable ASSIGNOP expression
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        AssignStmt * assign_stmt = new AssignStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto assign_stmt = create_node<AssignStmt>();
         assign_stmt->lval = std::unique_ptr<LValStmt>($1);
         assign_stmt->expr = std::unique_ptr<ExprStmt>($3);
         stmt_list->emplace_back(assign_stmt);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> variable ASSIGNOP expression");
+        LOG_RULE("statement -> variable ASSIGNOP expression");
     }
-    /* | IDENTIFIER ASSIGNOP expression
-    {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        AssignStmt * assign_stmt = new AssignStmt();
-        assign_stmt->lval = std::make_unique<LValStmt>();
-        assign_stmt->lval->id = std::string($1);
-        // how to deal with array_index
-        // assign_stmt->lval->array_index = std::vector<std::unique_ptr<ExprStmt>>();
-        assign_stmt->expr = std::unique_ptr<ExprStmt>($3);
-        stmt_list->emplace_back(assign_stmt);
-        $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> IDENTIFIER ASSIGNOP expression");
-    } */
     | procedure_call
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
         stmt_list->emplace_back($1);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> procedure_call");
+        LOG_RULE("statement -> procedure_call");
     }
     | compound_statement
     {
         $$ = $1;
-        LOG_DEBUG("DEBUG statement -> compound_statement");
+        LOG_RULE("statement -> compound_statement");
     }
     | WHILE expression DO statement
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        WhileStmt * while_stmt = new WhileStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto while_stmt = create_node<WhileStmt>();
         while_stmt->expr = std::unique_ptr<ExprStmt>($2);
-        if($4 != nullptr){
-            for(auto stmt : *$4){
+        
+        // 处理循环体语句
+        if($4 != nullptr) {
+            for(auto stmt : *$4) {
                 while_stmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
             delete $4;
         }
+        
         stmt_list->emplace_back(while_stmt);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> WHILE expression DO statement");
+        LOG_RULE("statement -> WHILE expression DO statement");
     }
     | IF expression THEN statement %prec THEN
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        IfStmt * if_stmt = new IfStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto if_stmt = create_node<IfStmt>();
         if_stmt->expr = std::unique_ptr<ExprStmt>($2);
-        if($4 != nullptr){
-            for(auto stmt : *$4){
+        
+        // 处理if条件为真时的语句
+        if($4 != nullptr) {
+            for(auto stmt : *$4) {
                 if_stmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
         }
+        
         delete $4;
         stmt_list->emplace_back(if_stmt);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> IF expression THEN statement");
+        LOG_RULE("statement -> IF expression THEN statement");
     }
     | IF expression THEN statement ELSE statement
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        IfStmt * if_stmt = new IfStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto if_stmt = create_node<IfStmt>();
         if_stmt->expr = std::unique_ptr<ExprStmt>($2);
-        if($4 != nullptr){
-            for(auto stmt : *$4){
+        
+        // 处理if条件为真时的语句
+        if($4 != nullptr) {
+            for(auto stmt : *$4) {
                 if_stmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
         }
-        if($6 != nullptr){
-            for(auto stmt : *$6){
+        
+        // 处理if条件为假时的语句
+        if($6 != nullptr) {
+            for(auto stmt : *$6) {
                 if_stmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
         }
+        
         stmt_list->emplace_back(if_stmt);
-        $$ = stmt_list;
         delete $4;
         delete $6;
-        LOG_DEBUG("DEBUG statement -> IF expression THEN statement ELSE statement");
+        $$ = stmt_list;
+        LOG_RULE("statement -> IF expression THEN statement ELSE statement");
     }
     | FOR IDENTIFIER ASSIGNOP expression TO expression DO statement
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        ForStmt * for_stmt = new ForStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto for_stmt = create_node<ForStmt>();
         for_stmt->id = std::string($2);
         for_stmt->begin = std::unique_ptr<ExprStmt>($4);
         for_stmt->end = std::unique_ptr<ExprStmt>($6);
-        if($8 != nullptr){
-            for(auto stmt : *$8){
+        
+        // 处理循环体语句
+        if($8 != nullptr) {
+            for(auto stmt : *$8) {
                 for_stmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
         }
+        
         stmt_list->emplace_back(for_stmt);
-        $$ = stmt_list;
         free($2);
         delete $8;
-        LOG_DEBUG("DEBUG statement -> FOR IDENTIFIER ASSIGNOP expression TO expression DO statement");
+        $$ = stmt_list;
+        LOG_RULE("statement -> FOR IDENTIFIER ASSIGNOP expression TO expression DO statement");
     }
     | READ '(' variable_list ')'
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        ReadFuncStmt * read_stmt = new ReadFuncStmt();
-        for(auto lval : *$3){
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto read_stmt = create_node<ReadFuncStmt>();
+        
+        // 处理变量列表
+        for(auto lval : *$3) {
             read_stmt->lval.emplace_back(std::unique_ptr<LValStmt>(lval));
         }
+        
         delete $3;
         stmt_list->emplace_back(read_stmt);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> READ '(' variable_list ')'");
+        LOG_RULE("statement -> READ '(' variable_list ')'");
     }
     | WRITE '(' expression_list ')'
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        WriteFuncStmt * write_stmt = new WriteFuncStmt();
-        if($3 != nullptr){
-            for(auto expr : *$3){
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto write_stmt = create_node<WriteFuncStmt>();
+        
+        // 处理表达式列表
+        if($3 != nullptr) {
+            for(auto expr : *$3) {
                 write_stmt->expr.emplace_back(std::unique_ptr<ExprStmt>(expr));
             }
         }
+        
         stmt_list->emplace_back(write_stmt);
-        $$ = stmt_list;
         delete $3;
-        LOG_DEBUG("DEBUG statement -> WRITE '(' expression_list ')'");
+        $$ = stmt_list;
+        LOG_RULE("statement -> WRITE '(' expression_list ')'");
     }
     | BREAK
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        BreakStmt * break_stmt = new BreakStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto break_stmt = create_node<BreakStmt>();
         stmt_list->emplace_back(break_stmt);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> BREAK");
+        LOG_RULE("statement -> BREAK");
     }
     | CONTINUE
     {
-        std::vector<BaseStmt *> * stmt_list = new std::vector<BaseStmt *>();
-        ContinueStmt * continue_stmt = new ContinueStmt();
+        auto stmt_list = create_node<std::vector<BaseStmt *>>();
+        auto continue_stmt = create_node<ContinueStmt>();
         stmt_list->emplace_back(continue_stmt);
         $$ = stmt_list;
-        LOG_DEBUG("DEBUG statement -> CONTINUE");
+        LOG_RULE("statement -> CONTINUE");
     }
     ;
 
-/*
-* no : 4.2
-* rule  :  variable_list -> variable | variable_list ',' variable
-* node :   std::vector<LValStmt *> *  lval_list
-* son :  std::string id  std::vector<std::unique_ptr<ExprStmt>> array_index
-* error : 变量定义出错 请检查是否符合规范
-*/
+// 4.2 变量列表
 variable_list : variable
     {
         current_rule = CurrentRule::VariableList;
-        std::vector<LValStmt *> * lval_list = new std::vector<LValStmt *>();
+        auto lval_list = create_node<std::vector<LValStmt *>>();
         lval_list->emplace_back($1);
         $$ = lval_list;
-        LOG_DEBUG("DEBUG variable_list -> variable");
+        LOG_RULE("variable_list -> variable");
     }
     | variable_list ',' variable
     {
         current_rule = CurrentRule::VariableList;
-        if($3 != nullptr){
-                $1->emplace_back($3);
-            }
-            else{
-                std::vector<LValStmt *> * lval_list = new std::vector<LValStmt *>();
-                lval_list->emplace_back($3);
-                $1 = lval_list;
-            }
-
+        if($3 != nullptr) {
+            $1->emplace_back($3);
+        } else {
+            auto lval_list = create_node<std::vector<LValStmt *>>();
+            lval_list->emplace_back($3);
+            $1 = lval_list;
+        }
+        
         $$ = $1;
-        LOG_DEBUG("DEBUG variable_list -> variable_list ',' variable");
+        LOG_RULE("variable_list -> variable_list ',' variable");
     }
     | error ',' variable
     {
-        delete $3;
+        HANDLE_ERROR("variable_list -> error ',' variable", { delete $3; });
         $$ = nullptr;
-        LOG_DEBUG("ERROR variable_list -> error ',' variable");
     }
     ;
-/*
-* no : 4.3
-* rule  :  variable -> IDENTIFIER id_varpart
-* node :  LValStmt *  lval
-* son  :  std::string id  std::vector<std::unique_ptr<ExprStmt>> array_index
-* error : 变量定义出错 请检查是否符合规范 
-*/
+
+// 4.3 变量
 variable : IDENTIFIER id_varpart
     {
         current_rule = CurrentRule::Variable;
-        $$ = new LValStmt();
-        $$->id = std::string($1);
-        if($2 != nullptr){
-            for(auto expr : *$2){
-                $$->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));
+        auto lval = create_node<LValStmt>();
+        lval->id = std::string($1);
+        
+        // 处理变量的数组下标部分
+        if($2 != nullptr) {
+            for(auto expr : *$2) {
+                lval->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));
             }
             delete $2;
         }
+        
         free($1);
-        LOG_DEBUG("DEBUG variable -> IDENTIFIER id_varpart");
+        $$ = lval;
+        LOG_RULE("variable -> IDENTIFIER id_varpart");
     }
-    /* | IDENTIFIER id_random
-    {
-        $$ = new LValStmt();
-        $$->id = std::string($1);
-        if($2 != nullptr){
-            for(auto expr : *$2){
-                $$->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));
-            }
-            delete $2;
-        }
-        LOG_DEBUG("DEBUG variable -> IDENTIFIER id_random");
-    } */
     ;
 
-/*
-* no : 4.4
-* rule  :  id_varpart -> empty | '[' expression_list ']'
-* node :    std::vector<ExprStmt *> * expr_list  
-* son : ExprStmt * 
-* error : 数组下标定义出错 请检查是否符合规范
-*/
+// 4.4 变量附加部分（数组下标）
 id_varpart : /*empty*/
     {
         $$ = nullptr;
-        LOG_DEBUG("DEBUG id_varpart -> empty");
+        LOG_RULE("id_varpart -> empty");
     }
     | '[' expression_list ']'
     {
         current_rule = CurrentRule::IdVarpart;
-        if($2 != nullptr){
+        if($2 != nullptr) {
             $$ = $2;    
-        }else{
+        } else {
             yyerror(&@2, "code_str", program, scanner, "数组下标定义出错 请检查是否符合规范");
         }
-        LOG_DEBUG("DEBUG id_varpart -> '[' expression_list ']'");
+        LOG_RULE("id_varpart -> '[' expression_list ']'");
     }
     | '[' expression BRACE_PAIR array_index_expression
     {
         current_rule = CurrentRule::IdVarpart;
-        if($4 != nullptr){
+        if($4 != nullptr) {
             $$ = $4;
+            $$->emplace_back($2);
+            std::reverse($$->begin(), $$->end());
         } else {
-            
+            // 错误处理
+            $$ = nullptr;
         }
-        $$->emplace_back($2);
-        std::reverse($$->begin(), $$->end());
-        LOG_DEBUG("DEBUG id_varpart -> '[' expression BRACE_PAIR array_index_expression");
+        
+        LOG_RULE("id_varpart -> '[' expression BRACE_PAIR array_index_expression");
     }
     ;
 
-/*
-* no : 4.5
-* rule  :  array_index_expression -> expression ']' | ex
-* node :   std::vector<ExprStmt *> * expr_list
-* son :  ExprStmt *
-* error : 随机存取数组定义出错 请检查是否符合规范
-*/
+// 4.5 数组索引表达式
 array_index_expression: expression ']'
     {
         current_rule = CurrentRule::ArrayIndexExpression;
-        std::vector<ExprStmt *> * expr_list = new std::vector<ExprStmt *>();
+        auto expr_list = create_node<std::vector<ExprStmt *>>();
         expr_list->emplace_back($1);
         $$ = expr_list;
-        LOG_DEBUG("DEBUG array_index_expression -> expression_list");
+        LOG_RULE("array_index_expression -> expression_list");
     }
     | expression BRACE_PAIR array_index_expression
     {
         current_rule = CurrentRule::ArrayIndexExpression;
         $3->emplace_back($1);
         $$ = $3;
-        LOG_DEBUG("DEBUG array_index_expression -> array_index_expression BRACE_PAIR expression ']'");
+        LOG_RULE("array_index_expression -> array_index_expression BRACE_PAIR expression ']'");
     }
     ;
 
-
-
-/*
-* no : 5.1 
-* rule  :  procedure_call -> IDENTIFIER | IDENTIFIER '(' expression_list ')' 
-* node :   FuncCallStmt * proc_call
-* son :  std::string id  std::vector<ExprStmt *> * args
-* error : 过程调用定义出错 请检查是否符合规范
-*/
+// 5.1 过程调用
 procedure_call : IDENTIFIER
     {
         current_rule = CurrentRule::ProcedureCall;
-        FuncCallStmt * proc_call = new FuncCallStmt();
+        auto proc_call = create_node<FuncCallStmt>();
         proc_call->id = std::string($1);
-        $$ = proc_call;
         free($1);
-        LOG_DEBUG("DEBUG procedure_call -> IDENTIFIER");
+        $$ = proc_call;
+        LOG_RULE("procedure_call -> IDENTIFIER");
     }
     | IDENTIFIER '(' expression_list ')'
     {
         current_rule = CurrentRule::ProcedureCall;
-        FuncCallStmt * proc_call = new FuncCallStmt();
+        auto proc_call = create_node<FuncCallStmt>();
         proc_call->id = std::string($1);
-        if($3 != nullptr){
-            for(auto expr : *$3){
+        
+        // 处理参数表达式列表
+        if($3 != nullptr) {
+            for(auto expr : *$3) {
                 proc_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));
             }
             delete $3;
         }
-        $$ = proc_call;
+        
         free($1);
-        LOG_DEBUG("DEBUG procedure_call -> IDENTIFIER '(' expression_list ')'");
+        $$ = proc_call;
+        LOG_RULE("procedure_call -> IDENTIFIER '(' expression_list ')'");
     }
     ;
 
-
-/*
-* no : 5.2
-* rule  :  else_part -> empty | ELSE statement
-* node :   std::vector<BaseStmt *> * stmt 
-* son :  Stmt * 
-* error : else 语法定义出错 请检查是否符合规范
-*/
-/* else_part : //empty
+// 5.3 表达式列表
+expression_list : /*empty*/
     {
         $$ = nullptr;
-        LOG_DEBUG("DEBUG else_part -> empty");
-    }
-    | ELSE statement
-    {
-        // 强行取第一个
-        $$ = $2;
-        LOG_DEBUG("DEBUG else_part -> ELSE statement");
-    }
-    | error
-    {
-        syntax_error(&@1, "else 语法定义出错 请检查是否符合规范");
-    }
-    ; */
-
-/*
-* no : 5.3
-* rule  :  expression_list ->empty | expression | expression_list  ','  expression
-* node :   std::vector<ExprStmt *> * expr_list
-* son : ExprStmt *
-* error : 表达式定义出错 请检查是否符合规范
-*/
-expression_list : {
-        $$ = nullptr;
-        LOG_DEBUG("DEBUG expression_list -> empty");
+        LOG_RULE("expression_list -> empty");
     }
     | expression
     {
         current_rule = CurrentRule::ExpressionList;
-        std::vector<ExprStmt *> * expr_list = new std::vector<ExprStmt *>();
+        auto expr_list = create_node<std::vector<ExprStmt *>>();
         expr_list->emplace_back($1);
         $$ = expr_list;
-        LOG_DEBUG("DEBUG expression_list -> expression");
+        LOG_RULE("expression_list -> expression");
     }
     | expression_list ',' expression
     {
         current_rule = CurrentRule::ExpressionList;
         $1->emplace_back($3);
         $$ = $1;
-        LOG_DEBUG("DEBUG expression_list -> expression_list ',' expression");
+        LOG_RULE("expression_list -> expression_list ',' expression");
     }
     ;
-/*
-* no : 5.4
-* rule  :  expression -> simple_expression | simple_expression relop simple_expression
-* node :   ExprStmt * expr 
-* son : RelExprStmt * rel_expr
-* error : 表达式定义出错 请检查是否符合规范
-*/
+
+// 5.4 表达式
 expression : simple_expression
     {
         current_rule = CurrentRule::Expression;
-        ExprStmt * expr = new ExprStmt();
-        expr->rel_expr = std::make_unique<RelExprStmt>();
-        RelExprStmt::Term term;
-        term.type = RelExprStmt::RelExprType::NULL_TYPE;
-        term.add_expr = std::unique_ptr<AddExprStmt>($1);
-        expr->rel_expr->terms.emplace_back(std::move(term));
-        $$ = expr;
-        LOG_DEBUG("DEBUG expression -> simple_expression");
+        $$ = ExprNodeFactory::create_from_simple_expr($1);
+        LOG_RULE("expression -> simple_expression");
     }
     | expression relop simple_expression
     {
         current_rule = CurrentRule::Expression;
-        ExprStmt * expr = $1;
+        auto expr = $1;
         RelExprStmt::Term term;
         term.type = get_rel_expr_type($2);
         term.add_expr = std::unique_ptr<AddExprStmt>($3);
         expr->rel_expr->terms.emplace_back(std::move(term));
         $$ = expr;
-        LOG_DEBUG("DEBUG expression -> simple_expression relop simple_expression");
+        LOG_RULE("expression -> simple_expression relop simple_expression");
     };
 
-
-
-/*
-* no : 5.5
-* rule  :  simple_expression -> term | simple_expression addop term
-* node :   AddExprStmt * add_expr
-* son : AddExprType type; AddExprStmt * add_expr; MulExprStmt * mul_expr
-* error : 表达式定义出错 请检查是否符合规范
-*/
+// 5.5 简单表达式
 simple_expression : term
     {
         current_rule = CurrentRule::SimpleExpression;
-        AddExprStmt * add_expr = new AddExprStmt();
-        AddExprStmt::Term term;
-        term.type = AddExprStmt::AddExprType::NULL_TYPE;
-        term.mul_expr = std::unique_ptr<MulExprStmt>($1);
-        add_expr->terms.emplace_back(std::move(term));
-        $$ = add_expr;
-        LOG_DEBUG("DEBUG simple_expression -> term");
+        $$ = ExprNodeFactory::create_from_term($1);
+        LOG_RULE("simple_expression -> term");
     }
     | simple_expression addop term
     {
         current_rule = CurrentRule::SimpleExpression;
-        AddExprStmt * add_expr = $1;
+        auto add_expr = $1;
         AddExprStmt::Term term;
         term.type = get_add_expr_type($2);
         term.mul_expr = std::unique_ptr<MulExprStmt>($3);
         add_expr->terms.emplace_back(std::move(term));
         $$ = add_expr;
-        LOG_DEBUG("DEBUG simple_expression -> simple_expression %lld term\n", $2);
+        LOG_RULE("simple_expression -> simple_expression %lld term\n");
     }
     ;
 
-/*
-* no : 5.6
-* rule  :  term -> factor | term mulop factor
-* node :   MulExprStmt *  mul_expr
-* son : MulExprType type UnaryExprStmt * unary_expr  MulExprStmt * mul_expr
-* error : 表达式定义出错 请检查是否符合规范
-*/
+// 5.6 项
 term : factor
     {
         current_rule = CurrentRule::Term;
-        MulExprStmt * mul_expr = new MulExprStmt();
-        MulExprStmt::Term term;
-        term.type = MulExprStmt::MulExprType::NULL_TYPE;
-        term.unary_expr = std::unique_ptr<UnaryExprStmt>($1);
-        mul_expr->terms.emplace_back(std::move(term));
-        $$ = mul_expr;
-        LOG_DEBUG("DEBUG term -> factor");
+        $$ = ExprNodeFactory::create_from_factor($1);
+        LOG_RULE("term -> factor");
     }
     | term mulop factor
     {
         current_rule = CurrentRule::Term;
-        MulExprStmt * mul_expr = $1;
+        auto mul_expr = $1;
         MulExprStmt::Term term;
         term.type = get_mul_expr_type($2);
         term.unary_expr = std::unique_ptr<UnaryExprStmt>($3);
         mul_expr->terms.emplace_back(std::move(term));
         $$ = mul_expr;
-        LOG_DEBUG("DEBUG term -> term mulop factor");
+        LOG_RULE("term -> term mulop factor");
     }
     ;
 
-/*
-* no : 5.7
-* rule  :  factor -> INTEGER | REAL | variable | '(' expression ')' | IDENTIFIER '(' expression_list ')' | '-' factor 
-* node :    UnaryExprStmt * unary_expr
-* son :  UnaryExprType type; PrimaryExprStmt * primary_expr; 
-* error : 表达式定义出错 请检查是否符合规范
-*/
+// 5.7 因子
 factor : INTEGER
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
         unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
+        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
         unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(unary_expr->primary_expr->value->number,$1);
+        fill_number_stmt(unary_expr->primary_expr->value->number, $1);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> INTEGER");
+        LOG_RULE("factor -> INTEGER");
     }
-    /* | '+' INTEGER
-    {
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(unary_expr->primary_expr->value->number,$2);
-        $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> '+' INTEGER");
-    }
-    | '-' INTEGER
-    {
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus;
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(unary_expr->primary_expr->value->number,($2)*-1);
-        $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> '-' INTEGER");
-    } */
     | REAL
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
         unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
+        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
         unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
         double val = atof($1);
         fill_number_stmt(unary_expr->primary_expr->value->number, val);
         unary_expr->primary_expr->value->number->literal = std::string($1);
         free($1);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> REAL");
+        LOG_RULE("factor -> REAL");
     }
-    /* | '+' REAL
-    {
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(unary_expr->primary_expr->value->number,$2);
-        $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> '+' REAL");
-    }
-    | '-' REAL
-    {
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus;
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(unary_expr->primary_expr->value->number,($2)*-1);
-        $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> '-' REAL");
-    } */
     | BOOLEAN
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
         unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
+        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
         unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        long long int val = $1 == true ? 1 : 0;
-        fill_number_stmt(unary_expr->primary_expr->value->number,val);
+        long long int val = $1 ? 1 : 0;
+        fill_number_stmt(unary_expr->primary_expr->value->number, val);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> BOOLEAN");
+        LOG_RULE("factor -> BOOLEAN");
     }
     | CHAR
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
         unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::Number;
+        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
         unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        fill_number_stmt(unary_expr->primary_expr->value->number,$1);
+        fill_number_stmt(unary_expr->primary_expr->value->number, $1);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> CHAR");
+        LOG_RULE("factor -> CHAR");
     }
     | variable
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
         unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::LVal;
+        unary_expr->primary_expr->value->type = ValueStmt::ValueType::LVal;
         unary_expr->primary_expr->value->lval = std::unique_ptr<LValStmt>($1);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> variable");
+        LOG_RULE("factor -> variable");
     }
     | '(' expression ')'
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Parentheses;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Parentheses);
         unary_expr->primary_expr->expr = std::unique_ptr<ExprStmt>($2);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> '(' expression ')'");
+        LOG_RULE("factor -> '(' expression ')'");
     }
     | IDENTIFIER '(' expression_list ')'
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = new UnaryExprStmt();
-        //unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::NULL_TYPE);
-        unary_expr->primary_expr = std::make_unique<PrimaryExprStmt>();
-        unary_expr->primary_expr->type =PrimaryExprStmt::PrimaryExprType::Value;
+        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
         unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type =ValueStmt::ValueType::FuncCall;
+        unary_expr->primary_expr->value->type = ValueStmt::ValueType::FuncCall;
         unary_expr->primary_expr->value->func_call = std::make_unique<FuncCallStmt>();
         unary_expr->primary_expr->value->func_call->id = std::string($1);
-        if($3 != nullptr){
-            for(auto expr : *$3){
+        
+        // 处理函数参数
+        if($3 != nullptr) {
+            for(auto expr : *$3) {
                 unary_expr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));
             }
             delete $3;
         }
-        $$ = unary_expr;
+        
         free($1);
-        LOG_DEBUG("DEBUG factor -> IDENTIFIER '(' expression_list ')'");
+        $$ = unary_expr;
+        LOG_RULE("factor -> IDENTIFIER '(' expression_list ')'");
     }
     | NOT factor
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = $2;
+        auto unary_expr = $2;
         unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::Not);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> NOT factor");
+        LOG_RULE("factor -> NOT factor");
     }
     | '+' factor
     {
         current_rule = CurrentRule::Factor;
-        $$ = $2;
-        LOG_DEBUG("DEBUG factor -> '+' factor");
+        $$ = $2;  // 正号不改变值
+        LOG_RULE("factor -> '+' factor");
     }
     | '-' factor
     {
         current_rule = CurrentRule::Factor;
-        UnaryExprStmt * unary_expr = $2;
+        auto unary_expr = $2;
         unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus);
         $$ = unary_expr;
-        LOG_DEBUG("DEBUG factor -> '-' factor");
+        LOG_RULE("factor -> '-' factor");
     };
-/*
-* addop ->  + | - | or
-*/
+
+// 运算符定义
 addop : '+' { $$ = 0; } | '-' { $$ = 1; } | OR { $$ = 2; }
 
-/*
-* relop -> = | <> | < | <= | > | >= 
-*/
 relop : '=' { $$ = 0; } | NE { $$ = 1; } | '<' { $$ = 2; } | LE { $$ = 3; } | '>' { $$ = 4; } | GE { $$ = 5; } | IN { $$ = 6; }
 
-/*
-* mulop -> * | / | div | mod | and
-*/
 mulop : '*' { $$ = 0; } | '/' { $$ = 1; } | DIV { $$ = 1; } | MOD { $$ = 2; } | AND { $$ = 3; } | ANDTHEN { $$ = 4; } 
 
-error_recovery
-    : error ';'
+// 错误恢复
+error_recovery : error ';'
     {
         yyerrok;
     }
@@ -1913,45 +1645,6 @@ error_recovery
 // 此处书写相关函数，会添加在生成的代码中
 extern void scan_string(const char *str, yyscan_t scanner);
 
-void get_error_location(const char* code_str, YYLTYPE *llocp, std::string &error_note, std::string &msg, bool have_expected) {
-    std::string code(code_str); // 将C风格字符串转换为std::string
-    std::istringstream stream(code);
-    std::string line;
-    int current_line = 1;
-    msg += "\t";
-    while (std::getline(stream, line)) {
-        if (current_line == llocp->first_line) {
-            // 打印到错误开始之前的部分
-            msg += line.substr(0, llocp->first_column);
-            // 错误部分使用红色高亮显示
-            error_note = line.substr(llocp->first_column, llocp->last_column - llocp->first_column + 1);
-            msg += "\033[31m";
-            msg += error_note;
-            msg += "\033[0m";
-            // 打印错误之后的部分
-            if (llocp->last_column < line.size()) {
-                msg+= line.substr(llocp->last_column + 1);
-            }
-            // 添加箭头
-            msg += "\n\t";
-            if (have_expected) {
-                for (int i = 0; i < llocp->first_column; ++i) {
-                    msg += " ";
-                }
-                for (int i = llocp->first_column; i <= llocp->last_column; ++i) {
-                    msg += "\033[1;37m^\033[0m";
-                }
-            } else {
-                for (int i = 0; i < llocp->first_column; ++i) {
-                    msg += "\033[1;37m^\033[0m";
-                }
-            }
-            
-            break; // 已找到错误行，跳出循环
-        }
-        ++current_line;
-    }
-}
 // 相关所需的函数，可能包含一些错误处理函数
 int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg)
 {
@@ -1972,109 +1665,49 @@ static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str,
         << ":" << yypcontext_location(ctx)->first_column + 1 << ":\033[0m";
     buf << " \033[1;31m" << "Syntax error:" << "\033[0m";
     bool have_expected = false;
-    // Report the tokens expected at this point.
+    
+    // 报告此处期望的token
     {
         enum { TOKENMAX = 5 };
         yysymbol_kind_t expected[TOKENMAX];
-        int n = yypcontext_expected_tokens (ctx, expected, TOKENMAX);
+        int n = yypcontext_expected_tokens(ctx, expected, TOKENMAX);
         if (n < 0)
-            // Forward errors to yyparse.
+            // 向yyparse传递错误
             res = n;
-        else
+        else {
             for (int i = 0; i < n; ++i)
-                buf << (i == 0 ? " expected" : " or") << " " << yysymbol_name (expected[i]);
-        if (n > 0)
-            have_expected = true;
+                buf << (i == 0 ? " expected" : " or") << " " << yysymbol_name(expected[i]);
+            if (n > 0)
+                have_expected = true;
+        }
     }
-    // Report the unexpected token.
+    
+    // 报告意外的token
     {
-        yysymbol_kind_t lookahead = yypcontext_token (ctx);
+        yysymbol_kind_t lookahead = yypcontext_token(ctx);
         if (lookahead != YYSYMBOL_YYEMPTY)
-            buf << " before " << yysymbol_name (lookahead);
+            buf << " before " << yysymbol_name(lookahead);
     }
+    
     std::string error_note;
     std::string msg;
     
     get_error_location(code_str, yypcontext_location(ctx), error_note, msg, have_expected);
     if (have_expected)
         buf << " but found \"" << error_note << "\"";
-    std::cerr<< buf.str() << std::endl;
-    std::cerr<< msg << std::endl;
-    /* switch (current_rule)
-        {
-            case CurrentRule::ProgramStruct:
-                LOG_ERROR("程序定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::ProgramHead:
-                LOG_ERROR("程序头定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::ProgramBody:
-                LOG_ERROR("程序体定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::IdList:
-                LOG_ERROR("标识符定义错误 请检查是否符合规范");
-                break;
-            case CurrentRule::ConstDeclarations: case CurrentRule::ConstDeclaration:
-                LOG_ERROR("常量定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::ConstValue:
-                LOG_ERROR("常量 请检查是否为合法常量");
-                break;
-            case CurrentRule::VarDeclarations: case CurrentRule::VarDeclaration:
-                LOG_ERROR("变量定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::Type:
-                LOG_ERROR("类型定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::SubprogramDeclarations: case CurrentRule::Subprogram:
-                LOG_ERROR("子函数定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::SubprogramHead:
-                LOG_ERROR("子函数头定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::FormalParameter:
-                LOG_ERROR("参数定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::SubprogramBody:
-                LOG_ERROR("子函数体定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::CompoundStatement:
-                LOG_ERROR("复合语句定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::StatementList: case CurrentRule::Statement:
-                LOG_ERROR("语句定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::ProcedureCall:
-                LOG_ERROR("过程调用出错 请检查是否符合规范");
-                break;
-            case CurrentRule::VariableList: case CurrentRule::Variable:
-                LOG_ERROR("变量定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::IdVarpart: case CurrentRule::ArrayIndexExpression:
-            case CurrentRule::BracketExpressionList:
-                LOG_ERROR("数组下标定义出错 请检查是否符合规范");
-                break;
-            case CurrentRule::ExpressionList: case CurrentRule::Expression:
-            case CurrentRule::SimpleExpression: case CurrentRule::Term: case CurrentRule::Factor:
-                LOG_ERROR("表达式定义出错 请检查是否符合规范");
-                break;
-            default:
-                LOG_ERROR("请检查相关代码是否符合规范");
-                break;
-
-        } */
+    
+    std::cerr << buf.str() << std::endl;
+    std::cerr << msg << std::endl;
+    
     return res;
 }
-
-
 
 int code_parse(const char * code_str, ProgramStmt ** program) {
     yyscan_t scanner;
     yylex_init(&scanner);
     scan_string(code_str, scanner);
 
-
-    int ret = yyparse(code_str,program, scanner);
+    int ret = yyparse(code_str, program, scanner);
     
     yylex_destroy(scanner);
     if (hadError) {

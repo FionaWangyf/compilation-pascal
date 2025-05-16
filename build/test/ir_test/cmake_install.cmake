@@ -1,4 +1,4 @@
-# Install script for directory: /com/test/ir_test
+# Install script for directory: /src/test/ir_test
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

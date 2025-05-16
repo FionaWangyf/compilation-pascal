@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=gnu++17
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/com/src -I/com/test/ir_test/../../src/ast -I/com/test/ir_test/../../src/common -I/com/test/ir_test/../../src/ir -I/com/test/ir_test/../../src/parser -I/com/test/ir_test/../../src/token 
+CXX_INCLUDES = -I/src/src -I/src/test/ir_test/../../src/ast -I/src/test/ir_test/../../src/common -I/src/test/ir_test/../../src/ir -I/src/test/ir_test/../../src/parser -I/src/test/ir_test/../../src/token 
 

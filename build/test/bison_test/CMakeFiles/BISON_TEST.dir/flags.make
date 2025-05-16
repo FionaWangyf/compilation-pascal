@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=gnu++17
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/com/src -I/com/test/bison_test/../../src -I/com/build/test/bison_test 
+CXX_INCLUDES = -I/src/src -I/src/test/bison_test/../../src -I/src/build/test/bison_test 
 

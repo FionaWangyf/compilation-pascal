@@ -6,5 +6,5 @@ CXX_FLAGS =  -pthread   -std=gnu++17
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/com/src 
+CXX_INCLUDES = -I/src/src 
 

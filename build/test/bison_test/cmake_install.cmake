@@ -1,4 +1,4 @@
-# Install script for directory: /com/test/bison_test
+# Install script for directory: /src/test/bison_test
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

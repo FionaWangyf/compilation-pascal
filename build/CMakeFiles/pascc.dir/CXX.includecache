@@ -134,13 +134,13 @@ string
 string
 -
 
-/com/src/ast/stmt.cpp
+/src/src/ast/stmt.cpp
 ast/visitor.hpp
-/com/src/ast/ast/visitor.hpp
+/src/src/ast/ast/visitor.hpp
 ast/stmt.hpp
-/com/src/ast/ast/stmt.hpp
+/src/src/ast/ast/stmt.hpp
 
-/com/src/ast/stmt.hpp
+/src/src/ast/stmt.hpp
 algorithm
 -
 memory
@@ -152,37 +152,37 @@ utility
 vector
 -
 
-/com/src/ast/stmt_test.cpp
+/src/src/ast/stmt_test.cpp
 ast/stmt_test.hpp
-/com/src/ast/ast/stmt_test.hpp
+/src/src/ast/ast/stmt_test.hpp
 sstream
 -
 thread
 -
 
-/com/src/builder/c/c_builder.cpp
+/src/src/builder/c/c_builder.cpp
 builder/c/c_builder.hpp
-/com/src/builder/c/builder/c/c_builder.hpp
+/src/src/builder/c/builder/c/c_builder.hpp
 common/log/log.hpp
-/com/src/builder/c/common/log/log.hpp
+/src/src/builder/c/common/log/log.hpp
 ir/ir.hpp
-/com/src/builder/c/ir/ir.hpp
+/src/src/builder/c/ir/ir.hpp
 common/setting/settings.hpp
-/com/src/builder/c/common/setting/settings.hpp
+/src/src/builder/c/common/setting/settings.hpp
 ir/ir_gen.hpp
-/com/src/builder/c/ir/ir_gen.hpp
+/src/src/builder/c/ir/ir_gen.hpp
 unordered_set
 -
 sstream
 -
 
-/com/src/builder/c/c_builder.hpp
+/src/src/builder/c/c_builder.hpp
 builder/builder.hpp
-/com/src/builder/c/builder/builder.hpp
+/src/src/builder/c/builder/builder.hpp
 
-/com/src/common/log/log.cpp
+/src/src/common/log/log.cpp
 common/log/log.hpp
-/com/src/common/log/common/log/log.hpp
+/src/src/common/log/common/log/log.hpp
 cstdarg
 -
 deque
@@ -200,7 +200,7 @@ string
 vector
 -
 
-/com/src/common/log/log.hpp
+/src/src/common/log/log.hpp
 map
 -
 mutex
@@ -222,11 +222,11 @@ thread
 condition_variable
 -
 
-/com/src/common/setting/settings.cpp
+/src/src/common/setting/settings.cpp
 common/setting/settings.hpp
-/com/src/common/setting/common/setting/settings.hpp
+/src/src/common/setting/common/setting/settings.hpp
 common/log/log.hpp
-/com/src/common/setting/common/log/log.hpp
+/src/src/common/setting/common/log/log.hpp
 cstdlib
 -
 unistd.h
@@ -234,15 +234,15 @@ unistd.h
 cstring
 -
 
-/com/src/common/setting/settings.hpp
+/src/src/common/setting/settings.hpp
 string
 -
 
-/com/src/common/thpool/thpool.cpp
+/src/src/common/thpool/thpool.cpp
 common/thpool/thpool.hpp
-/com/src/common/thpool/common/thpool/thpool.hpp
+/src/src/common/thpool/common/thpool/thpool.hpp
 
-/com/src/common/thpool/thpool.hpp
+/src/src/common/thpool/thpool.hpp
 vector
 -
 queue
@@ -258,11 +258,11 @@ future
 functional
 -
 
-/com/src/ir/ir.cpp
+/src/src/ir/ir.cpp
 ir/ir.hpp
-/com/src/ir/ir/ir.hpp
+/src/src/ir/ir/ir.hpp
 ir/visitor.hpp
-/com/src/ir/ir/visitor.hpp
+/src/src/ir/ir/visitor.hpp
 deque
 -
 iterator
@@ -274,19 +274,19 @@ iostream
 stdlib.h
 -
 
-/com/src/ir/ir_gen.cpp
+/src/src/ir/ir_gen.cpp
 ir/ir_gen.hpp
-/com/src/ir/ir/ir_gen.hpp
+/src/src/ir/ir/ir_gen.hpp
 assert.h
-/com/src/ir/assert.h
+/src/src/ir/assert.h
 ast/stmt.hpp
-/com/src/ir/ast/stmt.hpp
+/src/src/ir/ast/stmt.hpp
 common/exception/exception.hpp
-/com/src/ir/common/exception/exception.hpp
+/src/src/ir/common/exception/exception.hpp
 common/log/log.hpp
-/com/src/ir/common/log/log.hpp
+/src/src/ir/common/log/log.hpp
 ir/ir.hpp
-/com/src/ir/ir/ir.hpp
+/src/src/ir/ir/ir.hpp
 algorithm
 -
 iostream
@@ -296,13 +296,13 @@ memory
 utility
 -
 
-/com/src/ir/ir_gen.hpp
+/src/src/ir/ir_gen.hpp
 ir/ir.hpp
-/com/src/ir/ir/ir.hpp
+/src/src/ir/ir/ir.hpp
 ast/visitor.hpp
-/com/src/ir/ast/visitor.hpp
+/src/src/ir/ast/visitor.hpp
 ast/stmt.hpp
-/com/src/ir/ast/stmt.hpp
+/src/src/ir/ast/stmt.hpp
 fstream
 -
 memory
@@ -314,7 +314,7 @@ map
 string
 -
 
-/com/src/main.cpp
+/src/src/main.cpp
 cstddef
 -
 cstdlib
@@ -334,47 +334,47 @@ string
 vector
 -
 common/thpool/thpool.hpp
-/com/src/common/thpool/thpool.hpp
+/src/src/common/thpool/thpool.hpp
 common/log/log.hpp
-/com/src/common/log/log.hpp
+/src/src/common/log/log.hpp
 opt/opt.hpp
-/com/src/opt/opt.hpp
+/src/src/opt/opt.hpp
 ast/stmt.hpp
-/com/src/ast/stmt.hpp
+/src/src/ast/stmt.hpp
 ir/ir_gen.hpp
-/com/src/ir/ir_gen.hpp
+/src/src/ir/ir_gen.hpp
 common/setting/settings.hpp
-/com/src/common/setting/settings.hpp
+/src/src/common/setting/settings.hpp
 builder/c/c_builder.hpp
-/com/src/builder/c/c_builder.hpp
+/src/src/builder/c/c_builder.hpp
 opt/const_expr.hpp
-/com/src/opt/const_expr.hpp
+/src/src/opt/const_expr.hpp
 parser/yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 builder/c/c_builder.hpp
-/com/src/builder/c/c_builder.hpp
+/src/src/builder/c/c_builder.hpp
 
-/com/src/opt/const_expr.cpp
+/src/src/opt/const_expr.cpp
 opt/const_expr.hpp
-/com/src/opt/opt/const_expr.hpp
+/src/src/opt/opt/const_expr.hpp
 common/log/log.hpp
-/com/src/opt/common/log/log.hpp
+/src/src/opt/common/log/log.hpp
 ir/ir.hpp
-/com/src/opt/ir/ir.hpp
+/src/src/opt/ir/ir.hpp
 memory
 -
 
-/com/src/opt/const_expr.hpp
+/src/src/opt/const_expr.hpp
 opt.hpp
-/com/src/opt/opt.hpp
+/src/src/opt/opt.hpp
 string
 -
 
-/com/src/opt/opt.hpp
+/src/src/opt/opt.hpp
 string
 -
 
-/com/src/parser/lex_pascal.cpp
+/src/src/parser/lex_pascal.cpp
 stdio.h
 -
 string.h
@@ -390,15 +390,15 @@ cstring
 cstdio
 -
 ast/stmt.hpp
-/com/src/parser/ast/stmt.hpp
+/src/src/parser/ast/stmt.hpp
 common/log/log.hpp
-/com/src/parser/common/log/log.hpp
+/src/src/parser/common/log/log.hpp
 yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 unistd.h
 -
 
-/com/src/parser/lex_pascal.hpp
+/src/src/parser/lex_pascal.hpp
 stdio.h
 -
 string.h
@@ -412,7 +412,7 @@ inttypes.h
 unistd.h
 -
 
-/com/src/parser/yacc_pascal.cpp
+/src/src/parser/yacc_pascal.cpp
 memory
 -
 sstream
@@ -423,20 +423,24 @@ utility
 -
 vector
 -
+map
+-
+type_traits
+-
 common/log/log.hpp
-/com/src/parser/common/log/log.hpp
+/src/src/parser/common/log/log.hpp
 common/setting/settings.hpp
-/com/src/parser/common/setting/settings.hpp
+/src/src/parser/common/setting/settings.hpp
 ast/stmt.hpp
-/com/src/parser/ast/stmt.hpp
+/src/src/parser/ast/stmt.hpp
 ast/stmt_test.hpp
-/com/src/parser/ast/stmt_test.hpp
+/src/src/parser/ast/stmt_test.hpp
 yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 lex_pascal.hpp
-/com/src/parser/lex_pascal.hpp
+/src/src/parser/lex_pascal.hpp
 yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 limits.h
 -
 stdint.h
@@ -458,15 +462,15 @@ stdlib.h
 stdio.h
 -
 
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 
-/com/src/token/token.cpp
+/src/src/token/token.cpp
 token.hpp
-/com/src/token/token.hpp
+/src/src/token/token.hpp
 string
 -
 
-/com/src/token/token.hpp
+/src/src/token/token.hpp
 iostream
 -
 string

@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /com
+CMAKE_SOURCE_DIR = /src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /com/build
+CMAKE_BINARY_DIR = /src/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/pascc.dir/depend.make
@@ -59,172 +59,172 @@ include CMakeFiles/pascc.dir/flags.make
 
 CMakeFiles/pascc.dir/src/ast/stmt.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/ast/stmt.cpp.o: ../src/ast/stmt.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/pascc.dir/src/ast/stmt.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ast/stmt.cpp.o -c /com/src/ast/stmt.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/pascc.dir/src/ast/stmt.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ast/stmt.cpp.o -c /src/src/ast/stmt.cpp
 
 CMakeFiles/pascc.dir/src/ast/stmt.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/ast/stmt.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/ast/stmt.cpp > CMakeFiles/pascc.dir/src/ast/stmt.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ast/stmt.cpp > CMakeFiles/pascc.dir/src/ast/stmt.cpp.i
 
 CMakeFiles/pascc.dir/src/ast/stmt.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/ast/stmt.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/ast/stmt.cpp -o CMakeFiles/pascc.dir/src/ast/stmt.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt.cpp -o CMakeFiles/pascc.dir/src/ast/stmt.cpp.s
 
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o -c /com/src/ast/stmt_test.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o -c /src/src/ast/stmt_test.cpp
 
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/ast/stmt_test.cpp > CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ast/stmt_test.cpp > CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.i
 
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/ast/stmt_test.cpp -o CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt_test.cpp -o CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s
 
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/builder/c/c_builder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o -c /com/src/builder/c/c_builder.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o -c /src/src/builder/c/c_builder.cpp
 
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/builder/c/c_builder.cpp > CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/builder/c/c_builder.cpp > CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.i
 
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/builder/c/c_builder.cpp -o CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/builder/c/c_builder.cpp -o CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.s
 
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: ../src/common/log/log.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/pascc.dir/src/common/log/log.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/common/log/log.cpp.o -c /com/src/common/log/log.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/pascc.dir/src/common/log/log.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/common/log/log.cpp.o -c /src/src/common/log/log.cpp
 
 CMakeFiles/pascc.dir/src/common/log/log.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/common/log/log.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/common/log/log.cpp > CMakeFiles/pascc.dir/src/common/log/log.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/common/log/log.cpp > CMakeFiles/pascc.dir/src/common/log/log.cpp.i
 
 CMakeFiles/pascc.dir/src/common/log/log.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/common/log/log.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/common/log/log.cpp -o CMakeFiles/pascc.dir/src/common/log/log.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/common/log/log.cpp -o CMakeFiles/pascc.dir/src/common/log/log.cpp.s
 
 CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o: ../src/common/setting/settings.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o -c /com/src/common/setting/settings.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o -c /src/src/common/setting/settings.cpp
 
 CMakeFiles/pascc.dir/src/common/setting/settings.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/common/setting/settings.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/common/setting/settings.cpp > CMakeFiles/pascc.dir/src/common/setting/settings.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/common/setting/settings.cpp > CMakeFiles/pascc.dir/src/common/setting/settings.cpp.i
 
 CMakeFiles/pascc.dir/src/common/setting/settings.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/common/setting/settings.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/common/setting/settings.cpp -o CMakeFiles/pascc.dir/src/common/setting/settings.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/common/setting/settings.cpp -o CMakeFiles/pascc.dir/src/common/setting/settings.cpp.s
 
 CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o: ../src/common/thpool/thpool.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o -c /com/src/common/thpool/thpool.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o -c /src/src/common/thpool/thpool.cpp
 
 CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/common/thpool/thpool.cpp > CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/common/thpool/thpool.cpp > CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.i
 
 CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/common/thpool/thpool.cpp -o CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/common/thpool/thpool.cpp -o CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.s
 
 CMakeFiles/pascc.dir/src/ir/ir.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/ir/ir.cpp.o: ../src/ir/ir.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/pascc.dir/src/ir/ir.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ir/ir.cpp.o -c /com/src/ir/ir.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/pascc.dir/src/ir/ir.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ir/ir.cpp.o -c /src/src/ir/ir.cpp
 
 CMakeFiles/pascc.dir/src/ir/ir.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/ir/ir.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/ir/ir.cpp > CMakeFiles/pascc.dir/src/ir/ir.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ir/ir.cpp > CMakeFiles/pascc.dir/src/ir/ir.cpp.i
 
 CMakeFiles/pascc.dir/src/ir/ir.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/ir/ir.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/ir/ir.cpp -o CMakeFiles/pascc.dir/src/ir/ir.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ir/ir.cpp -o CMakeFiles/pascc.dir/src/ir/ir.cpp.s
 
 CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ir/ir_gen.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o -c /com/src/ir/ir_gen.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o -c /src/src/ir/ir_gen.cpp
 
 CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/ir/ir_gen.cpp > CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ir/ir_gen.cpp > CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.i
 
 CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/ir/ir_gen.cpp -o CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ir/ir_gen.cpp -o CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.s
 
 CMakeFiles/pascc.dir/src/main.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/pascc.dir/src/main.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/main.cpp.o -c /com/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/pascc.dir/src/main.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/main.cpp.o -c /src/src/main.cpp
 
 CMakeFiles/pascc.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/main.cpp > CMakeFiles/pascc.dir/src/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/main.cpp > CMakeFiles/pascc.dir/src/main.cpp.i
 
 CMakeFiles/pascc.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/main.cpp -o CMakeFiles/pascc.dir/src/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/main.cpp -o CMakeFiles/pascc.dir/src/main.cpp.s
 
 CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: ../src/opt/const_expr.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o -c /com/src/opt/const_expr.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o -c /src/src/opt/const_expr.cpp
 
 CMakeFiles/pascc.dir/src/opt/const_expr.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/opt/const_expr.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/opt/const_expr.cpp > CMakeFiles/pascc.dir/src/opt/const_expr.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/opt/const_expr.cpp > CMakeFiles/pascc.dir/src/opt/const_expr.cpp.i
 
 CMakeFiles/pascc.dir/src/opt/const_expr.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/opt/const_expr.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/opt/const_expr.cpp -o CMakeFiles/pascc.dir/src/opt/const_expr.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/opt/const_expr.cpp -o CMakeFiles/pascc.dir/src/opt/const_expr.cpp.s
 
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o: ../src/parser/lex_pascal.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o -c /com/src/parser/lex_pascal.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o -c /src/src/parser/lex_pascal.cpp
 
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/parser/lex_pascal.cpp > CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/parser/lex_pascal.cpp > CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.i
 
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/parser/lex_pascal.cpp -o CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/lex_pascal.cpp -o CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.s
 
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o -c /com/src/parser/yacc_pascal.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o -c /src/src/parser/yacc_pascal.cpp
 
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/parser/yacc_pascal.cpp > CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/parser/yacc_pascal.cpp > CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i
 
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/parser/yacc_pascal.cpp -o CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/yacc_pascal.cpp -o CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s
 
 CMakeFiles/pascc.dir/src/token/token.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/token/token.cpp.o: ../src/token/token.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/pascc.dir/src/token/token.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/token/token.cpp.o -c /com/src/token/token.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/pascc.dir/src/token/token.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/token/token.cpp.o -c /src/src/token/token.cpp
 
 CMakeFiles/pascc.dir/src/token/token.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/token/token.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /com/src/token/token.cpp > CMakeFiles/pascc.dir/src/token/token.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/token/token.cpp > CMakeFiles/pascc.dir/src/token/token.cpp.i
 
 CMakeFiles/pascc.dir/src/token/token.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/token/token.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /com/src/token/token.cpp -o CMakeFiles/pascc.dir/src/token/token.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/token/token.cpp -o CMakeFiles/pascc.dir/src/token/token.cpp.s
 
 # Object files for target pascc
 pascc_OBJECTS = \
@@ -260,7 +260,7 @@ pascc_EXTERNAL_OBJECTS =
 ../bin/pascc: CMakeFiles/pascc.dir/src/token/token.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/build.make
 ../bin/pascc: CMakeFiles/pascc.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/com/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable ../bin/pascc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable ../bin/pascc"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/pascc.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -273,6 +273,6 @@ CMakeFiles/pascc.dir/clean:
 .PHONY : CMakeFiles/pascc.dir/clean
 
 CMakeFiles/pascc.dir/depend:
-	cd /com/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /com /com /com/build /com/build /com/build/CMakeFiles/pascc.dir/DependInfo.cmake --color=$(COLOR)
+	cd /src/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /src /src /src/build /src/build /src/build/CMakeFiles/pascc.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/pascc.dir/depend
 

@@ -54,23 +54,23 @@ condition_variable
 string
 -
 
-/com/src/ast/stmt.cpp
+/src/src/ast/stmt.cpp
 ast/visitor.hpp
-/com/src/ast/ast/visitor.hpp
+/src/src/ast/ast/visitor.hpp
 ast/stmt.hpp
-/com/src/ast/ast/stmt.hpp
+/src/src/ast/ast/stmt.hpp
 
-/com/src/ast/stmt_test.cpp
+/src/src/ast/stmt_test.cpp
 ast/stmt_test.hpp
-/com/src/ast/ast/stmt_test.hpp
+/src/src/ast/ast/stmt_test.hpp
 sstream
 -
 thread
 -
 
-/com/src/common/log/log.cpp
+/src/src/common/log/log.cpp
 common/log/log.hpp
-/com/src/common/log/common/log/log.hpp
+/src/src/common/log/common/log/log.hpp
 cstdarg
 -
 deque
@@ -88,11 +88,11 @@ string
 vector
 -
 
-/com/src/common/setting/settings.cpp
+/src/src/common/setting/settings.cpp
 common/setting/settings.hpp
-/com/src/common/setting/common/setting/settings.hpp
+/src/src/common/setting/common/setting/settings.hpp
 common/log/log.hpp
-/com/src/common/setting/common/log/log.hpp
+/src/src/common/setting/common/log/log.hpp
 cstdlib
 -
 unistd.h
@@ -100,7 +100,7 @@ unistd.h
 cstring
 -
 
-/com/src/parser/lex_pascal.cpp
+/src/src/parser/lex_pascal.cpp
 stdio.h
 -
 string.h
@@ -116,15 +116,15 @@ cstring
 cstdio
 -
 ast/stmt.hpp
-/com/src/parser/ast/stmt.hpp
+/src/src/parser/ast/stmt.hpp
 common/log/log.hpp
-/com/src/parser/common/log/log.hpp
+/src/src/parser/common/log/log.hpp
 yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 unistd.h
 -
 
-/com/src/parser/lex_pascal.hpp
+/src/src/parser/lex_pascal.hpp
 stdio.h
 -
 string.h
@@ -138,7 +138,7 @@ inttypes.h
 unistd.h
 -
 
-/com/src/parser/yacc_pascal.cpp
+/src/src/parser/yacc_pascal.cpp
 memory
 -
 sstream
@@ -149,20 +149,24 @@ utility
 -
 vector
 -
+map
+-
+type_traits
+-
 common/log/log.hpp
-/com/src/parser/common/log/log.hpp
+/src/src/parser/common/log/log.hpp
 common/setting/settings.hpp
-/com/src/parser/common/setting/settings.hpp
+/src/src/parser/common/setting/settings.hpp
 ast/stmt.hpp
-/com/src/parser/ast/stmt.hpp
+/src/src/parser/ast/stmt.hpp
 ast/stmt_test.hpp
-/com/src/parser/ast/stmt_test.hpp
+/src/src/parser/ast/stmt_test.hpp
 yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 lex_pascal.hpp
-/com/src/parser/lex_pascal.hpp
+/src/src/parser/lex_pascal.hpp
 yacc_pascal.hpp
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 limits.h
 -
 stdint.h
@@ -184,9 +188,9 @@ stdlib.h
 stdio.h
 -
 
-/com/src/parser/yacc_pascal.hpp
+/src/src/parser/yacc_pascal.hpp
 
-/com/test/bison_test/main.cpp
+/src/test/bison_test/main.cpp
 algorithm
 -
 cstddef
@@ -204,9 +208,9 @@ sstream
 vector
 -
 ast/stmt.hpp
-/com/test/bison_test/ast/stmt.hpp
+/src/test/bison_test/ast/stmt.hpp
 ast/stmt_test.hpp
-/com/test/bison_test/ast/stmt_test.hpp
+/src/test/bison_test/ast/stmt_test.hpp
 common/log/log.hpp
-/com/test/bison_test/common/log/log.hpp
+/src/test/bison_test/common/log/log.hpp
 
