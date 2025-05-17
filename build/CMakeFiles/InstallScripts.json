@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/build/cmake_install.cmake",
-		"/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/build/test/bison_test/cmake_install.cmake",
-		"/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/build/test/ir_test/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
