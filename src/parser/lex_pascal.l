@@ -1,3 +1,4 @@
+/*顶部代码*/
 %top{
 /*
 这里的代码会被复制到lex_pascal.cpp的最开始位置
@@ -23,8 +24,10 @@ do {                                                         \
 }                                                            \
 while (0);
 
-
 }
+
+
+/*c代码部分，包含必要的头文件、宏定义和辅助函数*/
 %{
 #include<cstring>
 #include<cstdio>
@@ -75,6 +78,7 @@ char *strdup_tolower(const char *s) {
 DIGIT                   [0-9]
 INTEGER         {DIGIT}+
 REAL               {DIGIT}+"."{DIGIT}+
+EXPONENTIAL     {REAL}[eE][+-]?{INTEGER}
 
 LETTER                  [a-zA-Z]
 IDENTIFIER              ({LETTER}|[_])({LETTER}|{DIGIT}|[_])*
@@ -86,9 +90,13 @@ CHAR               (\'([^'\n]|\\.)\')
 ANNO_BIGBRACKET         (\{[^\}]*\})
 ANNO_DOUBLE                (\/\/[^\n]*)
 ANNO_MULTILINE            (\/\*([^*]|\*[^/])*\*\/)
+ANNO_STAR_BRACKET     (\(\*([^*]|\*[^\)])*\*\))
+UNCLOSED_COMMENT   (\{[^\}]*$)|(\/\*([^*]|\*[^/])*$)|(\(\*([^*]|\*[^\)])*$)
 
 BRACE_PAIR                (\]\[)
 OTHER_SIGN                     [\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!]
+
+ILLEGAL_CHAR       [^a-zA-Z0-9_\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!\t\n\r\ ]
 
 %%
 "program"                        RETURN_TOKEN(PROGRAM);
@@ -151,21 +159,52 @@ OTHER_SIGN                     [\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!]
 
 {OTHER_SIGN}                            RETURN_TOKEN(yytext[0]);
 
-{INTEGER}                                yylval->number = atoi(yytext); RETURN_TOKEN(INTEGER);
+{INTEGER}       {
+                    long val = atol(yytext);
+                    if (val > 2147483647) { /* INT_MAX */
+                        LOG_DEBUG("整数值过大: %s", yytext);
+                    }
+                    yylval->number = atoi(yytext); 
+                    RETURN_TOKEN(INTEGER);
+                }
+
 {REAL}                                     yylval->real = strdup(yytext); RETURN_TOKEN(REAL);
+
+{EXPONENTIAL}   {
+                    yylval->real = strdup(yytext);
+                    RETURN_TOKEN(REAL);
+                }
+
 {CHAR}                                    yylval->charactor = yytext[1]; RETURN_TOKEN(CHAR);
-{IDENTIFIER}                          yylval->string = strdup_tolower(yytext);RETURN_TOKEN(IDENTIFIER);
+
+{IDENTIFIER}    {
+                    if (strlen(yytext) > 255) {
+                        LOG_DEBUG("标识符过长: %s", yytext);
+                    }
+                    yylval->string = strdup_tolower(yytext);
+                    RETURN_TOKEN(IDENTIFIER);
+                }
 
 {ANNO_BIGBRACKET}               // ignore comments
 {ANNO_DOUBLE}                       // ignore comments
 {ANNO_MULTILINE}                   // ignore comments
+{ANNO_STAR_BRACKET}                // ignore comments
+
+{UNCLOSED_COMMENT}   {
+                        LOG_DEBUG("未闭合的注释: %s", yytext);
+                    }
 
 "\t"                                       /* ignore whitespace */
-"\n"
-"\r"
-" "
+"\n"                                       /* ignore whitespace */
+"\r"                                       /* ignore whitespace */
+" "                                        /* ignore whitespace */
+
 \"[^"]*\"                               yylval->string = strdup(yytext); RETURN_TOKEN(STRING);
 '[^']*\'                                yylval->string = strdup(yytext); RETURN_TOKEN(STRING);
+
+{ILLEGAL_CHAR}  {
+                    LOG_DEBUG("非法字符: '%c' (ASCII: %d)", yytext[0], (int)yytext[0]);
+                }
 
 .                                                /* ignore other characters */
 %%
@@ -173,5 +212,4 @@ OTHER_SIGN                     [\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!]
 void scan_string(const char *str, yyscan_t scanner) {
     yy_switch_to_buffer(yy_scan_string(str, scanner), scanner);
     yyset_lineno(1, scanner);
-    //{STRING}                                yylval->string = strdup(yytext); RETURN_TOKEN(STRING);
 }
