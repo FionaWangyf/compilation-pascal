@@ -1,4 +1,0 @@
-/com/build/CMakeFiles/rebuild_cache.dir
-/com/build/CMakeFiles/edit_cache.dir
-/com/build/CMakeFiles/test.dir
-/com/build/CMakeFiles/pascc.dir
