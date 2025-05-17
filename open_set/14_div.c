@@ -5,9 +5,13 @@
 #include <unistd.h>
 
 int a = 0;
+int b = 0;
+float c = 0.0;
 
 int main() {
-    a = 3;
-    printf("%d", a);
+    a = 10;
+    b = 5;
+    c = a / b;
+    printf("%f", c);
     return 0;
 }

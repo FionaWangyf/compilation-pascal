@@ -1,4 +1,3 @@
-
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
@@ -9,16 +8,12 @@
 #include <string>
 #include <vector>
 
-#include "common/thpool/thpool.hpp"
 #include "common/log/log.hpp"
-#include "opt/opt.hpp"
 #include "ast/stmt.hpp"
-#include "ir/ir_gen.hpp"
 #include "common/setting/settings.hpp"
-#include "builder/builder.hpp"
-#include "opt/const_expr.hpp"
+#include "semantic_analyzer/semantic_analyzer.hpp"
+#include "code_generator/code_generator.hpp"
 #include "parser/yacc_pascal.hpp"
-#include "builder/builder.hpp"
 
 int code_parse(const char *code, ProgramStmt **program_stmt);
 
@@ -42,21 +37,7 @@ void init_env()
         else
             filename = G_SETTINGS.input_file;
 
-        
-
         LOG_DEBUG("Output file: %s", G_SETTINGS.output_file.c_str());
-        // 检测文件是否存在
-        // std::ifstream file(G_SETTINGS.output_file);
-        // if (file.is_open())
-        // {
-        //     if (file.peek() != std::ifstream::traits_type::eof())
-        //     {
-        //         // 文件已经存在且不为空
-        //         LOG_WARN("Non-empty output file already exists: %s", G_SETTINGS.output_file.c_str());
-        //         LOG_WARN("Program exited.");
-        //         exit(0);
-        //     }
-        // }
     }
 #ifndef ONLINE_JUDGE
     switch (G_SETTINGS.log_level)
@@ -81,8 +62,6 @@ void init_env()
             break;
     }
 #endif
-    common::g_thpool = new common::ThreadPool(G_SETTINGS.thread_num);
-    
 }
 
 int main(int argc, char *argv[])
@@ -91,8 +70,6 @@ int main(int argc, char *argv[])
     G_SETTINGS.parse_args(argc, argv);
     // 初始化环境
     init_env();
-    // 管理线程池
-    std::unique_ptr<common::ThreadPool> thpool(common::g_thpool);
     // 管理日志
     std::unique_ptr<common::Log> log(common::g_log);
     // 从输入文件中读取代码
@@ -105,6 +82,7 @@ int main(int argc, char *argv[])
     buffer << input_file.rdbuf();
     std::string code = buffer.str();
     input_file.close();
+    
     // 第一步：词法分析 and 语法分析
     LOG_DEBUG("Start parsing code...");
     ProgramStmt* program_stmt;
@@ -119,37 +97,48 @@ int main(int argc, char *argv[])
         LOG_FATAL("Program exit");
         return -1;
     }
-    // 第二步: 语义分析 & 生成中间代码
-    LOG_DEBUG("Start generating intermediate code...");
-    std::unique_ptr<ir::IRGenerator> visitor = std::make_unique<ir::IRGenerator>();
-    visitor->visit(*program_stmt);
-    std::unique_ptr<ProgramStmt> program_stmt_ptr(program_stmt);
-    //visitor->show_result();
-    ir::Module ir = visitor->get_ir();
-    LOG_DEBUG("Generating intermediate code done.");
-    // 第三步: 优化
-    if (G_SETTINGS.opt_level)
-    {
-        LOG_DEBUG("Start optimizing intermediate code...");
-        // TODO
-        std::vector<std::unique_ptr<opt::Optimize>> opts;
-        opts.emplace_back(std::make_unique<opt::ConstExprOpt>());
-        for (auto &opt : opts)
-        {
-            LOG_DEBUG("Optimizing with %s...", opt->get_name().c_str());
-            opt->optimize(ir);
-            LOG_DEBUG("Optimizing with %s done.", opt->get_name().c_str());
+    
+    // 第二步: 语义分析
+    LOG_DEBUG("Start semantic analysis...");
+    semantic::SemanticAnalyzer semanticAnalyzer;
+    program_stmt->accept(semanticAnalyzer);
+    
+    if (semanticAnalyzer.hasErrors()) {
+        LOG_ERROR("Semantic analysis found errors.");
+        for (const auto& error : semanticAnalyzer.getErrors()) {
+            LOG_ERROR("%s", error.c_str());
         }
-        LOG_DEBUG("Optimizing intermediate code done.");
+        delete program_stmt;
+        return -1;
     }
-    // 第四步: 生成目标代码
-    std::ofstream output_file(G_SETTINGS.output_file);
+    LOG_DEBUG("Semantic analysis done.");
+    // std::cout << "Inferred Types:" << std::endl;
+    // for (const auto& pair : semanticAnalyzer.getInferredType()) {
+    //     const BaseStmt* stmt = pair.first;
+    //     const std::string& type = pair.second;
+    //     std::cout << "  Statement: " << typeid(*stmt).name() << ", Type: " << type << std::endl;
+    // }
+    
+    // 第三步: 代码生成
     LOG_DEBUG("Start generating target code...");
     LOG_INFO("Generating C code...");
-    std::unique_ptr<builder::Builder> builder = std::make_unique<builder::Builder>();
-    builder->build(ir);
-    builder->output(output_file);
+    codegen::CodeGenerator codeGenerator(semanticAnalyzer, semanticAnalyzer.getSymbolTable());
+    std::string generatedCode = codeGenerator.generate(program_stmt);
+    
+    // 输出结果到文件
+    std::ofstream output_file(G_SETTINGS.output_file);
+    if (!output_file.is_open()) {
+        LOG_FATAL("Can't open output file: %s", G_SETTINGS.output_file.c_str());
+        delete program_stmt;
+        return -1;
+    }
+    
+    output_file << generatedCode;
+    output_file.close();
     LOG_DEBUG("Generating target code done.");
+    
+    // 释放AST资源
+    delete program_stmt;
     
     return 0;
 }

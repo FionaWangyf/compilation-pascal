@@ -134,32 +134,6 @@ pascc/fast:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/build
 .PHONY : pascc/fast
 
-#=============================================================================
-# Target rules for targets named BISON_TEST
-
-# Build rule for target.
-BISON_TEST: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 BISON_TEST
-.PHONY : BISON_TEST
-
-# fast build rule for target.
-BISON_TEST/fast:
-	$(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/build
-.PHONY : BISON_TEST/fast
-
-#=============================================================================
-# Target rules for targets named IR_TEST
-
-# Build rule for target.
-IR_TEST: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 IR_TEST
-.PHONY : IR_TEST
-
-# fast build rule for target.
-IR_TEST/fast:
-	$(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/build
-.PHONY : IR_TEST/fast
-
 src/ast/stmt.o: src/ast/stmt.cpp.o
 
 .PHONY : src/ast/stmt.o
@@ -214,32 +188,32 @@ src/ast/stmt_test.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s
 .PHONY : src/ast/stmt_test.cpp.s
 
-src/builder/builder.o: src/builder/builder.cpp.o
+src/code_generator/code_generator.o: src/code_generator/code_generator.cpp.o
 
-.PHONY : src/builder/builder.o
+.PHONY : src/code_generator/code_generator.o
 
 # target to build an object file
-src/builder/builder.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/builder.cpp.o
-.PHONY : src/builder/builder.cpp.o
+src/code_generator/code_generator.cpp.o:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.o
+.PHONY : src/code_generator/code_generator.cpp.o
 
-src/builder/builder.i: src/builder/builder.cpp.i
+src/code_generator/code_generator.i: src/code_generator/code_generator.cpp.i
 
-.PHONY : src/builder/builder.i
+.PHONY : src/code_generator/code_generator.i
 
 # target to preprocess a source file
-src/builder/builder.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/builder.cpp.i
-.PHONY : src/builder/builder.cpp.i
+src/code_generator/code_generator.cpp.i:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.i
+.PHONY : src/code_generator/code_generator.cpp.i
 
-src/builder/builder.s: src/builder/builder.cpp.s
+src/code_generator/code_generator.s: src/code_generator/code_generator.cpp.s
 
-.PHONY : src/builder/builder.s
+.PHONY : src/code_generator/code_generator.s
 
 # target to generate assembly for a file
-src/builder/builder.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/builder/builder.cpp.s
-.PHONY : src/builder/builder.cpp.s
+src/code_generator/code_generator.cpp.s:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.s
+.PHONY : src/code_generator/code_generator.cpp.s
 
 src/common/log/log.o: src/common/log/log.cpp.o
 
@@ -295,87 +269,6 @@ src/common/setting/settings.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/common/setting/settings.cpp.s
 .PHONY : src/common/setting/settings.cpp.s
 
-src/common/thpool/thpool.o: src/common/thpool/thpool.cpp.o
-
-.PHONY : src/common/thpool/thpool.o
-
-# target to build an object file
-src/common/thpool/thpool.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o
-.PHONY : src/common/thpool/thpool.cpp.o
-
-src/common/thpool/thpool.i: src/common/thpool/thpool.cpp.i
-
-.PHONY : src/common/thpool/thpool.i
-
-# target to preprocess a source file
-src/common/thpool/thpool.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.i
-.PHONY : src/common/thpool/thpool.cpp.i
-
-src/common/thpool/thpool.s: src/common/thpool/thpool.cpp.s
-
-.PHONY : src/common/thpool/thpool.s
-
-# target to generate assembly for a file
-src/common/thpool/thpool.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.s
-.PHONY : src/common/thpool/thpool.cpp.s
-
-src/ir/ir.o: src/ir/ir.cpp.o
-
-.PHONY : src/ir/ir.o
-
-# target to build an object file
-src/ir/ir.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ir/ir.cpp.o
-.PHONY : src/ir/ir.cpp.o
-
-src/ir/ir.i: src/ir/ir.cpp.i
-
-.PHONY : src/ir/ir.i
-
-# target to preprocess a source file
-src/ir/ir.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ir/ir.cpp.i
-.PHONY : src/ir/ir.cpp.i
-
-src/ir/ir.s: src/ir/ir.cpp.s
-
-.PHONY : src/ir/ir.s
-
-# target to generate assembly for a file
-src/ir/ir.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ir/ir.cpp.s
-.PHONY : src/ir/ir.cpp.s
-
-src/ir/ir_gen.o: src/ir/ir_gen.cpp.o
-
-.PHONY : src/ir/ir_gen.o
-
-# target to build an object file
-src/ir/ir_gen.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o
-.PHONY : src/ir/ir_gen.cpp.o
-
-src/ir/ir_gen.i: src/ir/ir_gen.cpp.i
-
-.PHONY : src/ir/ir_gen.i
-
-# target to preprocess a source file
-src/ir/ir_gen.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.i
-.PHONY : src/ir/ir_gen.cpp.i
-
-src/ir/ir_gen.s: src/ir/ir_gen.cpp.s
-
-.PHONY : src/ir/ir_gen.s
-
-# target to generate assembly for a file
-src/ir/ir_gen.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.s
-.PHONY : src/ir/ir_gen.cpp.s
-
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -402,33 +295,6 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
-
-src/opt/const_expr.o: src/opt/const_expr.cpp.o
-
-.PHONY : src/opt/const_expr.o
-
-# target to build an object file
-src/opt/const_expr.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o
-.PHONY : src/opt/const_expr.cpp.o
-
-src/opt/const_expr.i: src/opt/const_expr.cpp.i
-
-.PHONY : src/opt/const_expr.i
-
-# target to preprocess a source file
-src/opt/const_expr.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/opt/const_expr.cpp.i
-.PHONY : src/opt/const_expr.cpp.i
-
-src/opt/const_expr.s: src/opt/const_expr.cpp.s
-
-.PHONY : src/opt/const_expr.s
-
-# target to generate assembly for a file
-src/opt/const_expr.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/opt/const_expr.cpp.s
-.PHONY : src/opt/const_expr.cpp.s
 
 src/parser/lex_pascal.o: src/parser/lex_pascal.cpp.o
 
@@ -484,6 +350,33 @@ src/parser/yacc_pascal.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s
 .PHONY : src/parser/yacc_pascal.cpp.s
 
+src/semantic_analyzer/semantic_analyzer.o: src/semantic_analyzer/semantic_analyzer.cpp.o
+
+.PHONY : src/semantic_analyzer/semantic_analyzer.o
+
+# target to build an object file
+src/semantic_analyzer/semantic_analyzer.cpp.o:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o
+.PHONY : src/semantic_analyzer/semantic_analyzer.cpp.o
+
+src/semantic_analyzer/semantic_analyzer.i: src/semantic_analyzer/semantic_analyzer.cpp.i
+
+.PHONY : src/semantic_analyzer/semantic_analyzer.i
+
+# target to preprocess a source file
+src/semantic_analyzer/semantic_analyzer.cpp.i:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.i
+.PHONY : src/semantic_analyzer/semantic_analyzer.cpp.i
+
+src/semantic_analyzer/semantic_analyzer.s: src/semantic_analyzer/semantic_analyzer.cpp.s
+
+.PHONY : src/semantic_analyzer/semantic_analyzer.s
+
+# target to generate assembly for a file
+src/semantic_analyzer/semantic_analyzer.cpp.s:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.s
+.PHONY : src/semantic_analyzer/semantic_analyzer.cpp.s
+
 src/token/token.o: src/token/token.cpp.o
 
 .PHONY : src/token/token.o
@@ -521,44 +414,33 @@ help:
 	@echo "... edit_cache"
 	@echo "... test"
 	@echo "... pascc"
-	@echo "... BISON_TEST"
-	@echo "... IR_TEST"
 	@echo "... src/ast/stmt.o"
 	@echo "... src/ast/stmt.i"
 	@echo "... src/ast/stmt.s"
 	@echo "... src/ast/stmt_test.o"
 	@echo "... src/ast/stmt_test.i"
 	@echo "... src/ast/stmt_test.s"
-	@echo "... src/builder/builder.o"
-	@echo "... src/builder/builder.i"
-	@echo "... src/builder/builder.s"
+	@echo "... src/code_generator/code_generator.o"
+	@echo "... src/code_generator/code_generator.i"
+	@echo "... src/code_generator/code_generator.s"
 	@echo "... src/common/log/log.o"
 	@echo "... src/common/log/log.i"
 	@echo "... src/common/log/log.s"
 	@echo "... src/common/setting/settings.o"
 	@echo "... src/common/setting/settings.i"
 	@echo "... src/common/setting/settings.s"
-	@echo "... src/common/thpool/thpool.o"
-	@echo "... src/common/thpool/thpool.i"
-	@echo "... src/common/thpool/thpool.s"
-	@echo "... src/ir/ir.o"
-	@echo "... src/ir/ir.i"
-	@echo "... src/ir/ir.s"
-	@echo "... src/ir/ir_gen.o"
-	@echo "... src/ir/ir_gen.i"
-	@echo "... src/ir/ir_gen.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/opt/const_expr.o"
-	@echo "... src/opt/const_expr.i"
-	@echo "... src/opt/const_expr.s"
 	@echo "... src/parser/lex_pascal.o"
 	@echo "... src/parser/lex_pascal.i"
 	@echo "... src/parser/lex_pascal.s"
 	@echo "... src/parser/yacc_pascal.o"
 	@echo "... src/parser/yacc_pascal.i"
 	@echo "... src/parser/yacc_pascal.s"
+	@echo "... src/semantic_analyzer/semantic_analyzer.o"
+	@echo "... src/semantic_analyzer/semantic_analyzer.i"
+	@echo "... src/semantic_analyzer/semantic_analyzer.s"
 	@echo "... src/token/token.o"
 	@echo "... src/token/token.i"
 	@echo "... src/token/token.s"

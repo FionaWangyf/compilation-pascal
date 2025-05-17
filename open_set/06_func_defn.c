@@ -4,10 +4,17 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int a = 0;
+int a;
+int b;
+
+int func(int p) {
+    p = p - 1;
+    return p;
+}
 
 int main() {
-    a = 3;
-    printf("%d", a);
+    a = 10;
+    b = func(a);
+    printf("%d", b);
     return 0;
 }

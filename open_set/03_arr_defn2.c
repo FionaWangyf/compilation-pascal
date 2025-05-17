@@ -4,10 +4,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int a = 0;
+int a[10][10] = 0;
 
 int main() {
-    a = 3;
-    printf("%d", a);
+    printf("%d", 0);
     return 0;
 }

@@ -9,14 +9,11 @@ CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt.hpp
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.hpp
 CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
 
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ast/visitor.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/builder/builder.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/common/log/log.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/common/setting/settings.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ir/ir.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/ir/ir_gen.hpp
-CMakeFiles/pascc.dir/src/builder/builder.cpp.o: ../src/builder/builder.cpp
+CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.o: ../src/ast/stmt.hpp
+CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.o: ../src/ast/visitor.hpp
+CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.o: ../src/code_generator/code_generator.hpp
+CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.o: ../src/semantic_analyzer/semantic_analyzer.hpp
+CMakeFiles/pascc.dir/src/code_generator/code_generator.cpp.o: ../src/code_generator/code_generator.cpp
 
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: ../src/common/log/log.hpp
 CMakeFiles/pascc.dir/src/common/log/log.cpp.o: ../src/common/log/log.cpp
@@ -25,39 +22,14 @@ CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o: ../src/common/log/log.hp
 CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o: ../src/common/setting/settings.hpp
 CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o: ../src/common/setting/settings.cpp
 
-CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o: ../src/common/thpool/thpool.hpp
-CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o: ../src/common/thpool/thpool.cpp
-
-CMakeFiles/pascc.dir/src/ir/ir.cpp.o: ../src/ir/ir.hpp
-CMakeFiles/pascc.dir/src/ir/ir.cpp.o: ../src/ir/visitor.hpp
-CMakeFiles/pascc.dir/src/ir/ir.cpp.o: ../src/ir/ir.cpp
-
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ast/visitor.hpp
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/common/exception/exception.hpp
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/common/log/log.hpp
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ir/ir.hpp
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ir/ir_gen.hpp
-CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o: ../src/ir/ir_gen.cpp
-
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ast/visitor.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ir/ir.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/builder/builder.hpp
+CMakeFiles/pascc.dir/src/main.cpp.o: ../src/code_generator/code_generator.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/common/log/log.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/common/setting/settings.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/common/thpool/thpool.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/ir/ir_gen.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/main.cpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/opt/const_expr.hpp
-CMakeFiles/pascc.dir/src/main.cpp.o: ../src/opt/opt.hpp
 CMakeFiles/pascc.dir/src/main.cpp.o: ../src/parser/yacc_pascal.hpp
-
-CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: ../src/common/log/log.hpp
-CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: ../src/ir/ir.hpp
-CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: ../src/opt/const_expr.hpp
-CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: ../src/opt/opt.hpp
-CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o: ../src/opt/const_expr.cpp
+CMakeFiles/pascc.dir/src/main.cpp.o: ../src/semantic_analyzer/semantic_analyzer.hpp
 
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o: ../src/ast/stmt.hpp
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o: ../src/common/log/log.hpp
@@ -71,6 +43,11 @@ CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/common/setting/setting
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/parser/lex_pascal.hpp
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.cpp
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.hpp
+
+CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o: ../src/ast/stmt.hpp
+CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o: ../src/ast/visitor.hpp
+CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o: ../src/semantic_analyzer/semantic_analyzer.hpp
+CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o: ../src/semantic_analyzer/semantic_analyzer.cpp
 
 CMakeFiles/pascc.dir/src/token/token.cpp.o: ../src/token/token.cpp
 CMakeFiles/pascc.dir/src/token/token.cpp.o: ../src/token/token.hpp

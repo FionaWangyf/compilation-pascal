@@ -4,10 +4,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int a = 0;
+int a;
+
+int defn() {
+    return 4;
+}
 
 int main() {
-    a = 3;
+    a = defn();
     printf("%d", a);
     return 0;
 }

@@ -7,7 +7,7 @@
 int a = 0;
 
 int main() {
-    a = 3;
-    printf("%d", a);
+    a = 10;
+    printf("%d", a / 3);
     return 0;
 }

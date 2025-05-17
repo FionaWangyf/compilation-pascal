@@ -7,7 +7,7 @@
 int a = 0;
 
 int main() {
-    a = 3;
-    printf("%d", a);
+    a = 60;
+    printf("%d", ~(a));
     return 0;
 }

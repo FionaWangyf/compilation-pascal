@@ -5,9 +5,11 @@
 #include <unistd.h>
 
 int a = 0;
+int b = 0;
 
 int main() {
-    a = 3;
-    printf("%d", a);
+    a = 10;
+    b = -(1);
+    printf("%d", a + b);
     return 0;
 }
