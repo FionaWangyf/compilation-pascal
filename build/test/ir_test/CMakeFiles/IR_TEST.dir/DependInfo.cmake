@@ -1,35 +1,32 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
-  "CXX"
-  )
-# The set of files for implicit dependencies of each language:
-set(CMAKE_DEPENDS_CHECK_CXX
-  "/src/src/ast/stmt.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o"
-  "/src/src/ast/stmt_test.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o"
-  "/src/src/common/log/log.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o"
-  "/src/src/common/setting/settings.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o"
-  "/src/src/common/thpool/thpool.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o"
-  "/src/src/ir/ir.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o"
-  "/src/src/ir/ir_gen.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o"
-  "/src/src/parser/lex_pascal.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o"
-  "/src/src/parser/yacc_pascal.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o"
-  "/src/src/token/token.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o"
-  "/src/test/ir_test/main.cpp" "/src/build/test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o"
-  )
-set(CMAKE_CXX_COMPILER_ID "GNU")
-
-# The include file search paths:
-set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "../src"
-  "../test/ir_test/../../src/ast"
-  "../test/ir_test/../../src/common"
-  "../test/ir_test/../../src/ir"
-  "../test/ir_test/../../src/parser"
-  "../test/ir_test/../../src/token"
   )
 
-# Targets to which this target links.
-set(CMAKE_TARGET_LINKED_INFO_FILES
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ast/stmt.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ast/stmt_test.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/common/log/log.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/common/setting/settings.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/common/thpool/thpool.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ir/ir.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ir/ir_gen.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/parser/lex_pascal.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/parser/yacc_pascal.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/token/token.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/test/ir_test/main.cpp" "test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o" "gcc" "test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o.d"
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

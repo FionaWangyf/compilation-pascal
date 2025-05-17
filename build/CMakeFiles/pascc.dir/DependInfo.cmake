@@ -1,32 +1,34 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
-  "CXX"
-  )
-# The set of files for implicit dependencies of each language:
-set(CMAKE_DEPENDS_CHECK_CXX
-  "/src/src/ast/stmt.cpp" "/src/build/CMakeFiles/pascc.dir/src/ast/stmt.cpp.o"
-  "/src/src/ast/stmt_test.cpp" "/src/build/CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o"
-  "/src/src/builder/c/c_builder.cpp" "/src/build/CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
-  "/src/src/common/log/log.cpp" "/src/build/CMakeFiles/pascc.dir/src/common/log/log.cpp.o"
-  "/src/src/common/setting/settings.cpp" "/src/build/CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"
-  "/src/src/common/thpool/thpool.cpp" "/src/build/CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o"
-  "/src/src/ir/ir.cpp" "/src/build/CMakeFiles/pascc.dir/src/ir/ir.cpp.o"
-  "/src/src/ir/ir_gen.cpp" "/src/build/CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o"
-  "/src/src/main.cpp" "/src/build/CMakeFiles/pascc.dir/src/main.cpp.o"
-  "/src/src/opt/const_expr.cpp" "/src/build/CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o"
-  "/src/src/parser/lex_pascal.cpp" "/src/build/CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o"
-  "/src/src/parser/yacc_pascal.cpp" "/src/build/CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o"
-  "/src/src/token/token.cpp" "/src/build/CMakeFiles/pascc.dir/src/token/token.cpp.o"
-  )
-set(CMAKE_CXX_COMPILER_ID "GNU")
-
-# The include file search paths:
-set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "../src"
   )
 
-# Targets to which this target links.
-set(CMAKE_TARGET_LINKED_INFO_FILES
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ast/stmt.cpp" "CMakeFiles/pascc.dir/src/ast/stmt.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/ast/stmt.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ast/stmt_test.cpp" "CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/builder/c/c_builder.cpp" "CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/common/log/log.cpp" "CMakeFiles/pascc.dir/src/common/log/log.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/common/log/log.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/common/setting/settings.cpp" "CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/common/thpool/thpool.cpp" "CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/common/thpool/thpool.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ir/ir.cpp" "CMakeFiles/pascc.dir/src/ir/ir.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/ir/ir.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/ir/ir_gen.cpp" "CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/ir/ir_gen.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/main.cpp" "CMakeFiles/pascc.dir/src/main.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/main.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/opt/const_expr.cpp" "CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/opt/const_expr.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/parser/lex_pascal.cpp" "CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/parser/yacc_pascal.cpp" "CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o.d"
+  "/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/src/token/token.cpp" "CMakeFiles/pascc.dir/src/token/token.cpp.o" "gcc" "CMakeFiles/pascc.dir/src/token/token.cpp.o.d"
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

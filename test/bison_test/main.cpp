@@ -7,10 +7,10 @@
 #include <sstream>
 #include <vector>
 
-
 #include "ast/stmt.hpp"
 #include "ast/stmt_test.hpp"
 #include "common/log/log.hpp"
+#include "ASTPrettyPrinter.hpp"
 
 extern int code_parse(const char *code_str, ProgramStmt **program);
 
@@ -36,7 +36,12 @@ void single_point_test(const std::string folderPath,
     LOG_FATAL("ERROR : Parsing failed.");
   } else {
     LOG_INFO("File %s Parsing succeeded.", fileName.c_str());
-    // std::cout<<program_stmt_str(program, 0)<<std::endl;
+    
+    // 使用新的AST打印器打印AST结构
+    ASTPrettyPrinter printer;
+    std::string astOutput = printer.printProgram(program);
+    std::cout << astOutput << std::endl;
+    
     delete program;
   }
 }
@@ -56,9 +61,13 @@ void batch_test(int beginIndex, const std::string folderPath,
       break;
     } else {
       LOG_INFO("File %s Parsing succeeded.", fileName.c_str());
+      
+      // 使用新的AST打印器打印AST结构
+      ASTPrettyPrinter printer;
+      std::string astOutput = printer.printProgram(program);
+      std::cout << astOutput << std::endl;
     }
     delete program;
-    // std::cout<<program_stmt_str(program, 0)<<std::endl;
   }
 }
 
@@ -93,14 +102,26 @@ int main(int argc, char *argv[]) {
       i--;
     }
   }
-  //
+  
   common::g_log = new common::Log(common::DEBUG);
-  // batch_test(58,folderPath,files);
-  //     common::g_log = new common::Log(common::FATAL);
-  //     batch_test(57,folderPath,files);
-   single_point_test(folderPath,files);
-  // batch_test(0, folderPath, files);
-  // single_point_test(folderPath,files);
+  
+  // 用户可以选择测试模式
+  std::cout << "Select test mode:\n";
+  std::cout << "1. Single file test\n";
+  std::cout << "2. Batch test (all files)\n";
+  std::cout << "Enter your choice (1 or 2): ";
+  
+  int choice;
+  std::cin >> choice;
+  
+  if (choice == 1) {
+    single_point_test(folderPath, files);
+  } else if (choice == 2) {
+    batch_test(0, folderPath, files);
+  } else {
+    std::cerr << "Invalid choice.\n";
+  }
+  
   delete common::g_log;
   return 0;
 }
