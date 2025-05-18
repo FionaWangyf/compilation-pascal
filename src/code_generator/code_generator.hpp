@@ -54,6 +54,8 @@ private:
     int exprDepth = 0;              // >0 表示当前在“表达式”上下文
 
     void emitExpr(ExprStmt *e);
+    
+    bool isLastStmtInFuncBody = false;
 public:
     CodeGenerator(const semantic::SemanticAnalyzer& s, semantic::SymbolTable& st);
     ~CodeGenerator();

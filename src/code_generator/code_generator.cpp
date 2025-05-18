@@ -556,31 +556,52 @@ void CodeGenerator::visit(FuncBodyDeclStmt &stmt) {
     for (const auto& varDecl : stmt.var_decl) {
         varDecl->accept(*this);
     }
-    
-    // 处理函数体语句
-    for (const auto& compStmt : stmt.comp_stmt) {
-        compStmt->accept(*this);
-    }
-    
-    // 如果函数没有return语句且不是void类型，添加默认返回值
+     // 获取当前函数符号
     semantic::SymbolEntry* entry = symbolTable.lookupSymbol(currentFunction);
-    if (entry && !hasReturn && entry->returnType != "void") {
-        if (entry->returnType == "int" || entry->returnType == "bool") {
-            code << getIndent() << "return 0;\n";
-        } else if (entry->returnType == "float") {
-            code << getIndent() << "return 0.0;\n";
-        } else if (entry->returnType == "char") {
-            code << getIndent() << "return '\\0';\n";
-        } else {
-            code << getIndent() << "return NULL;\n";
-        }
+
+    // 如果有返回值，声明临时变量
+    if (entry && entry->returnType != "void") {
+        code << getIndent() << mapPascalTypeToC(entry->returnType) << " res = 0;\n";
     }
     
+    // // 处理函数体语句
+    // for (const auto& compStmt : stmt.comp_stmt) {
+    //     compStmt->accept(*this);
+    // }
+    // 处理函数体语句
+    for (size_t idx = 0; idx < stmt.comp_stmt.size(); ++idx) {
+        isLastStmtInFuncBody = (idx == stmt.comp_stmt.size() - 1);
+        stmt.comp_stmt[idx]->accept(*this);
+    }
+    isLastStmtInFuncBody = false;
+    // 如果有返回值且没有return，自动补return
+    if (entry && entry->returnType != "void" && !hasReturn) {
+        code << getIndent() << "return res;\n";
+    }
+
     indentLevel--;
     code << getIndent() << "}\n\n";
-    
-    // 重置当前函数
     currentFunction = "";
+    hasReturn = false;
+    // // 如果函数没有return语句且不是void类型，添加默认返回值
+    // semantic::SymbolEntry* entry = symbolTable.lookupSymbol(currentFunction);
+    // if (entry && !hasReturn && entry->returnType != "void") {
+    //     if (entry->returnType == "int" || entry->returnType == "bool") {
+    //         code << getIndent() << "return 0;\n";
+    //     } else if (entry->returnType == "float") {
+    //         code << getIndent() << "return 0.0;\n";
+    //     } else if (entry->returnType == "char") {
+    //         code << getIndent() << "return '\\0';\n";
+    //     } else {
+    //         code << getIndent() << "return NULL;\n";
+    //     }
+    // }
+    
+    // indentLevel--;
+    // code << getIndent() << "}\n\n";
+    
+    // // 重置当前函数
+    // currentFunction = "";
 }
 
 void CodeGenerator::visit(FuncDeclStmt &stmt) {
@@ -596,12 +617,11 @@ void CodeGenerator::visit(FuncDeclStmt &stmt) {
 void CodeGenerator::visit(AssignStmt &stmt) {
     code << getIndent();
 
-    // Pascal 函数名赋值 → C return
+    // 如果是函数名赋值，赋给res
     if (stmt.lval->id == currentFunction) {
-        code << "return ";
+        code << "res = ";
         emitExpr(stmt.expr.get());
         code << ";\n";
-        hasReturn = true;
         return;
     }
 
