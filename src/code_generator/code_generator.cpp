@@ -371,52 +371,79 @@ void CodeGenerator::visit(StrStmt &stmt) {
     code << "\"" << stmt.val << "\"";
 }
 
-void CodeGenerator::visit(LValStmt &stmt) {
-    // 查找是否是函数名
-    semantic::SymbolEntry* entry = symbolTable.lookupSymbol(stmt.id);
+// void CodeGenerator::visit(LValStmt &stmt) {
+//     // 查找是否是函数名
+//     semantic::SymbolEntry* entry = symbolTable.lookupSymbol(stmt.id);
     
-    // 如果是函数名且不是数组访问，则需要生成函数调用
+//     // 如果是函数名且不是数组访问，则需要生成函数调用
+//     if (entry && entry->type == semantic::SymbolType::FUNCTION && stmt.array_index.empty()) {
+//         code << stmt.id << "()";  // 添加括号调用函数
+//     } else {
+//         code << stmt.id;
+        
+//         // 处理数组访问
+//         for (auto& index : stmt.array_index) {
+//             code << "[";
+//             index->accept(*this);
+//             code << "]";
+//         }
+        
+//         // 如果是引用类型参数，生成时需要解引用
+//         if (entry && entry->isReference) {
+//             code.str("(*" + code.str() + ")");
+//         }
+//     }
+// }
+// 修正：LValStmt 只输出表达式，不加分号和回车
+void CodeGenerator::visit(LValStmt &stmt) {
+    semantic::SymbolEntry* entry = symbolTable.lookupSymbol(stmt.id);
     if (entry && entry->type == semantic::SymbolType::FUNCTION && stmt.array_index.empty()) {
-        code << stmt.id << "()";  // 添加括号调用函数
+        code << stmt.id << "()";
     } else {
         code << stmt.id;
-        
-        // 处理数组访问
         for (auto& index : stmt.array_index) {
             code << "[";
-            index->accept(*this);
+            emitExpr(index.get());
             code << "]";
         }
-        
-        // 如果是引用类型参数，生成时需要解引用
         if (entry && entry->isReference) {
             code.str("(*" + code.str() + ")");
         }
     }
 }
 
+// void CodeGenerator::visit(FuncCallStmt &stmt) {
+//     bool inlineExpr = exprDepth > 0;               // 判断上下文
+
+//     if (!inlineExpr) code << getIndent();          // 只有语句上下文才加缩进
+
+//     /* 输出函数名和参数 */
+//     code << stmt.id << "(";
+//     for (size_t i = 0; i < stmt.args.size(); ++i) {
+//         if (i) code << ", ";
+//         emitExpr(stmt.args[i].get());              // 用 emitExpr 递归
+//     }
+//     code << ")";
+
+//     /* 语句上下文 → 结尾补 ; 与换行 */
+//     if (!inlineExpr) code << ";\n";
+// }
+// 修正：FuncCallStmt 只在语句上下文加分号和回车
 void CodeGenerator::visit(FuncCallStmt &stmt) {
-    bool inlineExpr = exprDepth > 0;               // 判断上下文
-
-    if (!inlineExpr) code << getIndent();          // 只有语句上下文才加缩进
-
-    /* 输出函数名和参数 */
+    bool inlineExpr = exprDepth > 0;
     code << stmt.id << "(";
     for (size_t i = 0; i < stmt.args.size(); ++i) {
         if (i) code << ", ";
-        emitExpr(stmt.args[i].get());              // 用 emitExpr 递归
+        emitExpr(stmt.args[i].get());
     }
     code << ")";
-
-    /* 语句上下文 → 结尾补 ; 与换行 */
     if (!inlineExpr) code << ";\n";
 }
-
-
 
 void CodeGenerator::visit(PeriodStmt &stmt) {
     code << (stmt.end - stmt.begin + 1);
 }
+
 
 void CodeGenerator::visit(ConstDeclStmt &stmt) {
     for (auto& pair : stmt.pairs) {
@@ -540,40 +567,93 @@ void CodeGenerator::visit(FuncHeadDeclStmt &stmt) {
     code << ")";
 }
 
+// void CodeGenerator::visit(FuncBodyDeclStmt &stmt) {
+//     code << " {\n";
+//     indentLevel++;
+    
+//     // 清空当前作用域变量列表
+//     currentVars.clear();
+    
+//     // 处理常量声明
+//     if (stmt.const_decl) {
+//         stmt.const_decl->accept(*this);
+//     }
+    
+//     // 处理变量声明
+//     for (const auto& varDecl : stmt.var_decl) {
+//         varDecl->accept(*this);
+//     }
+//      // 获取当前函数符号
+//     semantic::SymbolEntry* entry = symbolTable.lookupSymbol(currentFunction);
+
+//     // 如果有返回值，声明临时变量
+//     if (entry && entry->returnType != "void") {
+//         code << getIndent() << mapPascalTypeToC(entry->returnType) << " res = 0;\n";
+//     }
+    
+//     // // 处理函数体语句
+//     // for (const auto& compStmt : stmt.comp_stmt) {
+//     //     compStmt->accept(*this);
+//     // }
+//     // 处理函数体语句
+//     for (size_t idx = 0; idx < stmt.comp_stmt.size(); ++idx) {
+//         isLastStmtInFuncBody = (idx == stmt.comp_stmt.size() - 1);
+//         stmt.comp_stmt[idx]->accept(*this);
+//     }
+//     isLastStmtInFuncBody = false;
+//     // 如果有返回值且没有return，自动补return
+//     if (entry && entry->returnType != "void" && !hasReturn) {
+//         code << getIndent() << "return res;\n";
+//     }
+
+//     indentLevel--;
+//     code << getIndent() << "}\n\n";
+//     currentFunction = "";
+//     hasReturn = false;
+// }
+
 void CodeGenerator::visit(FuncBodyDeclStmt &stmt) {
     code << " {\n";
     indentLevel++;
-    
+
     // 清空当前作用域变量列表
     currentVars.clear();
-    
+
     // 处理常量声明
     if (stmt.const_decl) {
         stmt.const_decl->accept(*this);
     }
-    
+
     // 处理变量声明
     for (const auto& varDecl : stmt.var_decl) {
         varDecl->accept(*this);
     }
-     // 获取当前函数符号
-    semantic::SymbolEntry* entry = symbolTable.lookupSymbol(currentFunction);
 
-    // 如果有返回值，声明临时变量
-    if (entry && entry->returnType != "void") {
+    // 检查变量声明区是否已经有 res
+    semantic::SymbolEntry* entry = symbolTable.lookupSymbol(currentFunction);
+    bool hasRes = false;
+    for (const auto& varDecl : stmt.var_decl) {
+        for (const auto& name : varDecl->id) {
+            if (name == "res") {
+                hasRes = true;
+                break;
+            }
+        }
+        if (hasRes) break;
+    }
+
+    // 只有没有 res 时才声明
+    if (entry && entry->returnType != "void" && !hasRes) {
         code << getIndent() << mapPascalTypeToC(entry->returnType) << " res = 0;\n";
     }
-    
-    // // 处理函数体语句
-    // for (const auto& compStmt : stmt.comp_stmt) {
-    //     compStmt->accept(*this);
-    // }
+
     // 处理函数体语句
     for (size_t idx = 0; idx < stmt.comp_stmt.size(); ++idx) {
         isLastStmtInFuncBody = (idx == stmt.comp_stmt.size() - 1);
         stmt.comp_stmt[idx]->accept(*this);
     }
     isLastStmtInFuncBody = false;
+
     // 如果有返回值且没有return，自动补return
     if (entry && entry->returnType != "void" && !hasReturn) {
         code << getIndent() << "return res;\n";
@@ -583,25 +663,6 @@ void CodeGenerator::visit(FuncBodyDeclStmt &stmt) {
     code << getIndent() << "}\n\n";
     currentFunction = "";
     hasReturn = false;
-    // // 如果函数没有return语句且不是void类型，添加默认返回值
-    // semantic::SymbolEntry* entry = symbolTable.lookupSymbol(currentFunction);
-    // if (entry && !hasReturn && entry->returnType != "void") {
-    //     if (entry->returnType == "int" || entry->returnType == "bool") {
-    //         code << getIndent() << "return 0;\n";
-    //     } else if (entry->returnType == "float") {
-    //         code << getIndent() << "return 0.0;\n";
-    //     } else if (entry->returnType == "char") {
-    //         code << getIndent() << "return '\\0';\n";
-    //     } else {
-    //         code << getIndent() << "return NULL;\n";
-    //     }
-    // }
-    
-    // indentLevel--;
-    // code << getIndent() << "}\n\n";
-    
-    // // 重置当前函数
-    // currentFunction = "";
 }
 
 void CodeGenerator::visit(FuncDeclStmt &stmt) {
