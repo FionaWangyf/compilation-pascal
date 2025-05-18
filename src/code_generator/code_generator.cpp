@@ -613,6 +613,7 @@ void CodeGenerator::visit(FuncHeadDeclStmt &stmt) {
 // }
 
 void CodeGenerator::visit(FuncBodyDeclStmt &stmt) {
+    
     code << " {\n";
     indentLevel++;
 
@@ -758,36 +759,48 @@ void CodeGenerator::visit(WhileStmt &stmt) {
     code << getIndent() << "}\n";
 }
 
-void CodeGenerator::visit(ReadFuncStmt &stmt) {
-    code << getIndent() << "scanf(\"";
+// void CodeGenerator::visit(ReadFuncStmt &stmt) {
+//     code << getIndent() << "scanf(\"";
     
-    // 构建格式字符串
+//     // 构建格式字符串
+//     for (const auto& lvalStmt : stmt.lval) {
+//         semantic::SymbolEntry* entry = symbolTable.lookupSymbol(lvalStmt->id);
+//         if (entry) {
+//             if (entry->dataType == "int") {
+//                 code << "%d";
+//             } else if (entry->dataType == "float") {
+//                 code << "%f";
+//             } else if (entry->dataType == "char") {
+//                 code << "%c";
+//             } else if (entry->dataType == "string") {
+//                 code << "%s";
+//             }
+//         } else {
+//             code << "%d"; // 默认int
+//         }
+//     }
+    
+//     code << "\"";
+    
+//     // 添加参数
+//     for (const auto& lvalStmt : stmt.lval) {
+//         code << ", &";
+//         lvalStmt->accept(*this);
+//     }
+    
+//     code << ");\n";
+// }
+void CodeGenerator::visit(ReadFuncStmt &stmt) {
     for (const auto& lvalStmt : stmt.lval) {
-        semantic::SymbolEntry* entry = symbolTable.lookupSymbol(lvalStmt->id);
-        if (entry) {
-            if (entry->dataType == "int") {
-                code << "%d";
-            } else if (entry->dataType == "float") {
-                code << "%f";
-            } else if (entry->dataType == "char") {
-                code << "%c";
-            } else if (entry->dataType == "string") {
-                code << "%s";
-            }
+        // 如果是函数返回值变量
+        if (lvalStmt->id == currentFunction) {
+            code << getIndent() << "scanf(\"%d\", &res);\n";
         } else {
-            code << "%d"; // 默认int
+            code << getIndent() << "scanf(\"%d\", &";
+            lvalStmt->accept(*this);
+            code << ");\n";
         }
     }
-    
-    code << "\"";
-    
-    // 添加参数
-    for (const auto& lvalStmt : stmt.lval) {
-        code << ", &";
-        lvalStmt->accept(*this);
-    }
-    
-    code << ");\n";
 }
 
 void CodeGenerator::visit(WriteFuncStmt &stmt) {
