@@ -79,15 +79,15 @@
 #include <map>
 #include <type_traits>
 
-#include "common/log/log.hpp"
-#include "common/setting/settings.hpp"
-#include "ast/stmt.hpp"
-#include "ast/stmt_test.hpp"
-#include "yacc_pascal.hpp"
-#include "lex_pascal.hpp"
+#include "common/log/log.hpp"//日志系统
+#include "common/setting/settings.hpp"//编译器设置
+#include "ast/stmt.hpp"//抽象语法树定义
+#include "ast/stmt_test.hpp"//ast测试
+#include "yacc_pascal.hpp"//bison生成的头文件
+#include "lex_pascal.hpp"//flex生成的头文件
 
 namespace {
-    bool syntaxErrorFlag = false; 
+    bool syntaxErrorFlag = false; //标记是否发生语法错误
     
     // 日志宏定义
     #define GRAMMAR_TRACE(rule)    LOG_DEBUG("TRACE: " rule)
@@ -118,7 +118,7 @@ namespace {
         {4, MulExprStmt::MulExprType::AndThen}
     };
 
-    // 获取运算符类型的函数 - 重命名函数
+    // 从映射表中获取运算符枚举类型
     template<typename EnumType, typename MapType>
     EnumType getOperatorKind(long long op, const MapType& typeMap) {
         auto it = typeMap.find(op);
@@ -128,28 +128,30 @@ namespace {
         return static_cast<EnumType>(0);
     }
 
-    // 特化版本 - 重命名函数
+    // 特化版本
+    //关系运算符 (=, <>, <, <=, >, >=, in)
     RelExprStmt::RelExprType getRelationOperator(long long op) {
         return getOperatorKind<RelExprStmt::RelExprType>(op, relOperatorMap);
     }
-
+    //加法级运算符 (+, -, or)
     AddExprStmt::AddExprType getArithmeticOperator(long long op) {
         return getOperatorKind<AddExprStmt::AddExprType>(op, addOperatorMap);
     }
-
+    //乘法级运算符 (*, /, div, mod, and, andthen)
     MulExprStmt::MulExprType getTermOperator(long long op) {
         return getOperatorKind<MulExprStmt::MulExprType>(op, mulOperatorMap);
     }
 
-    // 填充数值节点函数 - 重命名函数
+    // 填充数值节点函数
     template<typename T>
     void setupNumberNode(std::unique_ptr<NumberStmt>& numNode, T val) {
         numNode->is_signed = true;
-        numNode->is_real = std::is_same<T, double>::value;
+        numNode->is_real = std::is_same<T, double>::value;////在编译时检测类型，并相应设置 is_real 和 is_char 标志
         numNode->is_char = std::is_same<T, char>::value;
         numNode->is_unsigned = false;
 
-        if constexpr (std::is_same<T, long long>::value) {
+        //根据类型将值存储到适当的字段中
+        if constexpr (std::is_same<T, long long>::value) {//
             numNode->int_val = val;
         } 
         else if constexpr (std::is_same<T, double>::value) {
@@ -161,13 +163,14 @@ namespace {
         }
     }
 
-    // 节点创建函数 - 重命名函数
+    // 节点创建函数
     template<typename T, typename... Args>
     T* allocateNode(Args&&... args) {
         return new T(std::forward<Args>(args)...);
     }
 
-    // 将列表项目转移到容器函数 - 重命名函数
+    // 将列表项目转移到容器函数：用于将一个临时的指针列表转移到所有者对象的智能指针容器中
+    //函数将普通指针列表中的每个项目封装到 unique_ptr 中，然后添加到所有者对象的容器中，最后删除原始列表。确保了内存安全和所有权的明确转移。
     template<typename Owner, typename T>
     void moveListToContainer(Owner* owner, std::vector<T*>* list, std::vector<std::unique_ptr<T>> Owner::* container) {
         if (list) {
@@ -178,9 +181,10 @@ namespace {
         }
     }
 
-    // 值节点工厂类 - 重命名类和方法
+    // 值节点工厂类：用于创建不同类型的值节点对象
     class ValueFactory {
     public:
+        //创建整数值节点，返回包含整数值的ValueStmt指针
         static ValueStmt* makeInteger(long long val) {
             ValueStmt* value = new ValueStmt();
             value->type = ValueStmt::ValueType::Number;
@@ -188,17 +192,17 @@ namespace {
             setupNumberNode(value->number, val);
             return value;
         }
-
+        //创建实数值节点，返回包含实数值的ValueStmt指针
         static ValueStmt* makeReal(const char* str) {
             ValueStmt* value = new ValueStmt();
             value->type = ValueStmt::ValueType::Number;
             value->number = std::make_unique<NumberStmt>();
-            double val = atof(str);
+            double val = atof(str);//将字符串转换为双精度浮点数
             setupNumberNode(value->number, val);
             value->number->literal = std::string(str);
             return value;
         }
-
+        //创建字符值节点，返回包含字符值的ValueStmt指针
         static ValueStmt* makeChar(char val) {
             ValueStmt* value = new ValueStmt();
             value->type = ValueStmt::ValueType::Number;
@@ -206,19 +210,21 @@ namespace {
             setupNumberNode(value->number, val);
             return value;
         }
-
+        //创建字符串值节点，返回包含字符串值的ValueStmt指针
         static ValueStmt* makeString(const char* str) {
             ValueStmt* value = new ValueStmt();
             value->type = ValueStmt::ValueType::Str;
             value->str = std::make_unique<StrStmt>();
-            value->str->val = std::string(str).substr(1, std::string(str).length() - 2);
+            value->str->val = std::string(str).substr(1, std::string(str).length() - 2);//从输入字符串中提取内容，去掉首尾的引号
             return value;
         }
     };
 
-    // 表达式节点工厂类 - 重命名类和方法
+    // 表达式节点工厂类：负责创建各种层次的表达式节点
+    //Factor (因子) → Term (项) → Simple Expression (简单表达式) → Expression (表达式)
     class ExprFactory {
     public:
+        //将简单表达式转换为完整表达式节点
         static ExprStmt* createFromSimpleExpr(AddExprStmt* simpleExpr) {
             ExprStmt* expr = new ExprStmt();
             expr->rel_expr = std::make_unique<RelExprStmt>();
@@ -228,7 +234,7 @@ namespace {
             expr->rel_expr->terms.emplace_back(std::move(term));
             return expr;
         }
-
+        //将项(term)转换为简单表达式节点
         static AddExprStmt* createFromTerm(MulExprStmt* term) {
             AddExprStmt* addExpr = new AddExprStmt();
             AddExprStmt::Term termStruct;
@@ -237,7 +243,7 @@ namespace {
             addExpr->terms.emplace_back(std::move(termStruct));
             return addExpr;
         }
-
+        //将因子(factor)转换为项节点
         static MulExprStmt* createFromFactor(UnaryExprStmt* factor) {
             MulExprStmt* mulExpr = new MulExprStmt();
             MulExprStmt::Term term;
@@ -248,7 +254,7 @@ namespace {
         }
     };
 
-    // 创建一元表达式的函数 - 重命名函数
+    // 创建一元表达式的函数
     UnaryExprStmt* makeUnaryExpr(PrimaryExprStmt::PrimaryExprType type) {
         UnaryExprStmt* unary = new UnaryExprStmt();
         unary->primary_expr = std::make_unique<PrimaryExprStmt>();
@@ -256,14 +262,14 @@ namespace {
         return unary;
     }
 
-    // 报告语法错误 - 重命名函数
+    // 报告语法错误，输出错误信息并终止编译过程
     void reportSyntaxError(YYLTYPE *llocp, const char *msg) {
         LOG_ERROR("[Syntax Error] at line %d, column %d: %s", llocp->first_line, llocp->first_column, msg);
         syntaxErrorFlag = true;
         exit(1);
     }
 
-    // 获取错误位置函数 - 重命名函数
+    // 获取错误位置函数，生成可视化的错误位置显示
     void locateErrorPosition(const char* code_str, YYLTYPE *llocp, std::string &error_note, std::string &msg, bool have_expected) {
         std::string code(code_str);
         std::istringstream stream(code);
@@ -305,56 +311,63 @@ namespace {
     }
 }
 
-// 枚举类，定义编译器正在处理的语法规则类型
+// 此枚举类，跟踪编译器在语法分析过程中当前所处的上下文它，有助于提供准确的错误诊断，支持特定上下文的代码生成，
 enum class ParserContext {
-    ProgramStruct,     
-    ProgramHead,      
-    ProgramBody,       
-    IdList,            
-    ConstDeclarations, 
-    ConstDeclaration,  
-    ConstValue,        
-    VarDeclarations,   
-    VarDeclaration,    
-    Type,              
-    BasicType,         
-    PeriodList,        
-    SubprogramDeclarations, 
-    Subprogram,        
-    SubprogramHead,    
-    FormalParameter,   
-    ParameterList,     
-    Parameter,         
-    VarParameter,      
-    ValueParameter,    
-    SubprogramBody,    
-    CompoundStatement, 
-    StatementList,     
-    Statement,         
-    ProcedureCall,     
-    VariableList,      
-    Variable,          
-    IdVarpart,         
-    ExpressionList,    
-    ArrayIndexExpression, 
-    BracketExpressionList, 
-    Expression,        
-    SimpleExpression,  
-    Term,              
-    Factor,            
+    ProgramStruct,      ///< 整个程序结构，Pascal程序的顶层结构
+    ProgramHead,        ///< 程序头部，包括程序名称和参数列表，如 "program Calculator(input, output);"
+    ProgramBody,        ///< 程序主体，包括声明部分和执行语句部分
+    IdList,             ///< 标识符列表，用于变量声明、参数列表等，如 "x, y, z"
+    
+    ConstDeclarations,  ///< 常量声明部分，以 "const" 关键字开始的部分
+    ConstDeclaration,   ///< 单个常量声明，如 "PI = 3.14159;"
+    ConstValue,         ///< 常量值，如整数、实数、字符或字符串字面量
+    
+    VarDeclarations,    ///< 变量声明部分，以 "var" 关键字开始的部分
+    VarDeclaration,     ///< 单个或多个变量的声明，如 "x, y: integer;"
+    Type,               ///< 类型说明，如 "integer"、"array[1..10] of real" 等
+    BasicType,          ///< 基本类型，如 "integer"、"real"、"boolean"、"char"
+    PeriodList,         ///< 数组索引范围列表，如 "1..10, 1..20"
+    
+    SubprogramDeclarations, ///< 子程序声明部分，包括函数和过程声明
+    Subprogram,         ///< 单个子程序（函数或过程）
+    SubprogramHead,     ///< 子程序头部，如 "function Max(a, b: integer): integer;"
+    FormalParameter,    ///< 形式参数部分，如 "(a, b: integer)"
+    ParameterList,      ///< 参数列表，可能包含多组参数
+    Parameter,          ///< 单个参数或参数组
+    VarParameter,       ///< 变量参数（按引用传递），如 "var a: integer"
+    ValueParameter,     ///< 值参数（按值传递），如 "a: integer"
+    SubprogramBody,     ///< 子程序体，包括局部声明和语句部分
+    
+    CompoundStatement,  ///< 复合语句，由 "begin" 和 "end" 包围的语句块
+    StatementList,      ///< 语句列表，由分号分隔的多个语句
+    Statement,          ///< 单个语句，如赋值、条件、循环等
+    ProcedureCall,      ///< 过程调用，如 "WriteLn(x, y);"
+    
+    VariableList,       ///< 变量列表，用于输入/输出语句等
+    Variable,           ///< 单个变量引用，可能包括数组索引
+    IdVarpart,          ///< 变量的附加部分，如数组索引 "[i, j]"
+    
+    ExpressionList,     ///< 表达式列表，如函数调用参数列表
+    ArrayIndexExpression, ///< 数组索引表达式，如 "a[i, j+1]" 中的索引部分
+    BracketExpressionList, ///< 方括号表达式列表，用于多维数组索引
+    
+    Expression,         ///< 完整表达式，可包含关系运算符（如 "a > b"）
+    SimpleExpression,   ///< 简单表达式，可包含加法级运算符（如 "a + b"）
+    Term,               ///< 项，可包含乘法级运算符（如 "a * b"）
+    Factor,             ///< 因子，表达式的基本单位（如变量、常量、函数调用等）
 };
 
-// 跟踪编译器当前正在处理的语法规则 - 重命名变量
+// 跟踪编译器当前正在处理的语法规则
 static ParserContext currentParserContext = ParserContext::ProgramStruct;
 
 void resetSyntaxError() {
     syntaxErrorFlag = false; // 重置错误标志，为下一次解析准备
 }
-
+//当语法分析器检测到语法错误时，Bison会自动调用此函数报告错误。
 int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg);
 
 
-#line 358 "yacc_pascal.cpp"
+#line 371 "yacc_pascal.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -480,17 +493,16 @@ enum yysymbol_kind_t
   YYSYMBOL_variable_list = 95,             /* variable_list  */
   YYSYMBOL_variable = 96,                  /* variable  */
   YYSYMBOL_id_varpart = 97,                /* id_varpart  */
-  YYSYMBOL_array_index_expression = 98,    /* array_index_expression  */
-  YYSYMBOL_procedure_call = 99,            /* procedure_call  */
-  YYSYMBOL_expression_list = 100,          /* expression_list  */
-  YYSYMBOL_expression = 101,               /* expression  */
-  YYSYMBOL_simple_expression = 102,        /* simple_expression  */
-  YYSYMBOL_term = 103,                     /* term  */
-  YYSYMBOL_factor = 104,                   /* factor  */
-  YYSYMBOL_addop = 105,                    /* addop  */
-  YYSYMBOL_relop = 106,                    /* relop  */
-  YYSYMBOL_mulop = 107,                    /* mulop  */
-  YYSYMBOL_error_recovery = 108            /* error_recovery  */
+  YYSYMBOL_procedure_call = 98,            /* procedure_call  */
+  YYSYMBOL_expression_list = 99,           /* expression_list  */
+  YYSYMBOL_expression = 100,               /* expression  */
+  YYSYMBOL_simple_expression = 101,        /* simple_expression  */
+  YYSYMBOL_term = 102,                     /* term  */
+  YYSYMBOL_factor = 103,                   /* factor  */
+  YYSYMBOL_addop = 104,                    /* addop  */
+  YYSYMBOL_relop = 105,                    /* relop  */
+  YYSYMBOL_mulop = 106,                    /* mulop  */
+  YYSYMBOL_error_recovery = 107            /* error_recovery  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -821,16 +833,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  8
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   298
+#define YYLAST   276
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  70
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  39
+#define YYNNTS  38
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  121
+#define YYNRULES  118
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  230
+#define YYNSTATES  223
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   309
@@ -884,19 +896,18 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   483,   483,   493,   499,   505,   514,   523,   531,   540,
-     576,   612,   620,   632,   637,   660,   669,   678,   685,   697,
-     700,   703,   706,   710,   714,   722,   726,   734,   738,   743,
-     752,   772,   791,   803,   812,   831,   835,   839,   843,   851,
-     862,   876,   880,   898,   912,   931,   950,   955,   964,   968,
-     977,   981,   988,   998,  1004,  1014,  1022,  1039,  1071,  1081,
-    1085,  1107,  1119,  1135,  1139,  1151,  1158,  1162,  1181,  1200,
-    1227,  1249,  1264,  1281,  1290,  1303,  1312,  1326,  1336,  1359,
-    1363,  1374,  1392,  1401,  1413,  1423,  1446,  1450,  1459,  1471,
-    1477,  1493,  1499,  1515,  1521,  1537,  1549,  1566,  1580,  1593,
-    1604,  1613,  1635,  1644,  1650,  1662,  1662,  1662,  1664,  1664,
-    1664,  1664,  1664,  1664,  1664,  1666,  1666,  1666,  1666,  1666,
-    1666,  1670
+       0,   543,   543,   554,   561,   568,   579,   592,   602,   612,
+     666,   717,   727,   740,   747,   772,   782,   793,   802,   816,
+     821,   826,   831,   837,   843,   853,   859,   869,   875,   882,
+     894,   916,   937,   952,   963,   984,   990,   996,  1002,  1012,
+    1025,  1041,  1047,  1067,  1083,  1104,  1125,  1132,  1143,  1149,
+    1160,  1166,  1175,  1186,  1193,  1203,  1211,  1229,  1261,  1274,
+    1281,  1305,  1319,  1338,  1344,  1358,  1367,  1373,  1394,  1416,
+    1445,  1469,  1486,  1505,  1516,  1531,  1542,  1554,  1565,  1589,
+    1595,  1610,  1620,  1643,  1647,  1656,  1668,  1674,  1690,  1696,
+    1712,  1718,  1734,  1746,  1763,  1777,  1790,  1801,  1810,  1832,
+    1841,  1847,  1859,  1859,  1859,  1861,  1861,  1861,  1861,  1861,
+    1861,  1861,  1863,  1863,  1863,  1863,  1863,  1863,  1867
 };
 #endif
 
@@ -929,15 +940,15 @@ yysymbol_name (yysymbol_kind_t yysymbol)
   "subprogram_head", "formal_parameter", "parameter_list", "parameter",
   "var_parameter", "value_parameter", "subprogram_body",
   "compound_statement", "statement_list", "statement", "variable_list",
-  "variable", "id_varpart", "array_index_expression", "procedure_call",
-  "expression_list", "expression", "simple_expression", "term", "factor",
-  "addop", "relop", "mulop", "error_recovery", YY_NULLPTR
+  "variable", "id_varpart", "procedure_call", "expression_list",
+  "expression", "simple_expression", "term", "factor", "addop", "relop",
+  "mulop", "error_recovery", YY_NULLPTR
   };
   return yy_sname[yysymbol];
 }
 #endif
 
-#define YYPACT_NINF (-133)
+#define YYPACT_NINF (-134)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -951,29 +962,29 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     107,   -14,     8,    69,    20,   263,  -133,    24,  -133,   267,
-      33,     9,    41,    97,   110,    67,    33,    76,  -133,    91,
-      65,    98,  -133,    10,  -133,    97,  -133,    70,  -133,   120,
-      90,   135,    99,    27,   104,   186,  -133,  -133,   138,    81,
-    -133,  -133,  -133,  -133,    -3,    86,  -133,   117,    67,    92,
-      67,    11,    16,    15,   137,   154,  -133,   186,  -133,    90,
-    -133,  -133,  -133,  -133,    90,    28,   126,  -133,  -133,  -133,
-    -133,  -133,  -133,    44,  -133,   162,  -133,   162,   168,   153,
-     153,   176,   172,   177,  -133,  -133,    38,  -133,     6,  -133,
-     195,  -133,  -133,   110,  -133,  -133,  -133,    92,   187,    92,
-      25,   179,  -133,   164,   153,   -25,  -133,  -133,  -133,  -133,
-     153,   153,   153,  -133,    95,    39,   -13,  -133,   133,   206,
-      17,   153,   153,   153,  -133,  -133,    71,   153,    97,  -133,
-    -133,   213,   -22,  -133,    67,    46,    57,  -133,  -133,  -133,
-     220,  -133,  -133,   153,   188,  -133,  -133,   164,  -133,  -133,
-    -133,  -133,  -133,  -133,  -133,   153,  -133,  -133,  -133,   153,
-    -133,  -133,  -133,  -133,  -133,  -133,   153,   164,   153,   208,
-     205,   105,  -133,   163,   223,   182,   -21,   193,  -133,  -133,
-     223,   259,   230,   231,   274,  -133,   220,    25,  -133,  -133,
-     198,  -133,   268,    39,   -13,  -133,  -133,   128,   236,  -133,
-     236,  -133,   153,  -133,  -133,   153,  -133,  -133,   241,   220,
-    -133,  -133,  -133,   164,   153,  -133,  -133,   223,  -133,   178,
-     237,  -133,  -133,   141,   153,  -133,  -133,   164,  -133,  -133
+     102,   -38,     9,    27,    28,   226,  -134,    50,  -134,   238,
+      36,    11,   107,   163,   118,   130,    36,   113,  -134,   126,
+     143,   156,  -134,    12,  -134,   163,  -134,    84,  -134,   169,
+     160,   171,   170,   -23,   173,    34,  -134,  -134,   185,   180,
+    -134,  -134,  -134,  -134,   112,   123,  -134,   182,   130,   108,
+     130,    22,    29,     8,   188,   189,  -134,    34,  -134,   160,
+    -134,  -134,  -134,  -134,   160,    65,   181,  -134,  -134,  -134,
+    -134,  -134,  -134,    82,  -134,   194,  -134,   194,   191,   133,
+     133,   203,   196,   197,  -134,  -134,    52,  -134,    -2,  -134,
+     214,  -134,  -134,   118,  -134,  -134,  -134,   108,   206,   108,
+      23,   195,  -134,   153,   133,    44,  -134,  -134,  -134,  -134,
+     133,   133,   133,  -134,    -1,   -19,    61,  -134,    93,   216,
+      30,   133,   133,   133,  -134,  -134,    63,   133,   163,  -134,
+    -134,   215,   -40,  -134,   130,    98,    64,  -134,  -134,  -134,
+     167,  -134,  -134,   133,   149,  -134,  -134,   153,  -134,  -134,
+    -134,  -134,  -134,  -134,  -134,   133,  -134,  -134,  -134,   133,
+    -134,  -134,  -134,  -134,  -134,  -134,   133,   153,   133,   200,
+     198,    96,  -134,   134,   166,   165,    21,  -134,  -134,   166,
+     249,   213,   217,   256,  -134,   167,    23,  -134,  -134,   172,
+    -134,   250,   -19,    61,  -134,  -134,    60,   219,  -134,   219,
+    -134,   133,  -134,  -134,  -134,  -134,   220,   167,  -134,  -134,
+    -134,   153,   133,  -134,  -134,   166,   221,  -134,  -134,   110,
+    -134,   153,  -134
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -982,37 +993,37 @@ static const yytype_int16 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     8,     7,     1,     0,
-       5,     0,     0,    27,    13,     0,     4,     0,   121,     0,
+       5,     0,     0,    27,    13,     0,     4,     0,   118,     0,
        0,     0,     3,     0,    41,    27,    11,     0,     2,    15,
        0,    14,     0,     0,     0,     0,    41,     6,     0,     0,
       19,    22,    25,    26,     0,     0,    16,     0,    29,     0,
       28,     0,     0,     0,     0,     0,     9,     0,    12,     0,
       20,    23,    21,    24,     0,     0,     0,    38,    35,    36,
       37,    30,    33,     0,    46,    48,    47,    48,     0,     0,
-       0,     0,     0,     0,    73,    74,    84,    66,     0,    59,
+       0,     0,     0,     0,    73,    74,    81,    66,     0,    59,
        0,    65,    42,    13,    10,    18,    17,     0,     0,     0,
-      50,     0,    44,    63,     0,    79,    95,    97,    96,    98,
-       0,     0,     0,    99,     0,    89,    91,    93,     0,     0,
-       0,    86,    86,    86,    78,    58,     0,     0,    27,    43,
+      50,     0,    44,    63,     0,    79,    92,    94,    93,    95,
+       0,     0,     0,    96,     0,    86,    88,    90,     0,     0,
+       0,    83,    83,    83,    78,    58,     0,     0,    27,    43,
       32,     0,     0,    31,     0,     0,     0,    51,    53,    54,
-       0,    61,   102,    86,     0,   103,   104,    63,   109,   111,
-     113,   114,   108,   110,   112,     0,   107,   105,   106,     0,
-     117,   118,   119,   120,   115,   116,     0,    63,     0,     0,
-      79,     0,    75,     0,    87,     0,     0,    87,    62,    60,
-      64,     0,     0,     0,     0,    55,     0,     0,    49,    45,
-       0,   100,    68,    90,    92,    94,    67,     0,     0,    71,
-       0,    72,     0,    85,    80,     0,    57,    39,     0,     0,
-      56,    52,   101,    63,     0,    77,    76,    88,    81,     0,
-       0,    34,    69,     0,     0,    82,    40,    63,    83,    70
+       0,    61,    99,    83,     0,   100,   101,    63,   106,   108,
+     110,   111,   105,   107,   109,     0,   104,   102,   103,     0,
+     114,   115,   116,   117,   112,   113,     0,    63,     0,     0,
+      79,     0,    75,     0,    84,     0,     0,    62,    60,    64,
+       0,     0,     0,     0,    55,     0,     0,    49,    45,     0,
+      97,    68,    87,    89,    91,    67,     0,     0,    71,     0,
+      72,     0,    82,    80,    57,    39,     0,     0,    56,    52,
+      98,    63,     0,    77,    76,    85,     0,    34,    69,     0,
+      40,    63,    70
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -133,  -133,  -133,   279,    30,   -11,  -133,   -44,   -24,  -133,
-      59,  -132,  -133,   255,  -133,  -133,   215,  -133,   106,  -133,
-     160,  -133,   -33,  -133,   -96,  -133,   -53,  -133,    72,  -133,
-     -97,   -75,   140,   139,   -98,  -133,  -133,  -133,  -133
+    -134,  -134,  -134,   260,    39,    -8,  -134,    92,   -24,  -134,
+     120,  -133,  -134,   234,  -134,  -134,   199,  -134,    86,  -134,
+     139,  -134,   -33,  -134,   -98,  -134,   -53,  -134,  -134,   -75,
+     -76,   119,   116,   -96,  -134,  -134,  -134,  -134
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -1020,8 +1031,8 @@ static const yytype_uint8 yydefgoto[] =
 {
        0,     3,     4,    12,   135,    13,    21,    46,    24,    34,
       71,    72,   132,    35,    54,    55,   101,   136,   137,   138,
-     139,   129,    87,    88,    89,   171,   113,   124,   218,    91,
-     173,   174,   115,   116,   117,   159,   155,   166,    14
+     139,   129,    87,    88,    89,   171,   113,   124,    91,   173,
+     174,   115,   116,   117,   159,   155,   166,    14
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -1029,70 +1040,66 @@ static const yytype_uint8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      90,    36,    56,    25,   114,   118,   142,   141,   189,     6,
-      19,    32,    74,   145,   146,    95,    78,    76,   169,   125,
-      96,   160,   161,   162,    94,   175,   176,    53,   -63,    79,
-     179,   163,   143,    80,   134,   144,    81,   183,   202,   123,
-      82,     5,    83,   184,   204,    27,   190,    60,   177,    61,
-      90,   192,   180,    33,   210,   164,   165,     7,    20,    26,
-      75,   126,    84,    85,    86,    77,   170,   172,   195,     8,
-     -63,   196,   178,    90,    26,     9,   156,   221,    65,   -79,
-      73,    15,   128,    53,   -63,    79,    38,    38,    18,    80,
-      49,    97,    81,   197,    90,   122,    82,    22,    83,    66,
-     157,   158,   123,    38,   181,    38,    23,    99,     1,   186,
-     147,     2,   187,    11,    90,   188,    26,   222,    84,    85,
-      86,    67,    68,    69,    70,    30,   -63,   217,    37,    38,
-     219,   229,    28,   148,   149,   150,    62,   151,    63,   223,
-      40,    59,    41,    42,    43,   215,    29,   216,   206,   219,
-     214,    44,    45,    31,    48,   152,   130,   167,   133,    50,
-      90,   153,   154,   199,   200,   227,   148,   149,   150,    39,
-     151,   148,   149,   150,    90,   151,    53,    64,    79,   148,
-     149,   150,    80,   151,    47,    81,   104,    58,   152,    82,
-      98,    83,    92,   152,   153,   154,    51,    52,    53,   153,
-     154,   152,   105,   106,   107,   108,   109,   153,   154,    93,
-     110,    84,    85,    86,   111,   112,   148,   149,   150,   100,
-     151,   201,   202,   103,   224,   119,   148,   149,   150,   120,
-     151,   148,   149,   150,   121,   151,   127,   131,   152,   205,
-     203,   202,   140,   225,   153,   154,   191,   168,   152,    67,
-      68,    69,    70,   152,   153,   154,   212,   202,   182,   153,
-     154,   148,   149,   150,    10,   151,    11,   198,    16,   123,
-      11,    53,   -13,   -13,   -13,   -13,   -13,   -13,   -13,   -13,
-     207,   208,   209,   152,   213,   170,   220,   226,    17,   153,
-     154,    57,   102,   211,   185,   193,   228,     0,   194
+      90,    36,    56,   114,   118,   141,    25,   188,   142,    78,
+       6,   125,    19,    32,   147,   145,   146,     5,   156,   182,
+      53,   -63,    79,    74,    94,   183,    80,     8,   178,    81,
+      76,   169,   134,    82,   144,    83,    38,   148,   149,   150,
+      49,   151,   157,   158,    51,    52,    53,   175,   176,   191,
+      90,   179,   208,   126,    27,    84,    85,    86,     7,   152,
+      20,    26,    33,   -63,   177,   153,   154,   172,   189,   195,
+     194,    75,    26,    90,   217,    53,   -63,    79,    77,   170,
+     201,    80,   212,     9,    81,   128,   203,    65,    82,    73,
+      83,    18,   196,   -79,    90,   160,   161,   162,   148,   149,
+     150,   143,   151,     1,   180,   163,     2,    15,   123,   122,
+      84,    85,    86,   218,    90,    66,   123,   167,   -63,   186,
+     152,    11,   187,   222,    38,   215,   153,   154,    97,   164,
+     165,   148,   149,   150,   221,   151,   219,    67,    68,    69,
+      70,    38,    37,    38,   213,    99,   214,   204,   148,   149,
+     150,    95,   151,   152,   198,   199,    96,    38,    90,   153,
+     154,   185,    60,    22,    61,    53,   104,    79,    90,    28,
+     152,    80,    23,    62,    81,    63,   153,   154,    82,    26,
+      83,    29,   105,   106,   107,   108,   109,   148,   149,   150,
+     110,   151,   200,   201,   111,   112,    67,    68,    69,    70,
+      84,    85,    86,    30,   148,   149,   150,   190,   151,   152,
+      40,    31,    41,    42,    43,   153,   154,   130,    39,   133,
+      47,    44,    45,   202,   201,    48,   152,    10,    50,    11,
+     210,   201,   153,   154,    58,   -13,   -13,   -13,   -13,    16,
+      59,    11,    64,    92,    93,    98,   103,   -13,   -13,   -13,
+     -13,   100,   119,   120,   121,   127,   131,   168,   140,   197,
+     181,    53,   123,   205,   207,   216,   211,   206,   170,    17,
+      57,   220,   209,   184,   192,   193,   102
 };
 
-static const yytype_int16 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      53,    25,    35,    14,    79,    80,   104,   103,   140,     1,
-       1,     1,     1,   111,   112,    59,     1,     1,     1,    13,
-      64,    34,    35,    36,    57,   122,   123,    12,    13,    14,
-     126,    44,    57,    18,     9,   110,    21,    59,    59,    64,
-      25,    55,    27,    65,    65,    15,   143,    50,   123,    52,
-     103,   147,   127,    23,   186,    68,    69,    49,    49,    49,
-      49,    55,    47,    48,    49,    49,    49,   120,   166,     0,
-      55,   167,     1,   126,    49,    55,    37,   209,    48,    41,
-      50,    57,    93,    12,    13,    14,    59,    59,    55,    18,
-      63,    63,    21,   168,   147,    57,    25,    56,    27,     7,
-      61,    62,    64,    59,   128,    59,     9,    63,     1,    63,
-      15,     4,    55,     3,   167,    58,    49,   213,    47,    48,
-      49,    29,    30,    31,    32,    60,    55,   202,    58,    59,
-     205,   227,    56,    38,    39,    40,    50,    42,    52,   214,
-      50,    60,    52,    53,    54,   198,    55,   200,   181,   224,
-      22,    61,    62,    55,    55,    60,    97,    24,    99,    55,
-     213,    66,    67,    58,    59,    24,    38,    39,    40,    49,
-      42,    38,    39,    40,   227,    42,    12,    60,    14,    38,
-      39,    40,    18,    42,    49,    21,    33,    49,    60,    25,
-      64,    27,    55,    60,    66,    67,    10,    11,    12,    66,
-      67,    60,    49,    50,    51,    52,    53,    66,    67,    55,
-      57,    47,    48,    49,    61,    62,    38,    39,    40,    57,
-      42,    58,    59,    55,    46,    49,    38,    39,    40,    57,
-      42,    38,    39,    40,    57,    42,    41,    50,    60,    46,
-      58,    59,    63,    65,    66,    67,    58,    41,    60,    29,
-      30,    31,    32,    60,    66,    67,    58,    59,    45,    66,
-      67,    38,    39,    40,     1,    42,     3,    59,     1,    64,
-       3,    12,     9,    10,    11,    12,     9,    10,    11,    12,
-      50,    50,     8,    60,    16,    49,    45,    50,     9,    66,
-      67,    36,    77,   187,   134,   155,   224,    -1,   159
+      53,    25,    35,    79,    80,   103,    14,   140,   104,     1,
+       1,    13,     1,     1,    15,   111,   112,    55,    37,    59,
+      12,    13,    14,     1,    57,    65,    18,     0,   126,    21,
+       1,     1,     9,    25,   110,    27,    59,    38,    39,    40,
+      63,    42,    61,    62,    10,    11,    12,   122,   123,   147,
+     103,   127,   185,    55,    15,    47,    48,    49,    49,    60,
+      49,    49,    23,    55,     1,    66,    67,   120,   143,   167,
+     166,    49,    49,   126,   207,    12,    13,    14,    49,    49,
+      59,    18,    22,    55,    21,    93,    65,    48,    25,    50,
+      27,    55,   168,    41,   147,    34,    35,    36,    38,    39,
+      40,    57,    42,     1,   128,    44,     4,    57,    64,    57,
+      47,    48,    49,   211,   167,     7,    64,    24,    55,    55,
+      60,     3,    58,   221,    59,   201,    66,    67,    63,    68,
+      69,    38,    39,    40,    24,    42,   212,    29,    30,    31,
+      32,    59,    58,    59,   197,    63,   199,   180,    38,    39,
+      40,    59,    42,    60,    58,    59,    64,    59,   211,    66,
+      67,    63,    50,    56,    52,    12,    33,    14,   221,    56,
+      60,    18,     9,    50,    21,    52,    66,    67,    25,    49,
+      27,    55,    49,    50,    51,    52,    53,    38,    39,    40,
+      57,    42,    58,    59,    61,    62,    29,    30,    31,    32,
+      47,    48,    49,    60,    38,    39,    40,    58,    42,    60,
+      50,    55,    52,    53,    54,    66,    67,    97,    49,    99,
+      49,    61,    62,    58,    59,    55,    60,     1,    55,     3,
+      58,    59,    66,    67,    49,     9,    10,    11,    12,     1,
+      60,     3,    60,    55,    55,    64,    55,     9,    10,    11,
+      12,    57,    49,    57,    57,    41,    50,    41,    63,    59,
+      45,    12,    64,    50,     8,    45,    16,    50,    49,     9,
+      36,    50,   186,   134,   155,   159,    77
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -1100,7 +1107,7 @@ static const yytype_int16 yycheck[] =
 static const yytype_int8 yystos[] =
 {
        0,     1,     4,    71,    72,    55,     1,    49,     0,    55,
-       1,     3,    73,    75,   108,    57,     1,    73,    55,     1,
+       1,     3,    73,    75,   107,    57,     1,    73,    55,     1,
       49,    76,    56,     9,    78,    75,    49,    74,    56,    55,
       60,    55,     1,    74,    79,    83,    78,    58,    59,    49,
       50,    52,    53,    54,    61,    62,    77,    49,    55,    63,
@@ -1108,20 +1115,20 @@ static const yytype_int8 yystos[] =
       50,    52,    50,    52,    60,    74,     7,    29,    30,    31,
       32,    80,    81,    74,     1,    49,     1,    49,     1,    14,
       18,    21,    25,    27,    47,    48,    49,    92,    93,    94,
-      96,    99,    55,    55,    92,    77,    77,    63,    64,    63,
+      96,    98,    55,    55,    92,    77,    77,    63,    64,    63,
       57,    86,    86,    55,    33,    49,    50,    51,    52,    53,
-      57,    61,    62,    96,   101,   102,   103,   104,   101,    49,
+      57,    61,    62,    96,   100,   101,   102,   103,   100,    49,
       57,    57,    57,    64,    97,    13,    55,    41,    75,    91,
       80,    50,    82,    80,     9,    74,    87,    88,    89,    90,
-      63,    94,   104,    57,   101,   104,   104,    15,    38,    39,
-      40,    42,    60,    66,    67,   106,    37,    61,    62,   105,
-      34,    35,    36,    44,    68,    69,   107,    24,    41,     1,
-      49,    95,    96,   100,   101,   100,   100,   101,     1,    94,
-     101,    78,    45,    59,    65,    90,    63,    55,    58,    81,
-     100,    58,    94,   102,   103,   104,    94,   101,    59,    58,
-      59,    58,    59,    58,    65,    46,    92,    50,    50,     8,
-      81,    88,    58,    16,    22,    96,    96,   101,    98,   101,
-      45,    81,    94,   101,    46,    65,    50,    24,    98,    94
+      63,    94,   103,    57,   100,   103,   103,    15,    38,    39,
+      40,    42,    60,    66,    67,   105,    37,    61,    62,   104,
+      34,    35,    36,    44,    68,    69,   106,    24,    41,     1,
+      49,    95,    96,    99,   100,    99,    99,     1,    94,   100,
+      78,    45,    59,    65,    90,    63,    55,    58,    81,    99,
+      58,    94,   101,   102,   103,    94,   100,    59,    58,    59,
+      58,    59,    58,    65,    92,    50,    50,     8,    81,    88,
+      58,    16,    22,    96,    96,   100,    45,    81,    94,   100,
+      50,    24,    94
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -1135,11 +1142,10 @@ static const yytype_int8 yyr1[] =
       87,    87,    87,    88,    88,    89,    90,    91,    92,    93,
       93,    93,    93,    94,    94,    94,    94,    94,    94,    94,
       94,    94,    94,    94,    94,    95,    95,    95,    96,    97,
-      97,    97,    98,    98,    99,    99,   100,   100,   100,   101,
-     101,   102,   102,   103,   103,   104,   104,   104,   104,   104,
-     104,   104,   104,   104,   104,   105,   105,   105,   106,   106,
-     106,   106,   106,   106,   106,   107,   107,   107,   107,   107,
-     107,   108
+      97,    98,    98,    99,    99,    99,   100,   100,   101,   101,
+     102,   102,   103,   103,   103,   103,   103,   103,   103,   103,
+     103,   103,   104,   104,   104,   105,   105,   105,   105,   105,
+     105,   105,   106,   106,   106,   106,   106,   106,   107
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -1153,11 +1159,10 @@ static const yytype_int8 yyr2[] =
        0,     1,     3,     1,     1,     2,     3,     3,     3,     1,
        3,     3,     3,     0,     3,     1,     1,     4,     4,     6,
        8,     4,     4,     1,     1,     1,     3,     3,     2,     0,
-       3,     4,     2,     3,     1,     4,     0,     1,     3,     1,
-       3,     1,     3,     1,     3,     1,     1,     1,     1,     1,
-       3,     4,     2,     2,     2,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     2
+       3,     1,     4,     0,     1,     3,     1,     3,     1,     3,
+       1,     3,     1,     1,     1,     1,     1,     3,     4,     2,
+       2,     2,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     2
 };
 
 
@@ -1526,73 +1531,73 @@ yydestruct (const char *yymsg,
   switch (yykind)
     {
     case YYSYMBOL_IDENTIFIER: /* IDENTIFIER  */
-#line 455 "yacc_pascal.y"
+#line 508 "yacc_pascal.y"
             { free(((*yyvaluep).string)); }
-#line 1532 "yacc_pascal.cpp"
+#line 1537 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_INTEGER: /* INTEGER  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1538 "yacc_pascal.cpp"
+#line 1543 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_BOOLEAN: /* BOOLEAN  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1544 "yacc_pascal.cpp"
+#line 1549 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_REAL: /* REAL  */
-#line 455 "yacc_pascal.y"
+#line 508 "yacc_pascal.y"
             { free(((*yyvaluep).real)); }
-#line 1550 "yacc_pascal.cpp"
+#line 1555 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_CHAR: /* CHAR  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1556 "yacc_pascal.cpp"
+#line 1561 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_STRING: /* STRING  */
-#line 455 "yacc_pascal.y"
+#line 508 "yacc_pascal.y"
             { free(((*yyvaluep).string)); }
-#line 1562 "yacc_pascal.cpp"
+#line 1567 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_programstruct: /* programstruct  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1568 "yacc_pascal.cpp"
+#line 1573 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_program_head: /* program_head  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).program_head); }
-#line 1574 "yacc_pascal.cpp"
+#line 1579 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_program_body: /* program_body  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).program_body); }
-#line 1580 "yacc_pascal.cpp"
+#line 1585 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_idlist: /* idlist  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).id_list); }
-#line 1586 "yacc_pascal.cpp"
+#line 1591 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_const_declarations: /* const_declarations  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).const_decls); }
-#line 1592 "yacc_pascal.cpp"
+#line 1597 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_const_declaration: /* const_declaration  */
-#line 464 "yacc_pascal.y"
+#line 520 "yacc_pascal.y"
             {
     if(((*yyvaluep).kv_pair_list) != nullptr){
         for(auto pair : *((*yyvaluep).kv_pair_list)){
@@ -1602,17 +1607,17 @@ yydestruct (const char *yymsg,
         delete ((*yyvaluep).kv_pair_list);
     }
 }
-#line 1606 "yacc_pascal.cpp"
+#line 1611 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_const_value: /* const_value  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).value); }
-#line 1612 "yacc_pascal.cpp"
+#line 1617 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_var_declarations: /* var_declarations  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).var_decls) != nullptr){
         for(auto kv_pair : *((*yyvaluep).var_decls)){
@@ -1621,11 +1626,11 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1625 "yacc_pascal.cpp"
+#line 1630 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_var_declaration: /* var_declaration  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).var_decls) != nullptr){
         for(auto kv_pair : *((*yyvaluep).var_decls)){
@@ -1634,23 +1639,23 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1638 "yacc_pascal.cpp"
+#line 1643 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_type: /* type  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1644 "yacc_pascal.cpp"
+#line 1649 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_basic_type: /* basic_type  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1650 "yacc_pascal.cpp"
+#line 1655 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_period_list: /* period_list  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).period_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).period_list)){
@@ -1659,11 +1664,11 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).period_list);
 }
-#line 1663 "yacc_pascal.cpp"
+#line 1668 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_subprogram_declarations: /* subprogram_declarations  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).func_decl_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).func_decl_list)){
@@ -1672,23 +1677,23 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).func_decl_list);
 }
-#line 1676 "yacc_pascal.cpp"
+#line 1681 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_subprogram: /* subprogram  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).func_decl); }
-#line 1682 "yacc_pascal.cpp"
+#line 1687 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_subprogram_head: /* subprogram_head  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).func_head); }
-#line 1688 "yacc_pascal.cpp"
+#line 1693 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_formal_parameter: /* formal_parameter  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).var_decls) != nullptr){
         for(auto kv_pair : *((*yyvaluep).var_decls)){
@@ -1697,11 +1702,11 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1701 "yacc_pascal.cpp"
+#line 1706 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_parameter_list: /* parameter_list  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).var_decls) != nullptr){
         for(auto kv_pair : *((*yyvaluep).var_decls)){
@@ -1710,35 +1715,35 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1714 "yacc_pascal.cpp"
+#line 1719 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_parameter: /* parameter  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1720 "yacc_pascal.cpp"
+#line 1725 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_var_parameter: /* var_parameter  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1726 "yacc_pascal.cpp"
+#line 1731 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_value_parameter: /* value_parameter  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1732 "yacc_pascal.cpp"
+#line 1737 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_subprogram_body: /* subprogram_body  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).func_body); }
-#line 1738 "yacc_pascal.cpp"
+#line 1743 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_compound_statement: /* compound_statement  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).stmt_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).stmt_list)){
@@ -1747,11 +1752,11 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1751 "yacc_pascal.cpp"
+#line 1756 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_statement_list: /* statement_list  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).stmt_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).stmt_list)){
@@ -1760,11 +1765,11 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1764 "yacc_pascal.cpp"
+#line 1769 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_statement: /* statement  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).stmt_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).stmt_list)){
@@ -1773,11 +1778,11 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1777 "yacc_pascal.cpp"
+#line 1782 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_variable_list: /* variable_list  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).lval_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).lval_list)){
@@ -1786,17 +1791,17 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).lval_list);
 }
-#line 1790 "yacc_pascal.cpp"
+#line 1795 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_variable: /* variable  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).lval); }
-#line 1796 "yacc_pascal.cpp"
+#line 1801 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_id_varpart: /* id_varpart  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).expr_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).expr_list)){
@@ -1805,30 +1810,17 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).expr_list);
 }
-#line 1809 "yacc_pascal.cpp"
-        break;
-
-    case YYSYMBOL_array_index_expression: /* array_index_expression  */
-#line 456 "yacc_pascal.y"
-            {
-    if(((*yyvaluep).expr_list) != nullptr){
-        for(auto kv_pair : *((*yyvaluep).expr_list)){
-            delete kv_pair;
-        }
-    }
-    delete ((*yyvaluep).expr_list);
-}
-#line 1822 "yacc_pascal.cpp"
+#line 1814 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_procedure_call: /* procedure_call  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).func_call_stmt); }
-#line 1828 "yacc_pascal.cpp"
+#line 1820 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_expression_list: /* expression_list  */
-#line 456 "yacc_pascal.y"
+#line 510 "yacc_pascal.y"
             {
     if(((*yyvaluep).expr_list) != nullptr){
         for(auto kv_pair : *((*yyvaluep).expr_list)){
@@ -1837,49 +1829,49 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).expr_list);
 }
-#line 1841 "yacc_pascal.cpp"
+#line 1833 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_expression: /* expression  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).expr); }
-#line 1847 "yacc_pascal.cpp"
+#line 1839 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_simple_expression: /* simple_expression  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).add_expr); }
-#line 1853 "yacc_pascal.cpp"
+#line 1845 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_term: /* term  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).mul_expr); }
-#line 1859 "yacc_pascal.cpp"
+#line 1851 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_factor: /* factor  */
-#line 473 "yacc_pascal.y"
+#line 530 "yacc_pascal.y"
             { delete ((*yyvaluep).unary_expr); }
-#line 1865 "yacc_pascal.cpp"
+#line 1857 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_addop: /* addop  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1871 "yacc_pascal.cpp"
+#line 1863 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_relop: /* relop  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1877 "yacc_pascal.cpp"
+#line 1869 "yacc_pascal.cpp"
         break;
 
     case YYSYMBOL_mulop: /* mulop  */
-#line 454 "yacc_pascal.y"
+#line 506 "yacc_pascal.y"
             {}
-#line 1883 "yacc_pascal.cpp"
+#line 1875 "yacc_pascal.cpp"
         break;
 
       default:
@@ -1973,12 +1965,12 @@ YYLTYPE yylloc = yyloc_default;
 
 
 /* User initialization code.  */
-#line 349 "yacc_pascal.y"
+#line 363 "yacc_pascal.y"
 {
-    *program = nullptr;
+    *program = nullptr;//初始化程序AST根节点为空指针
 }
 
-#line 1982 "yacc_pascal.cpp"
+#line 1974 "yacc_pascal.cpp"
 
   yylsp[0] = yylloc;
   goto yysetstate;
@@ -2189,1235 +2181,1219 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* programstruct: program_head ';' program_body '.'  */
-#line 483 "yacc_pascal.y"
+#line 543 "yacc_pascal.y"
                                            {
-        currentParserContext = ParserContext::ProgramStruct;
-        ProgramStmt* programStruct = allocateNode<ProgramStmt>();
-        programStruct->head = std::unique_ptr<ProgramHeadStmt>((yyvsp[-3].program_head));
-        programStruct->body = std::unique_ptr<ProgramBodyStmt>((yyvsp[-1].program_body));
+        currentParserContext = ParserContext::ProgramStruct;//设置当前解析上下文为程序结构
+        ProgramStmt* programStruct = allocateNode<ProgramStmt>();//创建程序结构AST节点
+        programStruct->head = std::unique_ptr<ProgramHeadStmt>((yyvsp[-3].program_head));//设置程序头部，使用智能指针管理内存
+        programStruct->body = std::unique_ptr<ProgramBodyStmt>((yyvsp[-1].program_body));//设置程序主体，使用智能指针管理内存 
         
         GRAMMAR_TRACE("programstruct -> program_head ';' program_body '.'");
-        *program = programStruct;
+        *program = programStruct;//将构建的AST根节点存储到输出参数中
         (yyval.program_struct) = nullptr; // 防止报错
     }
-#line 2204 "yacc_pascal.cpp"
+#line 2196 "yacc_pascal.cpp"
     break;
 
   case 3: /* programstruct: error ';' program_body '.'  */
-#line 493 "yacc_pascal.y"
+#line 554 "yacc_pascal.y"
                                     {
-        *program = allocateNode<ProgramStmt>();
-        delete (yyvsp[-1].program_body);
+        *program = allocateNode<ProgramStmt>();//创建空的程序结构作为恢复
+        delete (yyvsp[-1].program_body);//释放已解析的程序主体
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' program_body '.'");
     }
-#line 2215 "yacc_pascal.cpp"
+#line 2207 "yacc_pascal.cpp"
     break;
 
   case 4: /* programstruct: program_head ';' error  */
-#line 499 "yacc_pascal.y"
+#line 561 "yacc_pascal.y"
                                 {
         *program = allocateNode<ProgramStmt>();
         delete (yyvsp[-2].program_head);
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> program_head ';' error");
     }
-#line 2226 "yacc_pascal.cpp"
+#line 2218 "yacc_pascal.cpp"
     break;
 
   case 5: /* programstruct: error ';' error  */
-#line 505 "yacc_pascal.y"
+#line 568 "yacc_pascal.y"
                          {
         *program = allocateNode<ProgramStmt>();
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' error");
     }
-#line 2236 "yacc_pascal.cpp"
+#line 2228 "yacc_pascal.cpp"
     break;
 
   case 6: /* program_head: PROGRAM IDENTIFIER '(' idlist ')'  */
-#line 514 "yacc_pascal.y"
-                                         {
-        currentParserContext = ParserContext::ProgramHead;
-        (yyval.program_head) = allocateNode<ProgramHeadStmt>();
-        (yyval.program_head)->id_list = *(yyvsp[-1].id_list);
+#line 579 "yacc_pascal.y"
+                                         {  // 匹配 "program 标识符 ( 标识符列表 )"
+        currentParserContext = ParserContext::ProgramHead;  // 设置当前解析上下文为程序头
+        (yyval.program_head) = allocateNode<ProgramHeadStmt>();  // 创建新的程序头AST节点
+        (yyval.program_head)->id_list.push_back(std::string((yyvsp[-3].string)));  // 先添加程序名
+        (yyval.program_head)->id_list.insert((yyval.program_head)->id_list.end(), (yyvsp[-1].id_list)->begin(), (yyvsp[-1].id_list)->end());  // 再添加参数
+        //$$->id_list = *$4; 将标识符列表（参数）复制到程序头节点
         
-        delete (yyvsp[-1].id_list);
-        free((yyvsp[-3].string));
-        GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER '(' idlist ')'");
+        delete (yyvsp[-1].id_list);  // 释放标识符列表内存（已复制到AST节点中）
+        free((yyvsp[-3].string));   // 释放标识符字符串（程序名称）内存
+        GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER '(' idlist ')'");  // 记录语法跟踪日志
     }
-#line 2250 "yacc_pascal.cpp"
+#line 2244 "yacc_pascal.cpp"
     break;
 
   case 7: /* program_head: PROGRAM IDENTIFIER  */
-#line 523 "yacc_pascal.y"
-                          {
-        currentParserContext = ParserContext::ProgramHead;
-        (yyval.program_head) = allocateNode<ProgramHeadStmt>();
-        (yyval.program_head)->id_list.emplace_back(std::string((yyvsp[0].string)));
+#line 592 "yacc_pascal.y"
+                          {  // 匹配 "program 标识符"
+        currentParserContext = ParserContext::ProgramHead;  // 设置当前解析上下文为程序头
+        (yyval.program_head) = allocateNode<ProgramHeadStmt>();  // 创建新的程序头AST节点
+        (yyval.program_head)->id_list.emplace_back(std::string((yyvsp[0].string)));  // 将程序名称作为参数添加到id_list中
         
-        GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER");
-        free((yyvsp[0].string));
+        GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER");  // 记录语法跟踪日志
+        free((yyvsp[0].string));  // 释放标识符字符串（程序名称）内存
     }
-#line 2263 "yacc_pascal.cpp"
+#line 2257 "yacc_pascal.cpp"
     break;
 
   case 8: /* program_head: PROGRAM error  */
-#line 531 "yacc_pascal.y"
-                     {
-        (yyval.program_head) = nullptr;
-        GRAMMAR_ERROR("program_head -> PROGRAM error");
-        yyerrok;
+#line 602 "yacc_pascal.y"
+                     {  // 匹配 "program" 后跟语法错误
+        (yyval.program_head) = nullptr;  // 设置返回值为空指针，表示解析失败
+        GRAMMAR_ERROR("program_head -> PROGRAM error");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2273 "yacc_pascal.cpp"
+#line 2267 "yacc_pascal.cpp"
     break;
 
   case 9: /* program_body: const_declarations var_declarations subprogram_declarations compound_statement  */
-#line 540 "yacc_pascal.y"
+#line 612 "yacc_pascal.y"
                                                                                       {
+        // 设置当前解析上下文为程序体
         currentParserContext = ParserContext::ProgramBody;
+        
+        // 创建程序体AST节点
         ProgramBodyStmt* programBody = allocateNode<ProgramBodyStmt>();
         
-        // 处理常量声明
-        if((yyvsp[-3].const_decls) != nullptr) {
+        // 处理常量声明部分
+        if((yyvsp[-3].const_decls) != nullptr) {  // 如果有常量声明
+            // 将常量声明节点转移到程序体节点中，使用智能指针管理内存
             programBody->const_decl = std::unique_ptr<ConstDeclStmt>((yyvsp[-3].const_decls));
         }
         
-        // 处理变量声明
-        if((yyvsp[-2].var_decls) != nullptr) {
+        // 处理变量声明部分
+        if((yyvsp[-2].var_decls) != nullptr) {  // 如果有变量声明
+            // 遍历变量声明列表，将每个声明转移到程序体节点中
             for(auto varDecl : *(yyvsp[-2].var_decls)) {
+                // 使用智能指针封装每个变量声明，并添加到程序体的变量声明列表中
                 programBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));
             }
+            // 释放变量声明列表容器（内部元素已被转移到程序体节点）
             delete (yyvsp[-2].var_decls);
         }
         
-        // 处理子程序声明
-        if((yyvsp[-1].func_decl_list) != nullptr) {
+        // 处理子程序（函数/过程）声明部分
+        if((yyvsp[-1].func_decl_list) != nullptr) {  // 如果有子程序声明
+            // 遍历子程序声明列表，将每个声明转移到程序体节点中
             for(auto funcDecl : *(yyvsp[-1].func_decl_list)) {
+                // 使用智能指针封装每个函数声明，并添加到程序体的函数声明列表中
                 programBody->func_decl.emplace_back(std::unique_ptr<FuncDeclStmt>(funcDecl));
             }
+            // 释放子程序声明列表容器
             delete (yyvsp[-1].func_decl_list);
         }
         
-        // 处理复合语句
-        if((yyvsp[0].stmt_list) != nullptr) {
+        // 处理复合语句部分（主要的执行代码）
+        if((yyvsp[0].stmt_list) != nullptr) {  // 如果有复合语句
+            // 遍历语句列表，将每个语句转移到程序体节点中
             for(auto stmt : *(yyvsp[0].stmt_list)) {
+                // 使用智能指针封装每个语句，并添加到程序体的语句列表中
                 programBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
             }
+            // 释放语句列表容器
             delete (yyvsp[0].stmt_list);
         }
         
+        // 设置当前规则的返回值为构建好的程序体节点
         (yyval.program_body) = programBody;
+        
+        // 记录语法追踪日志
         GRAMMAR_TRACE("program_body -> const_declarations var_declarations subprogram_declarations compound_statement");
     }
-#line 2314 "yacc_pascal.cpp"
+#line 2324 "yacc_pascal.cpp"
     break;
 
   case 10: /* program_body: error_recovery const_declarations var_declarations subprogram_declarations compound_statement  */
-#line 576 "yacc_pascal.y"
+#line 666 "yacc_pascal.y"
                                                                                                      {
-        // 清理分配的资源
+        // 使用Lambda函数简化清理代码
         auto cleanupPtr = [](auto* ptr) {
-            if (ptr) delete ptr;
+            if (ptr) delete ptr;  // 如果指针非空，则删除它指向的对象
         };
         
-        cleanupPtr((yyvsp[-3].const_decls));
+        // 清理各个部分分配的内存
+        cleanupPtr((yyvsp[-3].const_decls));  // 清理常量声明
         
+        // 清理变量声明列表
         if((yyvsp[-2].var_decls) != nullptr) {
+            // 遍历并删除每个变量声明
             for(auto varDecl : *(yyvsp[-2].var_decls)) {
                 delete varDecl;
             }
+            // 删除列表容器本身
             delete (yyvsp[-2].var_decls);
         }
         
+        // 清理子程序声明列表
         if((yyvsp[-1].func_decl_list) != nullptr) {
+            // 遍历并删除每个函数声明
             for(auto funcDecl : *(yyvsp[-1].func_decl_list)) {
                 delete funcDecl;
             }
+            // 删除列表容器本身
             delete (yyvsp[-1].func_decl_list);
         }
         
+        // 清理语句列表
         if((yyvsp[0].stmt_list) != nullptr) {
+            // 遍历并删除每个语句
             for(auto stmt : *(yyvsp[0].stmt_list)) {
                 delete stmt;
             }
+            // 删除列表容器本身
             delete (yyvsp[0].stmt_list);
         }
         
+        // 设置返回值为nullptr，表示程序体构建失败
         (yyval.program_body) = nullptr;
+        
+        // 记录语法追踪日志
         GRAMMAR_TRACE("program_body -> error_recovery const_declarations var_declarations subprogram_declarations compound_statement");
     }
-#line 2351 "yacc_pascal.cpp"
+#line 2374 "yacc_pascal.cpp"
     break;
 
   case 11: /* idlist: IDENTIFIER  */
-#line 612 "yacc_pascal.y"
-                  {
-        currentParserContext = ParserContext::IdList;
-        (yyval.id_list) = allocateNode<std::vector<std::string>>();
-        (yyval.id_list)->emplace_back(std::string((yyvsp[0].string)));
+#line 717 "yacc_pascal.y"
+                  {  // 匹配单个标识符，如 "input"
+        currentParserContext = ParserContext::IdList;  // 设置当前解析上下文为标识符列表
+        (yyval.id_list) = allocateNode<std::vector<std::string>>();  // 创建新的字符串向量
+        (yyval.id_list)->emplace_back(std::string((yyvsp[0].string)));  // 将标识符添加到向量中
         
-        GRAMMAR_TRACE("idlist -> IDENTIFIER");
-        free((yyvsp[0].string));
-    }
-#line 2364 "yacc_pascal.cpp"
-    break;
-
-  case 12: /* idlist: idlist ',' IDENTIFIER  */
-#line 620 "yacc_pascal.y"
-                             {
-        currentParserContext = ParserContext::IdList;
-        (yyvsp[-2].id_list)->emplace_back(std::string((yyvsp[0].string)));
-        (yyval.id_list) = (yyvsp[-2].id_list);
-        
-        GRAMMAR_TRACE("idlist -> idlist ',' IDENTIFIER");
-        free((yyvsp[0].string));
-    }
-#line 2377 "yacc_pascal.cpp"
-    break;
-
-  case 13: /* const_declarations: %empty  */
-#line 632 "yacc_pascal.y"
-                 {
-        currentParserContext = ParserContext::ConstDeclarations;
-        (yyval.const_decls) = nullptr;
-        GRAMMAR_TRACE("const_declarations -> empty");
+        GRAMMAR_TRACE("idlist -> IDENTIFIER");  // 记录语法跟踪日志
+        free((yyvsp[0].string));  // 释放标识符字符串内存（已复制到向量中）
     }
 #line 2387 "yacc_pascal.cpp"
     break;
 
+  case 12: /* idlist: idlist ',' IDENTIFIER  */
+#line 727 "yacc_pascal.y"
+                             {  // 匹配"已存在的标识符列表,新标识符"，如 "input, output"
+        currentParserContext = ParserContext::IdList;  // 设置当前解析上下文
+        (yyvsp[-2].id_list)->emplace_back(std::string((yyvsp[0].string)));  // 将新标识符添加到已有列表中
+        (yyval.id_list) = (yyvsp[-2].id_list);  // 返回更新后的列表
+        
+        GRAMMAR_TRACE("idlist -> idlist ',' IDENTIFIER");  // 记录语法跟踪日志
+        free((yyvsp[0].string));  // 释放新标识符的字符串内存
+    }
+#line 2400 "yacc_pascal.cpp"
+    break;
+
+  case 13: /* const_declarations: %empty  */
+#line 740 "yacc_pascal.y"
+                 {  // 当程序中没有常量声明时匹配此规则
+        currentParserContext = ParserContext::ConstDeclarations;  // 设置当前解析上下文为常量声明
+        (yyval.const_decls) = nullptr;  // 返回空指针，表示没有常量声明
+        GRAMMAR_TRACE("const_declarations -> empty");  // 记录语法跟踪日志
+    }
+#line 2410 "yacc_pascal.cpp"
+    break;
+
   case 14: /* const_declarations: CONST const_declaration ';'  */
-#line 637 "yacc_pascal.y"
-                                   {
-        currentParserContext = ParserContext::ConstDeclarations;
-        ConstDeclStmt* constDecls = allocateNode<ConstDeclStmt>();
+#line 747 "yacc_pascal.y"
+                                   {  // 匹配 "const 常量定义列表;" 形式
+        currentParserContext = ParserContext::ConstDeclarations;  // 设置当前解析上下文为常量声明
+        ConstDeclStmt* constDecls = allocateNode<ConstDeclStmt>();  // 创建常量声明AST节点
         
         // 将声明列表中的键值对转移到常量声明对象中
-        for(auto kvPair : *(yyvsp[-1].kv_pair_list)) {
-            constDecls->pairs.emplace_back(std::make_pair(kvPair->first, kvPair->second));
-            delete kvPair;
+        for(auto kvPair : *(yyvsp[-1].kv_pair_list)) {  // 遍历解析得到的常量定义键值对列表
+            constDecls->pairs.emplace_back(std::make_pair(kvPair->first, kvPair->second));  // 创建新的键值对并添加到AST节点
+            delete kvPair;  // 删除原始键值对对象（内容已被转移）
         }
         
-        delete (yyvsp[-1].kv_pair_list);
-        (yyval.const_decls) = constDecls;
+        delete (yyvsp[-1].kv_pair_list);  // 删除原始键值对列表容器
+        (yyval.const_decls) = constDecls;  // 设置返回值为构建的常量声明节点
         
-        // 日志输出声明的常量信息
-        for(auto &t: constDecls->pairs) {
-            LOG_INFO("Get Const Type:%d, pointer %p", t.second->type, t.second.get());
-            if(t.second->str) {
-                LOG_INFO("Get string:%s", t.second->str->val.c_str());
+        // 日志输出声明的常量信息（用于调试）
+        for(auto &t: constDecls->pairs) {  // 遍历所有常量定义
+            LOG_INFO("Get Const Type:%d, pointer %p", t.second->type, t.second.get());  // 记录常量类型和指针地址
+            if(t.second->str) {  // 如果常量是字符串类型
+                LOG_INFO("Get string:%s", t.second->str->val.c_str());  // 记录字符串值
             }
         }
         
-        GRAMMAR_TRACE("const_declarations -> CONST const_declaration ';' const_declarations");
+        GRAMMAR_TRACE("const_declarations -> CONST const_declaration ';' const_declarations");  // 记录语法跟踪日志
     }
-#line 2415 "yacc_pascal.cpp"
+#line 2438 "yacc_pascal.cpp"
     break;
 
   case 15: /* const_declarations: CONST error ';'  */
-#line 660 "yacc_pascal.y"
-                       {
-        (yyval.const_decls) = nullptr;
-        GRAMMAR_ERROR("const_declarations -> CONST error ;");
-        yyerrok;
+#line 772 "yacc_pascal.y"
+                       {  // 匹配 "const [错误] ;" 形式
+        (yyval.const_decls) = nullptr;  // 设置返回值为空指针，表示常量声明解析失败
+        GRAMMAR_ERROR("const_declarations -> CONST error ;");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2425 "yacc_pascal.cpp"
+#line 2448 "yacc_pascal.cpp"
     break;
 
   case 16: /* const_declaration: IDENTIFIER '=' const_value  */
-#line 669 "yacc_pascal.y"
-                                  {
-        currentParserContext = ParserContext::ConstDeclaration;
-        auto constDecls = allocateNode<std::vector<std::pair<std::string, ValueStmt *>*>>();
-        auto kvPair = allocateNode<std::pair<std::string, ValueStmt *>>((yyvsp[-2].string), (yyvsp[0].value));
+#line 782 "yacc_pascal.y"
+                                  {  // 匹配 "标识符 = 常量值" 形式，如 "PI = 3.14159"
+        currentParserContext = ParserContext::ConstDeclaration;  // 设置当前解析上下文为常量声明
+        auto constDecls = allocateNode<std::vector<std::pair<std::string, ValueStmt *>*>>();  // 创建存储键值对指针的向量
+        auto kvPair = allocateNode<std::pair<std::string, ValueStmt *>>((yyvsp[-2].string), (yyvsp[0].value));  // 创建键值对，存储常量名和值
         
-        constDecls->emplace_back(kvPair);
-        free((yyvsp[-2].string));
-        (yyval.kv_pair_list) = constDecls;
+        constDecls->emplace_back(kvPair);  // 将键值对指针添加到向量中
+        free((yyvsp[-2].string));  // 释放标识符字符串（已复制到键值对中）
+        (yyval.kv_pair_list) = constDecls;  // 设置返回值为构建的常量声明列表
     }
-#line 2439 "yacc_pascal.cpp"
+#line 2462 "yacc_pascal.cpp"
     break;
 
   case 17: /* const_declaration: const_declaration ';' IDENTIFIER '=' const_value  */
-#line 678 "yacc_pascal.y"
-                                                        {
-        currentParserContext = ParserContext::ConstDeclaration;
-        (yyvsp[-4].kv_pair_list)->emplace_back(allocateNode<std::pair<std::string, ValueStmt *>>((yyvsp[-2].string), (yyvsp[0].value)));
+#line 793 "yacc_pascal.y"
+                                                        {  // 匹配 "已有声明; 标识符 = 常量值" 形式
+        currentParserContext = ParserContext::ConstDeclaration;  // 设置当前解析上下文
+        (yyvsp[-4].kv_pair_list)->emplace_back(allocateNode<std::pair<std::string, ValueStmt *>>((yyvsp[-2].string), (yyvsp[0].value)));  // 创建新键值对并添加到现有列表
         
-        free((yyvsp[-2].string));
-        (yyval.kv_pair_list) = (yyvsp[-4].kv_pair_list);
+        free((yyvsp[-2].string));  // 释放标识符字符串
+        (yyval.kv_pair_list) = (yyvsp[-4].kv_pair_list);  // 返回更新后的常量声明列表
     }
-#line 2451 "yacc_pascal.cpp"
+#line 2474 "yacc_pascal.cpp"
     break;
 
   case 18: /* const_declaration: error ';' IDENTIFIER '=' const_value  */
-#line 685 "yacc_pascal.y"
-                                            {
-        free((yyvsp[-2].string));
-        delete (yyvsp[0].value);
-        (yyval.kv_pair_list) = nullptr;
+#line 802 "yacc_pascal.y"
+                                            {  // 匹配 "[错误]; 标识符 = 常量值" 形式
+        free((yyvsp[-2].string));  // 释放标识符字符串
+        delete (yyvsp[0].value);  // 删除常量值对象
+        (yyval.kv_pair_list) = nullptr;  // 设置返回值为空指针，表示解析失败
         
-        GRAMMAR_ERROR("const_declaration -> error ';' IDENTIFIER = const_value");
-        yyerrok;
+        GRAMMAR_ERROR("const_declaration -> error ';' IDENTIFIER = const_value");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2464 "yacc_pascal.cpp"
+#line 2487 "yacc_pascal.cpp"
     break;
 
   case 19: /* const_value: INTEGER  */
-#line 697 "yacc_pascal.y"
-               {
-        (yyval.value) = ValueFactory::makeInteger((yyvsp[0].number));
+#line 816 "yacc_pascal.y"
+               {  // 匹配整数，如 "42"
+        (yyval.value) = ValueFactory::makeInteger((yyvsp[0].number));  // 使用工厂方法创建整数值对象
     }
-#line 2472 "yacc_pascal.cpp"
+#line 2495 "yacc_pascal.cpp"
     break;
 
   case 20: /* const_value: '+' INTEGER  */
-#line 700 "yacc_pascal.y"
-                   {
-        (yyval.value) = ValueFactory::makeInteger((yyvsp[0].number));
+#line 821 "yacc_pascal.y"
+                   {  // 匹配带正号的整数，如 "+42"
+        (yyval.value) = ValueFactory::makeInteger((yyvsp[0].number));  // 创建整数值对象（正号不改变值）
     }
-#line 2480 "yacc_pascal.cpp"
+#line 2503 "yacc_pascal.cpp"
     break;
 
   case 21: /* const_value: '-' INTEGER  */
-#line 703 "yacc_pascal.y"
-                   {
-        (yyval.value) = ValueFactory::makeInteger(-(yyvsp[0].number));
+#line 826 "yacc_pascal.y"
+                   {  // 匹配带负号的整数，如 "-42"
+        (yyval.value) = ValueFactory::makeInteger(-(yyvsp[0].number));  // 创建负整数值对象（对值取负）
     }
-#line 2488 "yacc_pascal.cpp"
+#line 2511 "yacc_pascal.cpp"
     break;
 
   case 22: /* const_value: REAL  */
-#line 706 "yacc_pascal.y"
-            {
-        (yyval.value) = ValueFactory::makeReal((yyvsp[0].real));
-        free((yyvsp[0].real));
+#line 831 "yacc_pascal.y"
+            {  // 匹配实数，如 "3.14159"
+        (yyval.value) = ValueFactory::makeReal((yyvsp[0].real));  // 创建实数值对象
+        free((yyvsp[0].real));  // 释放实数字符串（已在值对象中复制）
     }
-#line 2497 "yacc_pascal.cpp"
+#line 2520 "yacc_pascal.cpp"
     break;
 
   case 23: /* const_value: '+' REAL  */
-#line 710 "yacc_pascal.y"
-                {
-        (yyval.value) = ValueFactory::makeReal((yyvsp[0].real));
-        free((yyvsp[0].real));
+#line 837 "yacc_pascal.y"
+                {  // 匹配带正号的实数，如 "+3.14159"
+        (yyval.value) = ValueFactory::makeReal((yyvsp[0].real));  // 创建实数值对象（正号不改变值）
+        free((yyvsp[0].real));  // 释放实数字符串
     }
-#line 2506 "yacc_pascal.cpp"
+#line 2529 "yacc_pascal.cpp"
     break;
 
   case 24: /* const_value: '-' REAL  */
-#line 714 "yacc_pascal.y"
-                {
-        ValueStmt* value = ValueFactory::makeReal((yyvsp[0].real));
+#line 843 "yacc_pascal.y"
+                {  // 匹配带负号的实数，如 "-3.14159"
+        ValueStmt* value = ValueFactory::makeReal((yyvsp[0].real));  // 先创建实数值对象
         // 处理负号：将实数值设为负数
-        value->number->real_val *= -1;
+        value->number->real_val *= -1;  // 将实数值取负（直接修改对象中的值）
         
-        free((yyvsp[0].real));
-        (yyval.value) = value;
+        free((yyvsp[0].real));  // 释放实数字符串
+        (yyval.value) = value;  // 返回修改后的值对象
     }
-#line 2519 "yacc_pascal.cpp"
+#line 2542 "yacc_pascal.cpp"
     break;
 
   case 25: /* const_value: CHAR  */
-#line 722 "yacc_pascal.y"
-            {
-        (yyval.value) = ValueFactory::makeChar((yyvsp[0].charactor));
-        GRAMMAR_TRACE("const_value -> CHAR, value: %c");
+#line 853 "yacc_pascal.y"
+            {  // 匹配字符常量，如 "'A'"
+        (yyval.value) = ValueFactory::makeChar((yyvsp[0].charactor));  // 创建字符值对象
+        GRAMMAR_TRACE("const_value -> CHAR, value: %c");  // 记录语法跟踪日志（注意：缺少参数）
     }
-#line 2528 "yacc_pascal.cpp"
+#line 2551 "yacc_pascal.cpp"
     break;
 
   case 26: /* const_value: STRING  */
-#line 726 "yacc_pascal.y"
-              {
-        (yyval.value) = ValueFactory::makeString((yyvsp[0].string));
-        free((yyvsp[0].string));
+#line 859 "yacc_pascal.y"
+              {  // 匹配字符串常量，如 "'Hello'"
+        (yyval.value) = ValueFactory::makeString((yyvsp[0].string));  // 创建字符串值对象
+        free((yyvsp[0].string));  // 释放字符串（已在值对象中复制）
     }
-#line 2537 "yacc_pascal.cpp"
+#line 2560 "yacc_pascal.cpp"
     break;
 
   case 27: /* var_declarations: %empty  */
-#line 734 "yacc_pascal.y"
-                 {
-        (yyval.var_decls) = nullptr;
-        GRAMMAR_TRACE("var_declarations -> empty");
+#line 869 "yacc_pascal.y"
+                 {  // 当程序中没有变量声明时匹配此规则
+        (yyval.var_decls) = nullptr;  // 返回空指针，表示没有变量声明
+        GRAMMAR_TRACE("var_declarations -> empty");  // 记录语法跟踪日志
     }
-#line 2546 "yacc_pascal.cpp"
+#line 2569 "yacc_pascal.cpp"
     break;
 
   case 28: /* var_declarations: VAR var_declaration ';'  */
-#line 738 "yacc_pascal.y"
-                               {
-        currentParserContext = ParserContext::VarDeclarations;
-        (yyval.var_decls) = (yyvsp[-1].var_decls);
-        GRAMMAR_TRACE("var_declarations -> VAR var_declaration ';'");
+#line 875 "yacc_pascal.y"
+                               {  // 匹配 "var 变量声明列表;" 形式
+        currentParserContext = ParserContext::VarDeclarations;  // 设置当前解析上下文为变量声明
+        (yyval.var_decls) = (yyvsp[-1].var_decls);  // 直接返回var_declaration的结果（变量声明列表）
+        GRAMMAR_TRACE("var_declarations -> VAR var_declaration ';'");  // 记录语法跟踪日志
     }
-#line 2556 "yacc_pascal.cpp"
+#line 2579 "yacc_pascal.cpp"
     break;
 
   case 29: /* var_declarations: VAR error ';'  */
-#line 743 "yacc_pascal.y"
-                     {
-        (yyval.var_decls) = nullptr;
-        GRAMMAR_ERROR("var_declarations -> VAR error ;");
-        yyerrok;
+#line 882 "yacc_pascal.y"
+                     {  // 匹配 "var [错误] ;" 形式
+        (yyval.var_decls) = nullptr;  // 设置返回值为空指针，表示变量声明解析失败
+        GRAMMAR_ERROR("var_declarations -> VAR error ;");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2566 "yacc_pascal.cpp"
+#line 2589 "yacc_pascal.cpp"
     break;
 
   case 30: /* var_declaration: idlist ':' type  */
-#line 752 "yacc_pascal.y"
-                       {
-        currentParserContext = ParserContext::VarDeclaration;
-        auto varDecls = allocateNode<std::vector<VarDeclStmt *>>();
-        auto varDecl = allocateNode<VarDeclStmt>();
+#line 894 "yacc_pascal.y"
+                       {  // 匹配 "标识符列表 : 类型" 形式，如 "x, y : integer"
+        currentParserContext = ParserContext::VarDeclaration;  // 设置当前解析上下文为变量声明
+        auto varDecls = allocateNode<std::vector<VarDeclStmt *>>();  // 创建变量声明列表容器
+        auto varDecl = allocateNode<VarDeclStmt>();  // 创建单个变量声明对象
         
         // 将标识符列表中的所有标识符复制到变量声明中
-        varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());
+        varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());  // 添加所有标识符到变量声明对象
         
         // 处理类型信息
-        varDecl->basic_type = (yyvsp[0].var_decl)->basic_type;
-        varDecl->data_type = (yyvsp[0].var_decl)->data_type;
-        varDecl->array_range = std::move((yyvsp[0].var_decl)->array_range);
+        varDecl->basic_type = (yyvsp[0].var_decl)->basic_type;  // 复制基本类型（integer, real等）
+        varDecl->data_type = (yyvsp[0].var_decl)->data_type;    // 复制数据类型（基本类型、数组等）
+        varDecl->array_range = std::move((yyvsp[0].var_decl)->array_range);  // 移动数组范围信息（如果是数组类型）
         
-        delete (yyvsp[-2].id_list);
-        delete (yyvsp[0].var_decl);
-        varDecls->emplace_back(varDecl);
-        (yyval.var_decls) = varDecls;
+        delete (yyvsp[-2].id_list);  // 释放标识符列表
+        delete (yyvsp[0].var_decl);  // 释放类型对象
+        varDecls->emplace_back(varDecl);  // 将变量声明添加到列表中
+        (yyval.var_decls) = varDecls;  // 返回变量声明列表
         
-        GRAMMAR_TRACE("var_declaration -> idlist ':' type");
+        GRAMMAR_TRACE("var_declaration -> idlist ':' type");  // 记录语法跟踪日志
     }
-#line 2591 "yacc_pascal.cpp"
+#line 2614 "yacc_pascal.cpp"
     break;
 
   case 31: /* var_declaration: var_declaration ';' idlist ':' type  */
-#line 772 "yacc_pascal.y"
-                                           {
-        currentParserContext = ParserContext::VarDeclaration;
-        auto varDecl = allocateNode<VarDeclStmt>();
+#line 916 "yacc_pascal.y"
+                                           {  // 匹配 "已有声明; 标识符列表 : 类型" 形式
+        currentParserContext = ParserContext::VarDeclaration;  // 设置当前解析上下文
+        auto varDecl = allocateNode<VarDeclStmt>();  // 创建新的变量声明对象
         
         // 将标识符列表中的所有标识符复制到变量声明中
-        varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());
+        varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());  // 添加所有标识符到变量声明对象
         
         // 处理类型信息
-        varDecl->basic_type = (yyvsp[0].var_decl)->basic_type;
-        varDecl->data_type = (yyvsp[0].var_decl)->data_type;
-        varDecl->array_range = std::move((yyvsp[0].var_decl)->array_range);
+        varDecl->basic_type = (yyvsp[0].var_decl)->basic_type;  // 复制基本类型
+        varDecl->data_type = (yyvsp[0].var_decl)->data_type;    // 复制数据类型
+        varDecl->array_range = std::move((yyvsp[0].var_decl)->array_range);  // 移动数组范围信息
         
-        delete (yyvsp[-2].id_list);
-        delete (yyvsp[0].var_decl);
-        (yyvsp[-4].var_decls)->emplace_back(varDecl);
-        (yyval.var_decls) = (yyvsp[-4].var_decls);
+        delete (yyvsp[-2].id_list);  // 释放标识符列表
+        delete (yyvsp[0].var_decl);  // 释放类型对象
+        (yyvsp[-4].var_decls)->emplace_back(varDecl);  // 将新变量声明添加到已有列表中
+        (yyval.var_decls) = (yyvsp[-4].var_decls);  // 返回更新后的变量声明列表
         
-        GRAMMAR_TRACE("var_declaration -> var_declaration ';' idlist ':' type");
+        GRAMMAR_TRACE("var_declaration -> var_declaration ';' idlist ':' type");  // 记录语法跟踪日志
     }
-#line 2615 "yacc_pascal.cpp"
+#line 2638 "yacc_pascal.cpp"
     break;
 
   case 32: /* var_declaration: error ';' idlist ':' type  */
-#line 791 "yacc_pascal.y"
-                                 {
-        delete (yyvsp[-2].id_list);
-        delete (yyvsp[0].var_decl);
-        (yyval.var_decls) = nullptr;
+#line 937 "yacc_pascal.y"
+                                 {  // 匹配 "[错误]; 标识符列表 : 类型" 形式
+        delete (yyvsp[-2].id_list);  // 释放标识符列表
+        delete (yyvsp[0].var_decl);  // 释放类型对象
+        (yyval.var_decls) = nullptr;  // 设置返回值为空指针，表示解析失败
         
-        GRAMMAR_ERROR("var_declaration -> error ';' idlist ':' type");
-        yyerrok;
+        GRAMMAR_ERROR("var_declaration -> error ';' idlist ':' type");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2628 "yacc_pascal.cpp"
+#line 2651 "yacc_pascal.cpp"
     break;
 
   case 33: /* type: basic_type  */
-#line 803 "yacc_pascal.y"
-                  {
-        currentParserContext = ParserContext::Type;
-        auto typeStmt = allocateNode<VarDeclStmt>();
-        typeStmt->data_type = DataType::BasicType;
-        typeStmt->basic_type = (yyvsp[0].basic_type);
+#line 952 "yacc_pascal.y"
+                  {  // 匹配基本类型，如 "integer"、"real"、"boolean"、"char"
+        currentParserContext = ParserContext::Type;  // 设置当前解析上下文为类型
+        auto typeStmt = allocateNode<VarDeclStmt>();  // 创建变量声明对象用于存储类型信息
+        typeStmt->data_type = DataType::BasicType;  // 设置数据类型为基本类型
+        typeStmt->basic_type = (yyvsp[0].basic_type);  // 设置具体的基本类型（integer, real等）
         
-        (yyval.var_decl) = typeStmt;
-        GRAMMAR_TRACE("type -> basic_type");
+        (yyval.var_decl) = typeStmt;  // 返回创建的类型对象
+        GRAMMAR_TRACE("type -> basic_type");  // 记录语法跟踪日志
     }
-#line 2642 "yacc_pascal.cpp"
+#line 2665 "yacc_pascal.cpp"
     break;
 
   case 34: /* type: ARRAY '[' period_list ']' OF basic_type  */
-#line 812 "yacc_pascal.y"
-                                               {
-        currentParserContext = ParserContext::Type;
-        auto typeStmt = allocateNode<VarDeclStmt>();
-        typeStmt->data_type = DataType::ArrayType;
-        typeStmt->basic_type = (yyvsp[0].basic_type);
+#line 963 "yacc_pascal.y"
+                                               {  // 匹配 "array [范围列表] of 基本类型"
+        currentParserContext = ParserContext::Type;  // 设置当前解析上下文为类型
+        auto typeStmt = allocateNode<VarDeclStmt>();  // 创建变量声明对象用于存储类型信息
+        typeStmt->data_type = DataType::ArrayType;  // 设置数据类型为数组类型
+        typeStmt->basic_type = (yyvsp[0].basic_type);  // 设置数组元素的基本类型
         
         // 转移数组范围信息
-        for(auto period : *(yyvsp[-3].period_list)) {
-            typeStmt->array_range.emplace_back(std::unique_ptr<PeriodStmt>(period));
+        for(auto period : *(yyvsp[-3].period_list)) {  // 遍历范围列表
+            typeStmt->array_range.emplace_back(std::unique_ptr<PeriodStmt>(period));  // 将每个范围添加到数组范围容器
         }
         
-        delete (yyvsp[-3].period_list);
-        (yyval.var_decl) = typeStmt;
-        GRAMMAR_TRACE("type -> ARRAY '[' period_list ']' OF basic_type");
+        delete (yyvsp[-3].period_list);  // 释放原始范围列表容器
+        (yyval.var_decl) = typeStmt;  // 返回创建的类型对象
+        GRAMMAR_TRACE("type -> ARRAY '[' period_list ']' OF basic_type");  // 记录语法跟踪日志
     }
-#line 2662 "yacc_pascal.cpp"
+#line 2685 "yacc_pascal.cpp"
     break;
 
   case 35: /* basic_type: INTEGER_KW  */
-#line 831 "yacc_pascal.y"
-                  {
-        (yyval.basic_type) = BasicType::INT;
-        GRAMMAR_TRACE("basic_type -> INTEGER_KW");
+#line 984 "yacc_pascal.y"
+                  {  // 匹配 "integer" 关键字
+        (yyval.basic_type) = BasicType::INT;  // 返回整数类型枚举值
+        GRAMMAR_TRACE("basic_type -> INTEGER_KW");  // 记录语法跟踪日志
     }
-#line 2671 "yacc_pascal.cpp"
+#line 2694 "yacc_pascal.cpp"
     break;
 
   case 36: /* basic_type: REAL_KW  */
-#line 835 "yacc_pascal.y"
-               {
-        (yyval.basic_type) = BasicType::REAL;
-        GRAMMAR_TRACE("basic_type -> REAL_KW");
+#line 990 "yacc_pascal.y"
+               {  // 匹配 "real" 关键字
+        (yyval.basic_type) = BasicType::REAL;  // 返回实数类型枚举值
+        GRAMMAR_TRACE("basic_type -> REAL_KW");  // 记录语法跟踪日志
     }
-#line 2680 "yacc_pascal.cpp"
+#line 2703 "yacc_pascal.cpp"
     break;
 
   case 37: /* basic_type: BOOLEAN_KW  */
-#line 839 "yacc_pascal.y"
-                  {
-        (yyval.basic_type) = BasicType::BOOLEAN;
-        GRAMMAR_TRACE("basic_type -> BOOLEAN_KW");
+#line 996 "yacc_pascal.y"
+                  {  // 匹配 "boolean" 关键字
+        (yyval.basic_type) = BasicType::BOOLEAN;  // 返回布尔类型枚举值
+        GRAMMAR_TRACE("basic_type -> BOOLEAN_KW");  // 记录语法跟踪日志
     }
-#line 2689 "yacc_pascal.cpp"
+#line 2712 "yacc_pascal.cpp"
     break;
 
   case 38: /* basic_type: CHAR_KW  */
-#line 843 "yacc_pascal.y"
-               {
-        (yyval.basic_type) = BasicType::CHAR;
-        GRAMMAR_TRACE("basic_type -> CHAR_KW");
+#line 1002 "yacc_pascal.y"
+               {  // 匹配 "char" 关键字
+        (yyval.basic_type) = BasicType::CHAR;  // 返回字符类型枚举值
+        GRAMMAR_TRACE("basic_type -> CHAR_KW");  // 记录语法跟踪日志
     }
-#line 2698 "yacc_pascal.cpp"
+#line 2721 "yacc_pascal.cpp"
     break;
 
   case 39: /* period_list: INTEGER DOUBLE_DOT INTEGER  */
-#line 851 "yacc_pascal.y"
-                                  {
-        auto periodList = allocateNode<std::vector<PeriodStmt *>>();
-        auto period = allocateNode<PeriodStmt>();
+#line 1012 "yacc_pascal.y"
+                                  {  // 匹配 "整数 .. 整数" 形式，如 "1..10"
+        auto periodList = allocateNode<std::vector<PeriodStmt *>>();  // 创建范围列表容器
+        auto period = allocateNode<PeriodStmt>();  // 创建单个范围对象
         
-        period->begin = (yyvsp[-2].number);
-        period->end = (yyvsp[0].number);
-        periodList->emplace_back(period);
+        period->begin = (yyvsp[-2].number);  // 设置范围起始值
+        period->end = (yyvsp[0].number);    // 设置范围结束值
+        periodList->emplace_back(period);  // 将范围对象添加到列表中
         
-        (yyval.period_list) = periodList;
-        GRAMMAR_TRACE("period_list -> INTEGER '..' INTEGER");
+        (yyval.period_list) = periodList;  // 返回范围列表
+        GRAMMAR_TRACE("period_list -> INTEGER '..' INTEGER");  // 记录语法跟踪日志
     }
-#line 2714 "yacc_pascal.cpp"
+#line 2737 "yacc_pascal.cpp"
     break;
 
   case 40: /* period_list: period_list ',' INTEGER DOUBLE_DOT INTEGER  */
-#line 862 "yacc_pascal.y"
-                                                  {
-        auto period = allocateNode<PeriodStmt>();
-        period->begin = (yyvsp[-2].number);
-        period->end = (yyvsp[0].number);
+#line 1025 "yacc_pascal.y"
+                                                  {  // 匹配 "已有范围列表, 整数 .. 整数" 形式
+        auto period = allocateNode<PeriodStmt>();  // 创建新的范围对象
+        period->begin = (yyvsp[-2].number);  // 设置范围起始值
+        period->end = (yyvsp[0].number);    // 设置范围结束值
         
-        (yyvsp[-4].period_list)->emplace_back(period);
-        (yyval.period_list) = (yyvsp[-4].period_list);
+        (yyvsp[-4].period_list)->emplace_back(period);  // 将新范围对象添加到已有列表中
+        (yyval.period_list) = (yyvsp[-4].period_list);  // 返回更新后的范围列表
         
-        GRAMMAR_TRACE("period_list -> period_list ',' INTEGER '..' INTEGER");
+        GRAMMAR_TRACE("period_list -> period_list ',' INTEGER '..' INTEGER");  // 记录语法跟踪日志
     }
-#line 2729 "yacc_pascal.cpp"
+#line 2752 "yacc_pascal.cpp"
     break;
 
   case 41: /* subprogram_declarations: %empty  */
-#line 876 "yacc_pascal.y"
-                 {
-        (yyval.func_decl_list) = nullptr;
-        GRAMMAR_TRACE("subprogram_declarations -> empty");
+#line 1041 "yacc_pascal.y"
+                 {  // 当程序中没有子程序声明时匹配此规则
+        (yyval.func_decl_list) = nullptr;  // 返回空指针，表示没有子程序声明
+        GRAMMAR_TRACE("subprogram_declarations -> empty");  // 记录语法跟踪日志
     }
-#line 2738 "yacc_pascal.cpp"
+#line 2761 "yacc_pascal.cpp"
     break;
 
   case 42: /* subprogram_declarations: subprogram_declarations subprogram ';'  */
-#line 880 "yacc_pascal.y"
-                                              {
-        currentParserContext = ParserContext::SubprogramDeclarations;
+#line 1047 "yacc_pascal.y"
+                                              {  // 匹配递归的子程序声明列表
+        currentParserContext = ParserContext::SubprogramDeclarations;  // 设置当前解析上下文
         
-        if ((yyvsp[-2].func_decl_list) == nullptr) {
-            auto funcDeclList = allocateNode<std::vector<FuncDeclStmt *>>();
-            funcDeclList->emplace_back((yyvsp[-1].func_decl));    
-            (yyval.func_decl_list) = funcDeclList;
-        } else {
-            (yyvsp[-2].func_decl_list)->emplace_back((yyvsp[-1].func_decl));
-            (yyval.func_decl_list) = (yyvsp[-2].func_decl_list);
+        if ((yyvsp[-2].func_decl_list) == nullptr) {  // 如果这是第一个子程序声明
+            auto funcDeclList = allocateNode<std::vector<FuncDeclStmt *>>();  // 创建新的函数声明列表
+            funcDeclList->emplace_back((yyvsp[-1].func_decl));  // 添加新的子程序声明    
+            (yyval.func_decl_list) = funcDeclList;  // 返回新创建的列表
+        } else {  // 如果已经有子程序声明
+            (yyvsp[-2].func_decl_list)->emplace_back((yyvsp[-1].func_decl));  // 将新的子程序声明添加到已有列表
+            (yyval.func_decl_list) = (yyvsp[-2].func_decl_list);  // 返回更新后的列表
         }
         
-        GRAMMAR_TRACE("subprogram_declarations -> subprogram_declarations subprogram ';'");
+        GRAMMAR_TRACE("subprogram_declarations -> subprogram_declarations subprogram ';'");  // 记录语法跟踪日志
     }
-#line 2757 "yacc_pascal.cpp"
+#line 2780 "yacc_pascal.cpp"
     break;
 
   case 43: /* subprogram: subprogram_head ';' subprogram_body  */
-#line 898 "yacc_pascal.y"
-                                           {
-        currentParserContext = ParserContext::Subprogram;
-        auto subprogram = allocateNode<FuncDeclStmt>();
+#line 1067 "yacc_pascal.y"
+                                           {  // 匹配 "子程序头部; 子程序主体" 形式
+        currentParserContext = ParserContext::Subprogram;  // 设置当前解析上下文为子程序
+        auto subprogram = allocateNode<FuncDeclStmt>();  // 创建函数声明AST节点
         
-        subprogram->header = std::unique_ptr<FuncHeadDeclStmt>((yyvsp[-2].func_head));
-        subprogram->body = std::unique_ptr<FuncBodyDeclStmt>((yyvsp[0].func_body));
+        subprogram->header = std::unique_ptr<FuncHeadDeclStmt>((yyvsp[-2].func_head));  // 设置子程序头部，使用智能指针管理内存
+        subprogram->body = std::unique_ptr<FuncBodyDeclStmt>((yyvsp[0].func_body));  // 设置子程序主体，使用智能指针管理内存
         
-        (yyval.func_decl) = subprogram;
-        GRAMMAR_TRACE("subprogram -> subprogram_head ';' subprogram_body");
+        (yyval.func_decl) = subprogram;  // 返回创建的子程序声明节点
+        GRAMMAR_TRACE("subprogram -> subprogram_head ';' subprogram_body");  // 记录语法跟踪日志
     }
-#line 2772 "yacc_pascal.cpp"
+#line 2795 "yacc_pascal.cpp"
     break;
 
   case 44: /* subprogram_head: PROCEDURE IDENTIFIER formal_parameter  */
-#line 912 "yacc_pascal.y"
-                                             {
-        currentParserContext = ParserContext::SubprogramHead;
-        auto subHead = allocateNode<FuncHeadDeclStmt>();
+#line 1083 "yacc_pascal.y"
+                                             {  // 匹配 "procedure 名称 (参数列表)" 形式
+        currentParserContext = ParserContext::SubprogramHead;  // 设置当前解析上下文为子程序头部
+        auto subHead = allocateNode<FuncHeadDeclStmt>();  // 创建函数头部声明节点
         
-        subHead->func_name = std::string((yyvsp[-1].string));
-        subHead->ret_type = BasicType::VOID;
+        subHead->func_name = std::string((yyvsp[-1].string));  // 设置函数名称
+        subHead->ret_type = BasicType::VOID;  // 设置返回类型为VOID（表示过程）
         
         // 处理形式参数
-        if ((yyvsp[0].var_decls) != nullptr) {
-            for (auto formalParameter : *(yyvsp[0].var_decls)) {
-                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));
+        if ((yyvsp[0].var_decls) != nullptr) {  // 如果有参数列表
+            for (auto formalParameter : *(yyvsp[0].var_decls)) {  // 遍历参数列表
+                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));  // 将参数添加到函数头部
             }
-            delete (yyvsp[0].var_decls);
+            delete (yyvsp[0].var_decls);  // 释放原始参数列表容器
         }
         
-        (yyval.func_head) = subHead;
-        free((yyvsp[-1].string));
-        GRAMMAR_TRACE("subprogram_head -> PROGRAM IDENTIFIER formal_parameter");
+        (yyval.func_head) = subHead;  // 返回创建的函数头部节点
+        free((yyvsp[-1].string));  // 释放函数名称字符串
+        GRAMMAR_TRACE("subprogram_head -> PROCEDURE IDENTIFIER formal_parameter");  // 记录语法跟踪日志
     }
-#line 2796 "yacc_pascal.cpp"
+#line 2819 "yacc_pascal.cpp"
     break;
 
   case 45: /* subprogram_head: FUNCTION IDENTIFIER formal_parameter ':' basic_type  */
-#line 931 "yacc_pascal.y"
-                                                           {
-        currentParserContext = ParserContext::SubprogramHead;
-        auto subHead = allocateNode<FuncHeadDeclStmt>();
+#line 1104 "yacc_pascal.y"
+                                                           {  // 匹配 "function 名称 (参数列表) : 类型" 形式
+        currentParserContext = ParserContext::SubprogramHead;  // 设置当前解析上下文为子程序头部
+        auto subHead = allocateNode<FuncHeadDeclStmt>();  // 创建函数头部声明节点
         
-        subHead->func_name = std::string((yyvsp[-3].string));
-        subHead->ret_type = (yyvsp[0].basic_type);
+        subHead->func_name = std::string((yyvsp[-3].string));  // 设置函数名称
+        subHead->ret_type = (yyvsp[0].basic_type);  // 设置返回类型（由basic_type规则提供）
         
         // 处理形式参数
-        if ((yyvsp[-2].var_decls) != nullptr) {
-            for (auto formalParameter : *(yyvsp[-2].var_decls)) {
-                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));
+        if ((yyvsp[-2].var_decls) != nullptr) {  // 如果有参数列表
+            for (auto formalParameter : *(yyvsp[-2].var_decls)) {  // 遍历参数列表
+                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));  // 将参数添加到函数头部
             }
-            delete (yyvsp[-2].var_decls);
+            delete (yyvsp[-2].var_decls);  // 释放原始参数列表容器
         }
         
-        (yyval.func_head) = subHead;
-        free((yyvsp[-3].string));
-        GRAMMAR_TRACE("subprogram_head -> FUNCTION IDENTIFIER formal_parameter ':' basic_type");
+        (yyval.func_head) = subHead;  // 返回创建的函数头部节点
+        free((yyvsp[-3].string));  // 释放函数名称字符串
+        GRAMMAR_TRACE("subprogram_head -> FUNCTION IDENTIFIER formal_parameter ':' basic_type");  // 记录语法跟踪日志
     }
-#line 2820 "yacc_pascal.cpp"
+#line 2843 "yacc_pascal.cpp"
     break;
 
   case 46: /* subprogram_head: FUNCTION error  */
-#line 950 "yacc_pascal.y"
-                      {
-        (yyval.func_head) = nullptr;
-        GRAMMAR_ERROR("subprogram_head -> FUNCTION error");
-        yyerrok;
+#line 1125 "yacc_pascal.y"
+                      {  // 匹配 "function" 后跟语法错误
+        (yyval.func_head) = nullptr;  // 设置返回值为空指针，表示解析失败
+        GRAMMAR_ERROR("subprogram_head -> FUNCTION error");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2830 "yacc_pascal.cpp"
+#line 2853 "yacc_pascal.cpp"
     break;
 
   case 47: /* subprogram_head: PROCEDURE error  */
-#line 955 "yacc_pascal.y"
-                       {
-        (yyval.func_head) = nullptr;
-        GRAMMAR_ERROR("subprogram_head -> PROCEDURE error");
-        yyerrok;
+#line 1132 "yacc_pascal.y"
+                       {  // 匹配 "procedure" 后跟语法错误
+        (yyval.func_head) = nullptr;  // 设置返回值为空指针，表示解析失败
+        GRAMMAR_ERROR("subprogram_head -> PROCEDURE error");  // 记录语法错误日志
+        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2840 "yacc_pascal.cpp"
+#line 2863 "yacc_pascal.cpp"
     break;
 
   case 48: /* formal_parameter: %empty  */
-#line 964 "yacc_pascal.y"
-                   {
-        (yyval.var_decls) = nullptr;
-        GRAMMAR_TRACE("formal_parameter -> empty");
+#line 1143 "yacc_pascal.y"
+                   {  // 匹配空规则，表示没有参数
+        (yyval.var_decls) = nullptr;  // 返回空指针，表示没有参数列表
+        GRAMMAR_TRACE("formal_parameter -> empty");  // 记录语法跟踪日志
     }
-#line 2849 "yacc_pascal.cpp"
+#line 2872 "yacc_pascal.cpp"
     break;
 
   case 49: /* formal_parameter: '(' parameter_list ')'  */
-#line 968 "yacc_pascal.y"
-                              {
-        currentParserContext = ParserContext::FormalParameter;
-        (yyval.var_decls) = (yyvsp[-1].var_decls);
-        GRAMMAR_TRACE("formal_parameter -> '(' parameter_list ')'");
+#line 1149 "yacc_pascal.y"
+                              {  // 匹配 "(参数列表)" 形式
+        currentParserContext = ParserContext::FormalParameter;  // 设置当前解析上下文为形式参数
+        (yyval.var_decls) = (yyvsp[-1].var_decls);  // 直接返回parameter_list的结果
+        GRAMMAR_TRACE("formal_parameter -> '(' parameter_list ')'");  // 记录语法跟踪日志
     }
-#line 2859 "yacc_pascal.cpp"
+#line 2882 "yacc_pascal.cpp"
     break;
 
   case 50: /* parameter_list: %empty  */
-#line 977 "yacc_pascal.y"
-                   {
-        (yyval.var_decls) = nullptr;
-        GRAMMAR_TRACE("parameter_list -> empty");
-    }
-#line 2868 "yacc_pascal.cpp"
-    break;
-
-  case 51: /* parameter_list: parameter  */
-#line 981 "yacc_pascal.y"
-                 {
-        auto paramList = allocateNode<std::vector<VarDeclStmt *>>();
-        paramList->emplace_back((yyvsp[0].var_decl));
-        
-        (yyval.var_decls) = paramList;
-        GRAMMAR_TRACE("parameter_list -> parameter");
-    }
-#line 2880 "yacc_pascal.cpp"
-    break;
-
-  case 52: /* parameter_list: parameter_list ';' parameter  */
-#line 988 "yacc_pascal.y"
-                                    {
-        (yyvsp[-2].var_decls)->emplace_back((yyvsp[0].var_decl));
-        (yyval.var_decls) = (yyvsp[-2].var_decls);
-        
-        GRAMMAR_TRACE("parameter_list -> parameter_list ';' parameter");
+#line 1160 "yacc_pascal.y"
+                   {  // 匹配空规则，表示空的参数列表
+        (yyval.var_decls) = nullptr;  // 返回空指针，表示没有参数
+        GRAMMAR_TRACE("parameter_list -> empty");  // 记录语法跟踪日志
     }
 #line 2891 "yacc_pascal.cpp"
     break;
 
-  case 53: /* parameter: var_parameter  */
-#line 998 "yacc_pascal.y"
-                     {
-        (yyval.var_decl) = (yyvsp[0].var_decl);
-        (yyval.var_decl)->is_var = true;
+  case 51: /* parameter_list: parameter  */
+#line 1166 "yacc_pascal.y"
+                 {  // 匹配单个参数，如 "x: integer" 或 "var a: real"
+        auto paramList = allocateNode<std::vector<VarDeclStmt *>>();  // 创建参数列表容器
+        paramList->emplace_back((yyvsp[0].var_decl));  // 将参数添加到列表中
         
-        GRAMMAR_TRACE("parameter -> var_parameter");
+        (yyval.var_decls) = paramList;  // 返回参数列表
+        GRAMMAR_TRACE("parameter_list -> parameter");  // 记录语法跟踪日志
     }
-#line 2902 "yacc_pascal.cpp"
+#line 2903 "yacc_pascal.cpp"
+    break;
+
+  case 52: /* parameter_list: parameter_list ';' parameter  */
+#line 1175 "yacc_pascal.y"
+                                    {  // 匹配 "已有参数列表; 新参数" 形式
+        (yyvsp[-2].var_decls)->emplace_back((yyvsp[0].var_decl));  // 将新参数添加到已有列表中
+        (yyval.var_decls) = (yyvsp[-2].var_decls);  // 返回更新后的列表
+        
+        GRAMMAR_TRACE("parameter_list -> parameter_list ';' parameter");  // 记录语法跟踪日志
+    }
+#line 2914 "yacc_pascal.cpp"
+    break;
+
+  case 53: /* parameter: var_parameter  */
+#line 1186 "yacc_pascal.y"
+                     {// 匹配变量参数，如"var x: integer"
+        (yyval.var_decl) = (yyvsp[0].var_decl);// 将 var_parameter 的结果作为 parameter 的结果返回
+        (yyval.var_decl)->is_var = true;// 标记这是一个变量参数（即通过引用传递）
+        
+        GRAMMAR_TRACE("parameter -> var_parameter"); // 记录语法跟踪信息到日志
+    }
+#line 2925 "yacc_pascal.cpp"
     break;
 
   case 54: /* parameter: value_parameter  */
-#line 1004 "yacc_pascal.y"
-                       {
-        (yyval.var_decl) = (yyvsp[0].var_decl);
-        (yyval.var_decl)->is_var = false;
+#line 1193 "yacc_pascal.y"
+                       {// 匹配值参数，如"x: integer"
+        (yyval.var_decl) = (yyvsp[0].var_decl);// 将 value_parameter 的结果作为 parameter 的结果返回
+        (yyval.var_decl)->is_var = false;// 标记这是一个值参数（即通过值传递）
         
-        GRAMMAR_TRACE("parameter -> value_parameter");
+        GRAMMAR_TRACE("parameter -> value_parameter"); // 记录语法跟踪信息到日志
     }
-#line 2913 "yacc_pascal.cpp"
+#line 2936 "yacc_pascal.cpp"
     break;
 
   case 55: /* var_parameter: VAR value_parameter  */
-#line 1014 "yacc_pascal.y"
-                           {
-        (yyval.var_decl) = (yyvsp[0].var_decl);
-        GRAMMAR_TRACE("var_parameter -> VAR value_parameter");
+#line 1203 "yacc_pascal.y"
+                           {  // 匹配以VAR关键字开头的参数定义
+        (yyval.var_decl) = (yyvsp[0].var_decl);  // 将value_parameter创建的节点作为当前规则的结果
+        GRAMMAR_TRACE("var_parameter -> VAR value_parameter");  // 记录语法规则应用的跟踪日志
     }
-#line 2922 "yacc_pascal.cpp"
+#line 2945 "yacc_pascal.cpp"
     break;
 
   case 56: /* value_parameter: idlist ':' basic_type  */
-#line 1022 "yacc_pascal.y"
-                             {
-        auto varDecl = allocateNode<VarDeclStmt>();
+#line 1211 "yacc_pascal.y"
+                             {  // 匹配"标识符列表:类型"形式的参数定义
+        auto varDecl = allocateNode<VarDeclStmt>();  // 创建新的变量声明节点
         
-        varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());
-        varDecl->data_type = DataType::BasicType;
-        varDecl->basic_type = (yyvsp[0].basic_type);
-        varDecl->is_var = false;
+        varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());  // 将标识符列表中的所有标识符添加到变量声明中
+        varDecl->data_type = DataType::BasicType;  // 设置数据类型为基本类型
+        varDecl->basic_type = (yyvsp[0].basic_type);  // 设置具体的基本类型（integer、real等）
+        varDecl->is_var = false;  // 初始设置为值参数（非var参数）
         
-        delete (yyvsp[-2].id_list);
-        (yyval.var_decl) = varDecl;
+        delete (yyvsp[-2].id_list);  // 释放标识符列表的内存（已复制到变量声明节点）
+        (yyval.var_decl) = varDecl;  // 返回创建的变量声明节点
         
-        GRAMMAR_TRACE("value_parameter -> idlist ':' basic_type");
+        GRAMMAR_TRACE("value_parameter -> idlist ':' basic_type");  // 记录语法规则应用的跟踪日志
     }
-#line 2940 "yacc_pascal.cpp"
+#line 2963 "yacc_pascal.cpp"
     break;
 
   case 57: /* subprogram_body: const_declarations var_declarations compound_statement  */
-#line 1039 "yacc_pascal.y"
-                                                              {
-        currentParserContext = ParserContext::SubprogramBody;
-        auto funcBody = allocateNode<FuncBodyDeclStmt>();
-        
-        // 处理常量声明
-        if ((yyvsp[-2].const_decls) != nullptr) {
-            funcBody->const_decl = std::unique_ptr<ConstDeclStmt>((yyvsp[-2].const_decls));
-        }
-        
-        // 处理变量声明
-        if ((yyvsp[-1].var_decls) != nullptr) {
-            for (auto varDecl : *(yyvsp[-1].var_decls)) {
-                funcBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));
-            }
-            delete (yyvsp[-1].var_decls);
-        }
-        
-        // 处理复合语句
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            for (auto stmt : *(yyvsp[0].stmt_list)) {
-                funcBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
-            }
-            delete (yyvsp[0].stmt_list);
-        }
-        
-        (yyval.func_body) = funcBody;
-        GRAMMAR_TRACE("subprogram_body -> const_declarations var_declarations compound_statement");
-    }
-#line 2973 "yacc_pascal.cpp"
+#line 1229 "yacc_pascal.y"
+                                                             {  // 匹配常量声明、变量声明和复合语句组成的子程序体
+       currentParserContext = ParserContext::SubprogramBody;  // 设置当前解析上下文为子程序体
+       auto funcBody = allocateNode<FuncBodyDeclStmt>();  // 创建函数体声明节点
+       
+       // 处理常量声明
+       if ((yyvsp[-2].const_decls) != nullptr) {  // 如果存在常量声明部分
+           funcBody->const_decl = std::unique_ptr<ConstDeclStmt>((yyvsp[-2].const_decls));  // 将常量声明添加到函数体，使用智能指针管理内存
+       }
+       
+       // 处理变量声明
+       if ((yyvsp[-1].var_decls) != nullptr) {  // 如果存在变量声明部分
+           for (auto varDecl : *(yyvsp[-1].var_decls)) {  // 遍历所有变量声明
+               funcBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));  // 将每个变量声明添加到函数体
+           }
+           delete (yyvsp[-1].var_decls);  // 释放变量声明列表容器（内容已转移到函数体节点中）
+       }
+       
+       // 处理复合语句
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果存在复合语句部分
+           for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历所有语句
+               funcBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到函数体
+           }
+           delete (yyvsp[0].stmt_list);  // 释放语句列表容器（内容已转移到函数体节点中）
+       }
+       
+       (yyval.func_body) = funcBody;  // 返回构建完成的函数体节点
+       GRAMMAR_TRACE("subprogram_body -> const_declarations var_declarations compound_statement");  // 记录语法解析跟踪信息
+   }
+#line 2996 "yacc_pascal.cpp"
     break;
 
   case 58: /* compound_statement: BEGIN_TOKEN statement_list END  */
-#line 1071 "yacc_pascal.y"
-                                      {
-        currentParserContext = ParserContext::CompoundStatement;
-        (yyval.stmt_list) = (yyvsp[-1].stmt_list);
-        
-        GRAMMAR_TRACE("compound_statement -> BEGIN_TOKEN statement_list END");
-    }
-#line 2984 "yacc_pascal.cpp"
+#line 1261 "yacc_pascal.y"
+                                     {  // 匹配"BEGIN 语句列表 END"形式的语法结构
+       currentParserContext = ParserContext::CompoundStatement;  // 设置当前解析上下文为复合语句
+       (yyval.stmt_list) = (yyvsp[-1].stmt_list);  // 直接使用statement_list返回的语句列表作为复合语句的结果
+                 // 这里没有创建新的AST节点，而是复用了语句列表节点
+       
+       GRAMMAR_TRACE("compound_statement -> BEGIN_TOKEN statement_list END");  // 记录语法解析跟踪信息
+   }
+#line 3008 "yacc_pascal.cpp"
     break;
 
   case 59: /* statement_list: statement  */
-#line 1081 "yacc_pascal.y"
-                 {
-        (yyval.stmt_list) = (yyvsp[0].stmt_list);
-        GRAMMAR_TRACE("statement_list -> statement");
-    }
-#line 2993 "yacc_pascal.cpp"
+#line 1274 "yacc_pascal.y"
+                {  // 匹配单个语句
+       (yyval.stmt_list) = (yyvsp[0].stmt_list);  // 直接返回statement规则的结果作为语句列表
+                 // 如果statement返回nullptr（空语句），则语句列表也为空
+       GRAMMAR_TRACE("statement_list -> statement");  // 记录语法解析跟踪信息
+   }
+#line 3018 "yacc_pascal.cpp"
     break;
 
   case 60: /* statement_list: statement_list ';' statement  */
-#line 1085 "yacc_pascal.y"
-                                    {
-        currentParserContext = ParserContext::StatementList;
-        
-        // 如果有语句要添加，则处理
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            // 将第三个参数中的语句添加到结果列表中
-            if ((yyvsp[-2].stmt_list) != nullptr) {
-                for (auto stmt : *(yyvsp[0].stmt_list)) {
-                    (yyvsp[-2].stmt_list)->emplace_back(stmt);
-                }
-            } else {
-                // 如果结果列表为空，则直接使用第三个参数
-                (yyvsp[-2].stmt_list) = (yyvsp[0].stmt_list); 
-                (yyvsp[0].stmt_list) = nullptr; // 避免被删除
-            }
-        }
-        
-        (yyval.stmt_list) = (yyvsp[-2].stmt_list);
-        delete (yyvsp[0].stmt_list); // 如果$3已经被处理过，这里实际上删除的是nullptr
-        
-        GRAMMAR_TRACE("statement_list -> statement_list ';' statement");
-    }
-#line 3020 "yacc_pascal.cpp"
+#line 1281 "yacc_pascal.y"
+                                   {  // 匹配"已有语句列表;新语句"形式
+       currentParserContext = ParserContext::StatementList;  // 设置当前解析上下文为语句列表
+       
+       // 如果有语句要添加，则处理
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果新语句不为空
+           // 将第三个参数中的语句添加到结果列表中
+           if ((yyvsp[-2].stmt_list) != nullptr) {  // 如果原有语句列表不为空
+               for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历新语句列表中的所有语句
+                   (yyvsp[-2].stmt_list)->emplace_back(stmt);  // 将新语句添加到原有列表末尾
+               }
+           } else {  // 如果原有语句列表为空
+               // 如果结果列表为空，则直接使用第三个参数
+               (yyvsp[-2].stmt_list) = (yyvsp[0].stmt_list);  // 使用新语句列表作为结果
+               (yyvsp[0].stmt_list) = nullptr;  // 避免新语句列表被删除，因为它现在是结果
+           }
+       }
+       
+       (yyval.stmt_list) = (yyvsp[-2].stmt_list);  // 返回更新后的语句列表
+       delete (yyvsp[0].stmt_list);  // 如果$3已经被处理过，这里实际上删除的是nullptr
+       
+       GRAMMAR_TRACE("statement_list -> statement_list ';' statement");  // 记录语法解析跟踪信息
+   }
+#line 3045 "yacc_pascal.cpp"
     break;
 
   case 61: /* statement_list: error ';' statement  */
-#line 1107 "yacc_pascal.y"
-                           {
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            for (auto item : *(yyvsp[0].stmt_list)) {
-                delete item;
-            }
-            delete (yyvsp[0].stmt_list);
-        }
-        
-        (yyval.stmt_list) = nullptr;
-        GRAMMAR_ERROR("statement_list -> error ';' statement");
-        yyerrok;
-    }
-#line 3037 "yacc_pascal.cpp"
+#line 1305 "yacc_pascal.y"
+                          {  // 匹配"[错误];语句"形式
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果后面的语句不为空
+           for (auto item : *(yyvsp[0].stmt_list)) {  // 遍历语句列表中的所有语句
+               delete item;  // 删除每个语句节点
+           }
+           delete (yyvsp[0].stmt_list);  // 删除语句列表容器
+       }
+       
+       (yyval.stmt_list) = nullptr;  // 返回空指针，表示语法错误导致解析失败
+       GRAMMAR_ERROR("statement_list -> error ';' statement");  // 记录语法错误信息
+       yyerrok;  // 告诉Bison错误已恢复，可以继续解析
+   }
+#line 3062 "yacc_pascal.cpp"
     break;
 
   case 62: /* statement_list: statement_list ';' error  */
-#line 1119 "yacc_pascal.y"
-                                {
-        if ((yyvsp[-2].stmt_list) != nullptr) {
-            for (auto item : *(yyvsp[-2].stmt_list)) {
-                delete item;
-            }
-            delete (yyvsp[-2].stmt_list);
-        }
-        
-        (yyval.stmt_list) = nullptr;
-        GRAMMAR_ERROR("statement_list -> statement_list ';' error");
-        yyerrok;
-    }
-#line 3054 "yacc_pascal.cpp"
+#line 1319 "yacc_pascal.y"
+                               {  // 匹配"语句列表;[错误]"形式
+       if ((yyvsp[-2].stmt_list) != nullptr) {  // 如果前面的语句列表不为空
+           for (auto item : *(yyvsp[-2].stmt_list)) {  // 遍历语句列表中的所有语句
+               delete item;  // 删除每个语句节点
+           }
+           delete (yyvsp[-2].stmt_list);  // 删除语句列表容器
+       }
+       
+       (yyval.stmt_list) = nullptr;  // 返回空指针，表示语法错误导致解析失败
+       GRAMMAR_ERROR("statement_list -> statement_list ';' error");  // 记录语法错误信息
+       yyerrok;  // 告诉Bison错误已恢复，可以继续解析
+   }
+#line 3079 "yacc_pascal.cpp"
     break;
 
   case 63: /* statement: %empty  */
-#line 1135 "yacc_pascal.y"
-                 {
-        (yyval.stmt_list) = nullptr;
-        GRAMMAR_TRACE("statement -> empty");
-    }
-#line 3063 "yacc_pascal.cpp"
+#line 1338 "yacc_pascal.y"
+                {  // 匹配空语句，如连续两个分号之间没有代码
+       (yyval.stmt_list) = nullptr;  // 返回空指针表示没有语句
+       GRAMMAR_TRACE("statement -> empty");  // 记录语法解析跟踪信息
+   }
+#line 3088 "yacc_pascal.cpp"
     break;
 
   case 64: /* statement: variable ASSIGNOP expression  */
-#line 1139 "yacc_pascal.y"
-                                    {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto assignStmt = allocateNode<AssignStmt>();
-        
-        assignStmt->lval = std::unique_ptr<LValStmt>((yyvsp[-2].lval));
-        assignStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[0].expr));
-        
-        stmtList->emplace_back(assignStmt);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> variable ASSIGNOP expression");
-    }
-#line 3080 "yacc_pascal.cpp"
+#line 1344 "yacc_pascal.y"
+                                   {  // 匹配"变量 := 表达式"形式，如"x := y + 1"
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto assignStmt = allocateNode<AssignStmt>();  // 创建赋值语句节点
+       
+       assignStmt->lval = std::unique_ptr<LValStmt>((yyvsp[-2].lval));  // 设置左值（赋值目标）
+       assignStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[0].expr));  // 设置右值表达式
+       
+       stmtList->emplace_back(assignStmt);  // 将赋值语句添加到语句列表
+       (yyval.stmt_list) = stmtList;  // 返回包含赋值语句的列表
+       
+       GRAMMAR_TRACE("statement -> variable ASSIGNOP expression");  // 记录语法解析跟踪信息
+   }
+#line 3105 "yacc_pascal.cpp"
     break;
 
   case 65: /* statement: procedure_call  */
-#line 1151 "yacc_pascal.y"
-                      {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        stmtList->emplace_back((yyvsp[0].func_call_stmt));
-        
-        (yyval.stmt_list) = stmtList;
-        GRAMMAR_TRACE("statement -> procedure_call");
-    }
-#line 3092 "yacc_pascal.cpp"
+#line 1358 "yacc_pascal.y"
+                     {  // 匹配过程调用，如"WriteLn(x)"
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       stmtList->emplace_back((yyvsp[0].func_call_stmt));  // 将过程调用添加到语句列表
+       
+       (yyval.stmt_list) = stmtList;  // 返回包含过程调用的列表
+       GRAMMAR_TRACE("statement -> procedure_call");  // 记录语法解析跟踪信息
+   }
+#line 3117 "yacc_pascal.cpp"
     break;
 
   case 66: /* statement: compound_statement  */
-#line 1158 "yacc_pascal.y"
-                          {
-        (yyval.stmt_list) = (yyvsp[0].stmt_list);
-        GRAMMAR_TRACE("statement -> compound_statement");
-    }
-#line 3101 "yacc_pascal.cpp"
+#line 1367 "yacc_pascal.y"
+                         {  // 匹配begin-end块，如"begin x:=1; y:=2 end"
+       (yyval.stmt_list) = (yyvsp[0].stmt_list);  // 直接返回复合语句规则的结果
+       GRAMMAR_TRACE("statement -> compound_statement");  // 记录语法解析跟踪信息
+   }
+#line 3126 "yacc_pascal.cpp"
     break;
 
   case 67: /* statement: WHILE expression DO statement  */
-#line 1162 "yacc_pascal.y"
-                                     {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto whileStmt = allocateNode<WhileStmt>();
-        
-        whileStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));
-        
-        // 处理循环体语句
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            for (auto stmt : *(yyvsp[0].stmt_list)) {
-                whileStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
-            }
-            delete (yyvsp[0].stmt_list);
-        }
-        
-        stmtList->emplace_back(whileStmt);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> WHILE expression DO statement");
-    }
-#line 3125 "yacc_pascal.cpp"
+#line 1373 "yacc_pascal.y"
+                                    {  // 匹配"while 条件表达式 do 循环体"形式
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto whileStmt = allocateNode<WhileStmt>();  // 创建while语句节点
+       
+       whileStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));  // 设置循环条件表达式
+       
+       // 处理循环体语句
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果循环体不为空
+           for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历循环体中的所有语句
+               whileStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到while语句的循环体
+           }
+           delete (yyvsp[0].stmt_list);  // 释放语句列表容器（内容已转移）
+       }
+       
+       stmtList->emplace_back(whileStmt);  // 将while语句添加到语句列表
+       (yyval.stmt_list) = stmtList;  // 返回包含while语句的列表
+       
+       GRAMMAR_TRACE("statement -> WHILE expression DO statement");  // 记录语法解析跟踪信息
+   }
+#line 3150 "yacc_pascal.cpp"
     break;
 
   case 68: /* statement: IF expression THEN statement  */
-#line 1181 "yacc_pascal.y"
-                                               {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto ifStmt = allocateNode<IfStmt>();
-        
-        ifStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));
-        
-        // 处理if条件为真时的语句
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            for (auto stmt : *(yyvsp[0].stmt_list)) {
-                ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
-            }
-        }
-        
-        delete (yyvsp[0].stmt_list);
-        stmtList->emplace_back(ifStmt);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> IF expression THEN statement");
-    }
-#line 3149 "yacc_pascal.cpp"
+#line 1394 "yacc_pascal.y"
+                                              {  // 匹配"if 条件 then 语句"形式
+                                                 // %prec THEN 指定规则6的优先级等于THEN终结符的优先级，用于解决else悬挂问题
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
+       
+       ifStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));  // 设置条件表达式
+       
+       // 处理if条件为真时的语句
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果then分支不为空
+           for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历then分支中的所有语句
+               ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
+           }
+       }
+       
+       delete (yyvsp[0].stmt_list);  // 释放语句列表容器（内容已转移）
+       stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
+       (yyval.stmt_list) = stmtList;  // 返回包含if语句的列表
+       
+       GRAMMAR_TRACE("statement -> IF expression THEN statement");  // 记录语法解析跟踪信息
+   }
+#line 3175 "yacc_pascal.cpp"
     break;
 
   case 69: /* statement: IF expression THEN statement ELSE statement  */
-#line 1200 "yacc_pascal.y"
-                                                   {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto ifStmt = allocateNode<IfStmt>();
-        
-        ifStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-4].expr));
-        
-        // 处理if条件为真时的语句
-        if ((yyvsp[-2].stmt_list) != nullptr) {
-            for (auto stmt : *(yyvsp[-2].stmt_list)) {
-                ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
-            }
-        }
-        
-        // 处理if条件为假时的语句
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            for (auto stmt : *(yyvsp[0].stmt_list)) {
-                ifStmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
-            }
-        }
-        
-        stmtList->emplace_back(ifStmt);
-        delete (yyvsp[-2].stmt_list);
-        delete (yyvsp[0].stmt_list);
-        
-        (yyval.stmt_list) = stmtList;
-        GRAMMAR_TRACE("statement -> IF expression THEN statement ELSE statement");
-    }
-#line 3181 "yacc_pascal.cpp"
+#line 1416 "yacc_pascal.y"
+                                                  {  // 匹配"if 条件 then 语句1 else 语句2"形式
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
+       
+       ifStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-4].expr));  // 设置条件表达式
+       
+       // 处理if条件为真时的语句
+       if ((yyvsp[-2].stmt_list) != nullptr) {  // 如果then分支不为空
+           for (auto stmt : *(yyvsp[-2].stmt_list)) {  // 遍历then分支中的所有语句
+               ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
+           }
+       }
+       
+       // 处理if条件为假时的语句
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果else分支不为空
+           for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历else分支中的所有语句
+               ifStmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的false分支
+           }
+       }
+       
+       stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
+       delete (yyvsp[-2].stmt_list);  // 释放then分支语句列表容器（内容已转移）
+       delete (yyvsp[0].stmt_list);  // 释放else分支语句列表容器（内容已转移）
+       
+       (yyval.stmt_list) = stmtList;  // 返回包含if-else语句的列表
+       GRAMMAR_TRACE("statement -> IF expression THEN statement ELSE statement");  // 记录语法解析跟踪信息
+   }
+#line 3207 "yacc_pascal.cpp"
     break;
 
   case 70: /* statement: FOR IDENTIFIER ASSIGNOP expression TO expression DO statement  */
-#line 1227 "yacc_pascal.y"
-                                                                     {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto forStmt = allocateNode<ForStmt>();
-        
-        forStmt->id = std::string((yyvsp[-6].string));
-        forStmt->begin = std::unique_ptr<ExprStmt>((yyvsp[-4].expr));
-        forStmt->end = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));
-        
-        // 处理循环体语句
-        if ((yyvsp[0].stmt_list) != nullptr) {
-            for (auto stmt : *(yyvsp[0].stmt_list)) {
-                forStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
-            }
-        }
-        
-        stmtList->emplace_back(forStmt);
-        free((yyvsp[-6].string));
-        delete (yyvsp[0].stmt_list);
-        
-        (yyval.stmt_list) = stmtList;
-        GRAMMAR_TRACE("statement -> FOR IDENTIFIER ASSIGNOP expression TO expression DO statement");
-    }
-#line 3208 "yacc_pascal.cpp"
+#line 1445 "yacc_pascal.y"
+                                                                    {  // 匹配"for 变量:=初值 to 终值 do 循环体"形式
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto forStmt = allocateNode<ForStmt>();  // 创建for语句节点
+       
+       forStmt->id = std::string((yyvsp[-6].string));  // 设置循环变量名
+       forStmt->begin = std::unique_ptr<ExprStmt>((yyvsp[-4].expr));  // 设置循环初始值表达式
+       forStmt->end = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));  // 设置循环终止值表达式
+       
+       // 处理循环体语句
+       if ((yyvsp[0].stmt_list) != nullptr) {  // 如果循环体不为空
+           for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历循环体中的所有语句
+               forStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到for语句的循环体
+           }
+       }
+       
+       stmtList->emplace_back(forStmt);  // 将for语句添加到语句列表
+       free((yyvsp[-6].string));  // 释放循环变量名字符串
+       delete (yyvsp[0].stmt_list);  // 释放循环体语句列表容器（内容已转移）
+       
+       (yyval.stmt_list) = stmtList;  // 返回包含for语句的列表
+       GRAMMAR_TRACE("statement -> FOR IDENTIFIER ASSIGNOP expression TO expression DO statement");  // 记录语法解析跟踪信息
+   }
+#line 3234 "yacc_pascal.cpp"
     break;
 
   case 71: /* statement: READ '(' variable_list ')'  */
-#line 1249 "yacc_pascal.y"
-                                  {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto readStmt = allocateNode<ReadFuncStmt>();
-        
-        // 处理变量列表
-        for (auto lval : *(yyvsp[-1].lval_list)) {
-            readStmt->lval.emplace_back(std::unique_ptr<LValStmt>(lval));
-        }
-        
-        delete (yyvsp[-1].lval_list);
-        stmtList->emplace_back(readStmt);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> READ '(' variable_list ')'");
-    }
-#line 3228 "yacc_pascal.cpp"
+#line 1469 "yacc_pascal.y"
+                                 {  // 匹配"read(变量列表)"形式，如"read(x, y, z)"
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto readStmt = allocateNode<ReadFuncStmt>();  // 创建读取语句节点
+       
+       // 处理变量列表
+       for (auto lval : *(yyvsp[-1].lval_list)) {  // 遍历变量列表中的所有变量
+           readStmt->lval.emplace_back(std::unique_ptr<LValStmt>(lval));  // 将每个变量添加到读取语句的变量列表
+       }
+       
+       delete (yyvsp[-1].lval_list);  // 释放变量列表容器（内容已转移）
+       stmtList->emplace_back(readStmt);  // 将读取语句添加到语句列表
+       (yyval.stmt_list) = stmtList;  // 返回包含读取语句的列表
+       
+       GRAMMAR_TRACE("statement -> READ '(' variable_list ')'");  // 记录语法解析跟踪信息
+   }
+#line 3254 "yacc_pascal.cpp"
     break;
 
   case 72: /* statement: WRITE '(' expression_list ')'  */
-#line 1264 "yacc_pascal.y"
-                                     {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto writeStmt = allocateNode<WriteFuncStmt>();
-        
-        // 处理表达式列表
-        if ((yyvsp[-1].expr_list) != nullptr) {
-            for (auto expr : *(yyvsp[-1].expr_list)) {
-                writeStmt->expr.emplace_back(std::unique_ptr<ExprStmt>(expr));
-            }
-        }
-        
-        stmtList->emplace_back(writeStmt);
-        delete (yyvsp[-1].expr_list);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> WRITE '(' expression_list ')'");
-    }
-#line 3250 "yacc_pascal.cpp"
+#line 1486 "yacc_pascal.y"
+                                    {  // 匹配"write(表达式列表)"形式，如"write(x+y, 'hello')"
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto writeStmt = allocateNode<WriteFuncStmt>();  // 创建写入语句节点
+       
+       // 处理表达式列表
+       if ((yyvsp[-1].expr_list) != nullptr) {  // 如果表达式列表不为空
+           for (auto expr : *(yyvsp[-1].expr_list)) {  // 遍历表达式列表中的所有表达式
+               writeStmt->expr.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个表达式添加到写入语句的表达式列表
+           }
+       }
+       
+       stmtList->emplace_back(writeStmt);  // 将写入语句添加到语句列表
+       delete (yyvsp[-1].expr_list);  // 释放表达式列表容器（内容已转移）
+       (yyval.stmt_list) = stmtList;  // 返回包含写入语句的列表
+       
+       GRAMMAR_TRACE("statement -> WRITE '(' expression_list ')'");  // 记录语法解析跟踪信息
+   }
+#line 3276 "yacc_pascal.cpp"
     break;
 
   case 73: /* statement: BREAK  */
-#line 1281 "yacc_pascal.y"
-             {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto breakStmt = allocateNode<BreakStmt>();
-        
-        stmtList->emplace_back(breakStmt);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> BREAK");
-    }
-#line 3264 "yacc_pascal.cpp"
+#line 1505 "yacc_pascal.y"
+            {  // 匹配break关键字
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto breakStmt = allocateNode<BreakStmt>();  // 创建break语句节点
+       
+       stmtList->emplace_back(breakStmt);  // 将break语句添加到语句列表
+       (yyval.stmt_list) = stmtList;  // 返回包含break语句的列表
+       
+       GRAMMAR_TRACE("statement -> BREAK");  // 记录语法解析跟踪信息
+   }
+#line 3290 "yacc_pascal.cpp"
     break;
 
   case 74: /* statement: CONTINUE  */
-#line 1290 "yacc_pascal.y"
-                {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();
-        auto continueStmt = allocateNode<ContinueStmt>();
-        
-        stmtList->emplace_back(continueStmt);
-        (yyval.stmt_list) = stmtList;
-        
-        GRAMMAR_TRACE("statement -> CONTINUE");
-    }
-#line 3278 "yacc_pascal.cpp"
+#line 1516 "yacc_pascal.y"
+               {  // 匹配continue关键字
+       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto continueStmt = allocateNode<ContinueStmt>();  // 创建continue语句节点
+       
+       stmtList->emplace_back(continueStmt);  // 将continue语句添加到语句列表
+       (yyval.stmt_list) = stmtList;  // 返回包含continue语句的列表
+       
+       GRAMMAR_TRACE("statement -> CONTINUE");  // 记录语法解析跟踪信息
+   }
+#line 3304 "yacc_pascal.cpp"
     break;
 
   case 75: /* variable_list: variable  */
-#line 1303 "yacc_pascal.y"
-                {
-        currentParserContext = ParserContext::VariableList;
-        auto lvalList = allocateNode<std::vector<LValStmt *>>();
-        
-        lvalList->emplace_back((yyvsp[0].lval));
-        (yyval.lval_list) = lvalList;
-        
-        GRAMMAR_TRACE("variable_list -> variable");
-    }
-#line 3292 "yacc_pascal.cpp"
+#line 1531 "yacc_pascal.y"
+               {  // 匹配单个变量引用，如"x"或"arr[i]"
+       currentParserContext = ParserContext::VariableList;  // 设置当前解析上下文为变量列表
+       auto lvalList = allocateNode<std::vector<LValStmt *>>();  // 创建左值列表容器，变量列表中的元素必须是可赋值的目标（左值）
+       
+       lvalList->emplace_back((yyvsp[0].lval));  // 将变量添加到左值列表中
+       (yyval.lval_list) = lvalList;  // 返回包含单个变量的左值列表
+       
+       GRAMMAR_TRACE("variable_list -> variable");  // 记录语法解析跟踪信息
+   }
+#line 3318 "yacc_pascal.cpp"
     break;
 
   case 76: /* variable_list: variable_list ',' variable  */
-#line 1312 "yacc_pascal.y"
-                                  {
-        currentParserContext = ParserContext::VariableList;
-        
-        if ((yyvsp[0].lval) != nullptr) {
-            (yyvsp[-2].lval_list)->emplace_back((yyvsp[0].lval));
-        } else {
-            auto lvalList = allocateNode<std::vector<LValStmt *>>();
-            lvalList->emplace_back((yyvsp[0].lval));
-            (yyvsp[-2].lval_list) = lvalList;
-        }
-        
-        (yyval.lval_list) = (yyvsp[-2].lval_list);
-        GRAMMAR_TRACE("variable_list -> variable_list ',' variable");
-    }
-#line 3311 "yacc_pascal.cpp"
+#line 1542 "yacc_pascal.y"
+                                 {  // 匹配"已有变量列表,新变量"形式，如"x, y, z"
+       currentParserContext = ParserContext::VariableList;  // 设置当前解析上下文为变量列表
+       
+       if ((yyvsp[0].lval) != nullptr) {  // 如果新变量不为空
+           (yyvsp[-2].lval_list)->emplace_back((yyvsp[0].lval));  // 将新变量添加到已有列表末尾
+       } 
+       
+       (yyval.lval_list) = (yyvsp[-2].lval_list);  // 返回更新后的变量列表
+       GRAMMAR_TRACE("variable_list -> variable_list ',' variable");  // 记录语法解析跟踪信息
+   }
+#line 3333 "yacc_pascal.cpp"
     break;
 
   case 77: /* variable_list: error ',' variable  */
-#line 1326 "yacc_pascal.y"
-                          {
-        delete (yyvsp[0].lval);
-        (yyval.lval_list) = nullptr;
-        
-        GRAMMAR_ERROR("variable_list -> error ',' variable");
-    }
-#line 3322 "yacc_pascal.cpp"
+#line 1554 "yacc_pascal.y"
+                         {  // 匹配"[错误],变量"形式
+       delete (yyvsp[0].lval);  // 释放新变量的内存
+       (yyval.lval_list) = nullptr;  // 返回空指针，表示语法错误导致解析失败
+       
+       GRAMMAR_ERROR("variable_list -> error ',' variable");  // 记录语法错误信息
+   }
+#line 3344 "yacc_pascal.cpp"
     break;
 
   case 78: /* variable: IDENTIFIER id_varpart  */
-#line 1336 "yacc_pascal.y"
-                             {
-        currentParserContext = ParserContext::Variable;
-        auto lval = allocateNode<LValStmt>();
-        
-        lval->id = std::string((yyvsp[-1].string));
-        
-        // 处理变量的数组下标部分
-        if ((yyvsp[0].expr_list) != nullptr) {
-            for (auto expr : *(yyvsp[0].expr_list)) {
-                lval->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));
-            }
-            delete (yyvsp[0].expr_list);
-        }
-        
-        free((yyvsp[-1].string));
-        (yyval.lval) = lval;
-        
-        GRAMMAR_TRACE("variable -> IDENTIFIER id_varpart");
-    }
-#line 3346 "yacc_pascal.cpp"
+#line 1565 "yacc_pascal.y"
+                            {  // 匹配"标识符 可选的数组下标"形式，如"x"或"array[i, j+1]"
+       currentParserContext = ParserContext::Variable;  // 设置当前解析上下文为变量
+       auto lval = allocateNode<LValStmt>();  // 创建左值语句节点
+       
+       lval->id = std::string((yyvsp[-1].string));  // 设置变量的标识符名称
+       
+       // 处理变量的数组下标部分
+       if ((yyvsp[0].expr_list) != nullptr) {  // 如果有数组下标部分
+           for (auto expr : *(yyvsp[0].expr_list)) {  // 遍历所有下标表达式
+               lval->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个下标表达式添加到左值的数组索引列表
+           }
+           delete (yyvsp[0].expr_list);  // 释放下标表达式列表容器（内容已转移）
+       }
+       
+       free((yyvsp[-1].string));  // 释放标识符字符串（已复制到节点中）
+       (yyval.lval) = lval;  // 返回构建的左值节点
+       
+       GRAMMAR_TRACE("variable -> IDENTIFIER id_varpart");  // 记录语法解析跟踪信息
+   }
+#line 3368 "yacc_pascal.cpp"
     break;
 
   case 79: /* id_varpart: %empty  */
-#line 1359 "yacc_pascal.y"
-                 {
-        (yyval.expr_list) = nullptr;
-        GRAMMAR_TRACE("id_varpart -> empty");
+#line 1589 "yacc_pascal.y"
+                 {  // 匹配没有数组下标的情况，如简单变量"x"
+        (yyval.expr_list) = nullptr;  // 返回空指针，表示没有数组下标
+        GRAMMAR_TRACE("id_varpart -> empty");  // 记录语法解析跟踪信息
     }
-#line 3355 "yacc_pascal.cpp"
+#line 3377 "yacc_pascal.cpp"
     break;
 
   case 80: /* id_varpart: '[' expression_list ']'  */
-#line 1363 "yacc_pascal.y"
-                               {
-        currentParserContext = ParserContext::IdVarpart;
+#line 1595 "yacc_pascal.y"
+                               {  // 匹配"[表达式列表]"形式，如"[i]"或"[i, j]"
+        currentParserContext = ParserContext::IdVarpart;  // 设置当前解析上下文为变量附加部分
         
-        if ((yyvsp[-1].expr_list) != nullptr) {
-            (yyval.expr_list) = (yyvsp[-1].expr_list);    
-        } else {
-            yyerror(&(yylsp[-1]), "code_str", program, scanner, "数组下标定义出错 请检查是否符合规范");
+        if ((yyvsp[-1].expr_list) != nullptr) {  // 如果表达式列表不为空
+            (yyval.expr_list) = (yyvsp[-1].expr_list);  // 直接使用expression_list返回的表达式列表作为结果    
+        } else {  // 如果表达式列表为空（语法错误）
+            yyerror(&(yylsp[-1]), "code_str", program, scanner, "数组下标定义出错 请检查是否符合规范");  // 报告错误：数组下标定义有误
         }
         
-        GRAMMAR_TRACE("id_varpart -> '[' expression_list ']'");
+        GRAMMAR_TRACE("id_varpart -> '[' expression_list ']'");  // 记录语法解析跟踪信息
     }
-#line 3371 "yacc_pascal.cpp"
+#line 3393 "yacc_pascal.cpp"
     break;
 
-  case 81: /* id_varpart: '[' expression BRACE_PAIR array_index_expression  */
-#line 1374 "yacc_pascal.y"
-                                                        {
-        currentParserContext = ParserContext::IdVarpart;
-        
-        if ((yyvsp[0].expr_list) != nullptr) {
-            (yyval.expr_list) = (yyvsp[0].expr_list);
-            (yyval.expr_list)->emplace_back((yyvsp[-2].expr));
-            std::reverse((yyval.expr_list)->begin(), (yyval.expr_list)->end());
-        } else {
-            // 错误处理
-            (yyval.expr_list) = nullptr;
-        }
-        
-        GRAMMAR_TRACE("id_varpart -> '[' expression BRACE_PAIR array_index_expression");
-    }
-#line 3390 "yacc_pascal.cpp"
-    break;
-
-  case 82: /* array_index_expression: expression ']'  */
-#line 1392 "yacc_pascal.y"
-                      {
-        currentParserContext = ParserContext::ArrayIndexExpression;
-        auto exprList = allocateNode<std::vector<ExprStmt *>>();
-        
-        exprList->emplace_back((yyvsp[-1].expr));
-        (yyval.expr_list) = exprList;
-        
-        GRAMMAR_TRACE("array_index_expression -> expression_list");
-    }
-#line 3404 "yacc_pascal.cpp"
-    break;
-
-  case 83: /* array_index_expression: expression BRACE_PAIR array_index_expression  */
-#line 1401 "yacc_pascal.y"
-                                                    {
-        currentParserContext = ParserContext::ArrayIndexExpression;
-        
-        (yyvsp[0].expr_list)->emplace_back((yyvsp[-2].expr));
-        (yyval.expr_list) = (yyvsp[0].expr_list);
-        
-        GRAMMAR_TRACE("array_index_expression -> array_index_expression BRACE_PAIR expression ']'");
-    }
-#line 3417 "yacc_pascal.cpp"
-    break;
-
-  case 84: /* procedure_call: IDENTIFIER  */
-#line 1413 "yacc_pascal.y"
+  case 81: /* procedure_call: IDENTIFIER  */
+#line 1610 "yacc_pascal.y"
                   {
         currentParserContext = ParserContext::ProcedureCall;
         auto procCall = allocateNode<FuncCallStmt>();
@@ -3428,11 +3404,11 @@ yyreduce:
         
         GRAMMAR_TRACE("procedure_call -> IDENTIFIER");
     }
-#line 3432 "yacc_pascal.cpp"
+#line 3408 "yacc_pascal.cpp"
     break;
 
-  case 85: /* procedure_call: IDENTIFIER '(' expression_list ')'  */
-#line 1423 "yacc_pascal.y"
+  case 82: /* procedure_call: IDENTIFIER '(' expression_list ')'  */
+#line 1620 "yacc_pascal.y"
                                           {
         currentParserContext = ParserContext::ProcedureCall;
         auto procCall = allocateNode<FuncCallStmt>();
@@ -3452,20 +3428,20 @@ yyreduce:
         
         GRAMMAR_TRACE("procedure_call -> IDENTIFIER '(' expression_list ')'");
     }
-#line 3456 "yacc_pascal.cpp"
+#line 3432 "yacc_pascal.cpp"
     break;
 
-  case 86: /* expression_list: %empty  */
-#line 1446 "yacc_pascal.y"
+  case 83: /* expression_list: %empty  */
+#line 1643 "yacc_pascal.y"
                  {
         (yyval.expr_list) = nullptr;
         GRAMMAR_TRACE("expression_list -> empty");
     }
-#line 3465 "yacc_pascal.cpp"
+#line 3441 "yacc_pascal.cpp"
     break;
 
-  case 87: /* expression_list: expression  */
-#line 1450 "yacc_pascal.y"
+  case 84: /* expression_list: expression  */
+#line 1647 "yacc_pascal.y"
                   {
         currentParserContext = ParserContext::ExpressionList;
         auto exprList = allocateNode<std::vector<ExprStmt *>>();
@@ -3475,11 +3451,11 @@ yyreduce:
         
         GRAMMAR_TRACE("expression_list -> expression");
     }
-#line 3479 "yacc_pascal.cpp"
+#line 3455 "yacc_pascal.cpp"
     break;
 
-  case 88: /* expression_list: expression_list ',' expression  */
-#line 1459 "yacc_pascal.y"
+  case 85: /* expression_list: expression_list ',' expression  */
+#line 1656 "yacc_pascal.y"
                                       {
         currentParserContext = ParserContext::ExpressionList;
         
@@ -3488,22 +3464,22 @@ yyreduce:
         
         GRAMMAR_TRACE("expression_list -> expression_list ',' expression");
     }
-#line 3492 "yacc_pascal.cpp"
+#line 3468 "yacc_pascal.cpp"
     break;
 
-  case 89: /* expression: simple_expression  */
-#line 1471 "yacc_pascal.y"
+  case 86: /* expression: simple_expression  */
+#line 1668 "yacc_pascal.y"
                          {
         currentParserContext = ParserContext::Expression;
         (yyval.expr) = ExprFactory::createFromSimpleExpr((yyvsp[0].add_expr));
         
         GRAMMAR_TRACE("expression -> simple_expression");
     }
-#line 3503 "yacc_pascal.cpp"
+#line 3479 "yacc_pascal.cpp"
     break;
 
-  case 90: /* expression: expression relop simple_expression  */
-#line 1477 "yacc_pascal.y"
+  case 87: /* expression: expression relop simple_expression  */
+#line 1674 "yacc_pascal.y"
                                           {
         currentParserContext = ParserContext::Expression;
         auto expr = (yyvsp[-2].expr);
@@ -3516,22 +3492,22 @@ yyreduce:
         (yyval.expr) = expr;
         GRAMMAR_TRACE("expression -> simple_expression relop simple_expression");
     }
-#line 3520 "yacc_pascal.cpp"
+#line 3496 "yacc_pascal.cpp"
     break;
 
-  case 91: /* simple_expression: term  */
-#line 1493 "yacc_pascal.y"
+  case 88: /* simple_expression: term  */
+#line 1690 "yacc_pascal.y"
             {
         currentParserContext = ParserContext::SimpleExpression;
         (yyval.add_expr) = ExprFactory::createFromTerm((yyvsp[0].mul_expr));
         
         GRAMMAR_TRACE("simple_expression -> term");
     }
-#line 3531 "yacc_pascal.cpp"
+#line 3507 "yacc_pascal.cpp"
     break;
 
-  case 92: /* simple_expression: simple_expression addop term  */
-#line 1499 "yacc_pascal.y"
+  case 89: /* simple_expression: simple_expression addop term  */
+#line 1696 "yacc_pascal.y"
                                     {
         currentParserContext = ParserContext::SimpleExpression;
         auto addExpr = (yyvsp[-2].add_expr);
@@ -3544,22 +3520,22 @@ yyreduce:
         (yyval.add_expr) = addExpr;
         GRAMMAR_TRACE("simple_expression -> simple_expression %lld term\n");
     }
-#line 3548 "yacc_pascal.cpp"
+#line 3524 "yacc_pascal.cpp"
     break;
 
-  case 93: /* term: factor  */
-#line 1515 "yacc_pascal.y"
+  case 90: /* term: factor  */
+#line 1712 "yacc_pascal.y"
               {
         currentParserContext = ParserContext::Term;
         (yyval.mul_expr) = ExprFactory::createFromFactor((yyvsp[0].unary_expr));
         
         GRAMMAR_TRACE("term -> factor");
     }
-#line 3559 "yacc_pascal.cpp"
+#line 3535 "yacc_pascal.cpp"
     break;
 
-  case 94: /* term: term mulop factor  */
-#line 1521 "yacc_pascal.y"
+  case 91: /* term: term mulop factor  */
+#line 1718 "yacc_pascal.y"
                          {
         currentParserContext = ParserContext::Term;
         auto mulExpr = (yyvsp[-2].mul_expr);
@@ -3572,11 +3548,11 @@ yyreduce:
         (yyval.mul_expr) = mulExpr;
         GRAMMAR_TRACE("term -> term mulop factor");
     }
-#line 3576 "yacc_pascal.cpp"
+#line 3552 "yacc_pascal.cpp"
     break;
 
-  case 95: /* factor: INTEGER  */
-#line 1537 "yacc_pascal.y"
+  case 92: /* factor: INTEGER  */
+#line 1734 "yacc_pascal.y"
                {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
@@ -3589,11 +3565,11 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> INTEGER");
     }
-#line 3593 "yacc_pascal.cpp"
+#line 3569 "yacc_pascal.cpp"
     break;
 
-  case 96: /* factor: REAL  */
-#line 1549 "yacc_pascal.y"
+  case 93: /* factor: REAL  */
+#line 1746 "yacc_pascal.y"
             {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
@@ -3611,11 +3587,11 @@ yyreduce:
         
         GRAMMAR_TRACE("factor -> REAL");
     }
-#line 3615 "yacc_pascal.cpp"
+#line 3591 "yacc_pascal.cpp"
     break;
 
-  case 97: /* factor: BOOLEAN  */
-#line 1566 "yacc_pascal.y"
+  case 94: /* factor: BOOLEAN  */
+#line 1763 "yacc_pascal.y"
                {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
@@ -3630,11 +3606,11 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> BOOLEAN");
     }
-#line 3634 "yacc_pascal.cpp"
+#line 3610 "yacc_pascal.cpp"
     break;
 
-  case 98: /* factor: CHAR  */
-#line 1580 "yacc_pascal.y"
+  case 95: /* factor: CHAR  */
+#line 1777 "yacc_pascal.y"
             {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
@@ -3648,11 +3624,11 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> CHAR");
     }
-#line 3652 "yacc_pascal.cpp"
+#line 3628 "yacc_pascal.cpp"
     break;
 
-  case 99: /* factor: variable  */
-#line 1593 "yacc_pascal.y"
+  case 96: /* factor: variable  */
+#line 1790 "yacc_pascal.y"
                 {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
@@ -3664,11 +3640,11 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> variable");
     }
-#line 3668 "yacc_pascal.cpp"
+#line 3644 "yacc_pascal.cpp"
     break;
 
-  case 100: /* factor: '(' expression ')'  */
-#line 1604 "yacc_pascal.y"
+  case 97: /* factor: '(' expression ')'  */
+#line 1801 "yacc_pascal.y"
                           {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Parentheses);
@@ -3678,11 +3654,11 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> '(' expression ')'");
     }
-#line 3682 "yacc_pascal.cpp"
+#line 3658 "yacc_pascal.cpp"
     break;
 
-  case 101: /* factor: IDENTIFIER '(' expression_list ')'  */
-#line 1613 "yacc_pascal.y"
+  case 98: /* factor: IDENTIFIER '(' expression_list ')'  */
+#line 1810 "yacc_pascal.y"
                                           {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
@@ -3705,11 +3681,11 @@ yyreduce:
         
         GRAMMAR_TRACE("factor -> IDENTIFIER '(' expression_list ')'");
     }
-#line 3709 "yacc_pascal.cpp"
+#line 3685 "yacc_pascal.cpp"
     break;
 
-  case 102: /* factor: NOT factor  */
-#line 1635 "yacc_pascal.y"
+  case 99: /* factor: NOT factor  */
+#line 1832 "yacc_pascal.y"
                   {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = (yyvsp[0].unary_expr);
@@ -3719,22 +3695,22 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> NOT factor");
     }
-#line 3723 "yacc_pascal.cpp"
+#line 3699 "yacc_pascal.cpp"
     break;
 
-  case 103: /* factor: '+' factor  */
-#line 1644 "yacc_pascal.y"
+  case 100: /* factor: '+' factor  */
+#line 1841 "yacc_pascal.y"
                   {
         currentParserContext = ParserContext::Factor;
         (yyval.unary_expr) = (yyvsp[0].unary_expr);  // 正号不改变值
         
         GRAMMAR_TRACE("factor -> '+' factor");
     }
-#line 3734 "yacc_pascal.cpp"
+#line 3710 "yacc_pascal.cpp"
     break;
 
-  case 104: /* factor: '-' factor  */
-#line 1650 "yacc_pascal.y"
+  case 101: /* factor: '-' factor  */
+#line 1847 "yacc_pascal.y"
                   {
         currentParserContext = ParserContext::Factor;
         auto unaryExpr = (yyvsp[0].unary_expr);
@@ -3744,115 +3720,115 @@ yyreduce:
         (yyval.unary_expr) = unaryExpr;
         GRAMMAR_TRACE("factor -> '-' factor");
     }
+#line 3724 "yacc_pascal.cpp"
+    break;
+
+  case 102: /* addop: '+'  */
+#line 1859 "yacc_pascal.y"
+            { (yyval.number) = 0; }
+#line 3730 "yacc_pascal.cpp"
+    break;
+
+  case 103: /* addop: '-'  */
+#line 1859 "yacc_pascal.y"
+                              { (yyval.number) = 1; }
+#line 3736 "yacc_pascal.cpp"
+    break;
+
+  case 104: /* addop: OR  */
+#line 1859 "yacc_pascal.y"
+                                               { (yyval.number) = 2; }
+#line 3742 "yacc_pascal.cpp"
+    break;
+
+  case 105: /* relop: '='  */
+#line 1861 "yacc_pascal.y"
+            { (yyval.number) = 0; }
 #line 3748 "yacc_pascal.cpp"
     break;
 
-  case 105: /* addop: '+'  */
-#line 1662 "yacc_pascal.y"
-            { (yyval.number) = 0; }
+  case 106: /* relop: NE  */
+#line 1861 "yacc_pascal.y"
+                             { (yyval.number) = 1; }
 #line 3754 "yacc_pascal.cpp"
     break;
 
-  case 106: /* addop: '-'  */
-#line 1662 "yacc_pascal.y"
-                              { (yyval.number) = 1; }
+  case 107: /* relop: '<'  */
+#line 1861 "yacc_pascal.y"
+                                               { (yyval.number) = 2; }
 #line 3760 "yacc_pascal.cpp"
     break;
 
-  case 107: /* addop: OR  */
-#line 1662 "yacc_pascal.y"
-                                               { (yyval.number) = 2; }
+  case 108: /* relop: LE  */
+#line 1861 "yacc_pascal.y"
+                                                                { (yyval.number) = 3; }
 #line 3766 "yacc_pascal.cpp"
     break;
 
-  case 108: /* relop: '='  */
-#line 1664 "yacc_pascal.y"
-            { (yyval.number) = 0; }
+  case 109: /* relop: '>'  */
+#line 1861 "yacc_pascal.y"
+                                                                                  { (yyval.number) = 4; }
 #line 3772 "yacc_pascal.cpp"
     break;
 
-  case 109: /* relop: NE  */
-#line 1664 "yacc_pascal.y"
-                             { (yyval.number) = 1; }
+  case 110: /* relop: GE  */
+#line 1861 "yacc_pascal.y"
+                                                                                                   { (yyval.number) = 5; }
 #line 3778 "yacc_pascal.cpp"
     break;
 
-  case 110: /* relop: '<'  */
-#line 1664 "yacc_pascal.y"
-                                               { (yyval.number) = 2; }
+  case 111: /* relop: IN  */
+#line 1861 "yacc_pascal.y"
+                                                                                                                    { (yyval.number) = 6; }
 #line 3784 "yacc_pascal.cpp"
     break;
 
-  case 111: /* relop: LE  */
-#line 1664 "yacc_pascal.y"
-                                                                { (yyval.number) = 3; }
+  case 112: /* mulop: '*'  */
+#line 1863 "yacc_pascal.y"
+            { (yyval.number) = 0; }
 #line 3790 "yacc_pascal.cpp"
     break;
 
-  case 112: /* relop: '>'  */
-#line 1664 "yacc_pascal.y"
-                                                                                  { (yyval.number) = 4; }
+  case 113: /* mulop: '/'  */
+#line 1863 "yacc_pascal.y"
+                              { (yyval.number) = 1; }
 #line 3796 "yacc_pascal.cpp"
     break;
 
-  case 113: /* relop: GE  */
-#line 1664 "yacc_pascal.y"
-                                                                                                   { (yyval.number) = 5; }
+  case 114: /* mulop: DIV  */
+#line 1863 "yacc_pascal.y"
+                                                { (yyval.number) = 1; }
 #line 3802 "yacc_pascal.cpp"
     break;
 
-  case 114: /* relop: IN  */
-#line 1664 "yacc_pascal.y"
-                                                                                                                    { (yyval.number) = 6; }
+  case 115: /* mulop: MOD  */
+#line 1863 "yacc_pascal.y"
+                                                                  { (yyval.number) = 2; }
 #line 3808 "yacc_pascal.cpp"
     break;
 
-  case 115: /* mulop: '*'  */
-#line 1666 "yacc_pascal.y"
-            { (yyval.number) = 0; }
+  case 116: /* mulop: AND  */
+#line 1863 "yacc_pascal.y"
+                                                                                    { (yyval.number) = 3; }
 #line 3814 "yacc_pascal.cpp"
     break;
 
-  case 116: /* mulop: '/'  */
-#line 1666 "yacc_pascal.y"
-                              { (yyval.number) = 1; }
+  case 117: /* mulop: ANDTHEN  */
+#line 1863 "yacc_pascal.y"
+                                                                                                          { (yyval.number) = 4; }
 #line 3820 "yacc_pascal.cpp"
     break;
 
-  case 117: /* mulop: DIV  */
-#line 1666 "yacc_pascal.y"
-                                                { (yyval.number) = 1; }
-#line 3826 "yacc_pascal.cpp"
-    break;
-
-  case 118: /* mulop: MOD  */
-#line 1666 "yacc_pascal.y"
-                                                                  { (yyval.number) = 2; }
-#line 3832 "yacc_pascal.cpp"
-    break;
-
-  case 119: /* mulop: AND  */
-#line 1666 "yacc_pascal.y"
-                                                                                    { (yyval.number) = 3; }
-#line 3838 "yacc_pascal.cpp"
-    break;
-
-  case 120: /* mulop: ANDTHEN  */
-#line 1666 "yacc_pascal.y"
-                                                                                                          { (yyval.number) = 4; }
-#line 3844 "yacc_pascal.cpp"
-    break;
-
-  case 121: /* error_recovery: error ';'  */
-#line 1670 "yacc_pascal.y"
+  case 118: /* error_recovery: error ';'  */
+#line 1867 "yacc_pascal.y"
                  {
         yyerrok;
     }
-#line 3852 "yacc_pascal.cpp"
+#line 3828 "yacc_pascal.cpp"
     break;
 
 
-#line 3856 "yacc_pascal.cpp"
+#line 3832 "yacc_pascal.cpp"
 
       default: break;
     }
@@ -4055,7 +4031,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1675 "yacc_pascal.y"
+#line 1872 "yacc_pascal.y"
 
 // 此处书写相关函数，会添加在生成的代码中
 extern void scan_string(const char *str, yyscan_t scanner);
