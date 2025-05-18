@@ -1,6 +1,7 @@
 #include "code_generator/code_generator.hpp"
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 
 namespace codegen {
 
@@ -421,14 +422,15 @@ void CodeGenerator::visit(ConstDeclStmt &stmt) {
     for (auto& pair : stmt.pairs) {
         const std::string& name = pair.first;
         ValueStmt* value = pair.second.get();
-        
+
         code << getIndent() << "const ";
-        
+
         // 确定常量类型
         if (value->type == ValueStmt::ValueType::Number) {
             NumberStmt* num = value->number.get();
             if (num->is_real) {
-                code << "float ";
+                // 保留全部小数位，使用 double 类型
+                code << "double ";
             } else if (num->is_char) {
                 code << "char ";
             } else {
@@ -437,9 +439,22 @@ void CodeGenerator::visit(ConstDeclStmt &stmt) {
         } else if (value->type == ValueStmt::ValueType::Str) {
             code << "char* ";
         }
-        
+
         code << name << " = ";
-        value->accept(*this);
+        // 对于实数常量，保留全部小数位
+        if (value->type == ValueStmt::ValueType::Number) {
+            NumberStmt* num = value->number.get();
+            if (num->is_real) {
+                // 使用字符串流保证精度不丢失
+                code << std::setprecision(16) << num->real_val;
+            } else if (num->is_char) {
+                code << "'" << num->char_val << "'";
+            } else {
+                code << num->int_val;
+            }
+        } else {
+            value->accept(*this);
+        }
         code << ";\n";
     }
 }
@@ -712,7 +727,7 @@ void CodeGenerator::visit(WriteFuncStmt &stmt) {
 
 std::string CodeGenerator::type2fmt(const std::string& t) const {
     if (t == "int" || t == "bool") return "%d";
-    if (t == "float" || t == "real") return "%f";
+    if (t == "float" || t == "real") return "%.6f"; // 保证6位小数
     if (t == "char") return "%c";
     if (t == "string") return "%s";
     return "%d"; // 默认返回整数格式
