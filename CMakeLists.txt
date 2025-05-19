@@ -37,15 +37,13 @@ find_package(Threads REQUIRED)
 target_link_libraries(pascc Threads::Threads)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/test/bison_test)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/test/ir_test)
 # add_subdirectory(${PROJECT_SOURCE_DIR}/test/token_test)
 
 # 启动 CTest
 enable_testing()
 
 # 添加可执行文件测试
-add_test(NAME test_bison COMMAND ${PROJECT_SOURCE_DIR}/bin/BISON_TEST ${PROJECT_SOURCE_DIR}/open_set)
-# add_test(NAME test_ir COMMAND ${PROJECT_SOURCE_DIR}/bin/IR_TEST --i ${PROJECT_SOURCE_DIR}/open_set -d 4)
+add_test(NAME test_bison COMMAND ${PROJECT_SOURCE_DIR}/bin/BISON_TEST ${PROJECT_SOURCE_DIR}/test_set)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")

@@ -19,28 +19,28 @@ int code_parse(const char *code, ProgramNode **program_stmt);
 
 void init_env()
 {
-    if (G_SETTINGS.output_file.empty())
+    if (SETTINGS.output_file.empty())
     {
-        size_t pos = G_SETTINGS.input_file.find_last_of('.');
+        size_t pos = SETTINGS.input_file.find_last_of('.');
         if (pos == std::string::npos)
         {
-            G_SETTINGS.output_file = G_SETTINGS.input_file + ".c";
+            SETTINGS.output_file = SETTINGS.input_file + ".c";
         }
         else
         {
-            G_SETTINGS.output_file = G_SETTINGS.input_file.substr(0, pos) + ".c";
+            SETTINGS.output_file = SETTINGS.input_file.substr(0, pos) + ".c";
         }
-        pos = G_SETTINGS.input_file.find_last_of("/\\");
+        pos = SETTINGS.input_file.find_last_of("/\\");
         std::string filename;
         if (pos != std::string::npos)
-            filename = G_SETTINGS.input_file.substr(pos + 1);
+            filename = SETTINGS.input_file.substr(pos + 1);
         else
-            filename = G_SETTINGS.input_file;
+            filename = SETTINGS.input_file;
 
-        LOG_DEBUG("Output file: %s", G_SETTINGS.output_file.c_str());
+        LOG_DEBUG("Output file: %s", SETTINGS.output_file.c_str());
     }
 #ifndef ONLINE_JUDGE
-    switch (G_SETTINGS.log_level)
+    switch (SETTINGS.log_level)
     {
         case 0:
             common::g_log = new common::Log(common::FATAL);
@@ -67,78 +67,77 @@ void init_env()
 int main(int argc, char *argv[])
 {
     // 解析命令行参数
-    G_SETTINGS.parse_args(argc, argv);
+    SETTINGS.parse_args(argc, argv);
+
     // 初始化环境
     init_env();
+
     // 管理日志
     std::unique_ptr<common::Log> log(common::g_log);
-    // 从输入文件中读取代码
-    std::ifstream input_file(G_SETTINGS.input_file);
-    if (!input_file.is_open())
+
+    // 打开输入文件并读取内容
+    std::ifstream fin(SETTINGS.input_file);
+    if (!fin)
     {
-        LOG_FATAL("Can't open input file: %s", G_SETTINGS.input_file.c_str());
-    }
-    std::stringstream buffer;
-    buffer << input_file.rdbuf();
-    std::string code = buffer.str();
-    input_file.close();
-    
-    // 第一步：词法分析 and 语法分析
-    LOG_DEBUG("Start parsing code...");
-    ProgramNode* program_stmt;
-    int ret = code_parse(code.c_str(), &program_stmt);
-    if (ret != 0)
-    {
-        LOG_ERROR("Parsing code failed.");
-        return ret;
-    }
-    LOG_DEBUG("Parsing code done.");
-    if(!program_stmt) {
-        LOG_FATAL("Program exit");
+        LOG_FATAL("无法打开输入文件: %s", SETTINGS.input_file.c_str());
         return -1;
     }
-    
-    // 第二步: 语义分析
-    LOG_DEBUG("Start semantic analysis...");
-    semantic::SemanticAnalyzer semanticAnalyzer;
-    program_stmt->accept(semanticAnalyzer);
-    
-    if (semanticAnalyzer.hasErrors()) {
-        LOG_ERROR("Semantic analysis found errors.");
-        for (const auto& error : semanticAnalyzer.getErrors()) {
-            LOG_ERROR("%s", error.c_str());
+    std::string code((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
+    fin.close();
+
+    // 语法分析
+    LOG_DEBUG("开始语法分析...");
+    ProgramNode* root = nullptr;
+    int parse_result = code_parse(code.c_str(), &root);
+    if (parse_result != 0)
+    {
+        LOG_ERROR("语法分析失败。");
+        return parse_result;
+    }
+    LOG_DEBUG("语法分析完成。");
+    if (!root)
+    {
+        LOG_FATAL("未生成语法树，程序退出。");
+        return -1;
+    }
+
+    // 语义分析
+    LOG_DEBUG("开始语义分析...");
+    semantic::SemanticAnalyzer analyzer;
+    root->accept(analyzer);
+
+    if (analyzer.hasErrors())
+    {
+        LOG_ERROR("语义分析发现错误：");
+        for (const auto& err : analyzer.getErrors())
+        {
+            LOG_ERROR("%s", err.c_str());
         }
-        delete program_stmt;
+        delete root;
         return -1;
     }
-    LOG_DEBUG("Semantic analysis done.");
-    // std::cout << "Inferred Types:" << std::endl;
-    // for (const auto& pair : semanticAnalyzer.getInferredType()) {
-    //     const BaseNode* stmt = pair.first;
-    //     const std::string& type = pair.second;
-    //     std::cout << "  Statement: " << typeid(*stmt).name() << ", Type: " << type << std::endl;
-    // }
-    
-    // 第三步: 代码生成
-    LOG_DEBUG("Start generating target code...");
-    LOG_INFO("Generating C code...");
-    codegen::CodeGenerator codeGenerator(semanticAnalyzer, semanticAnalyzer.getSymbolTable());
-    std::string generatedCode = codeGenerator.generate(program_stmt);
-    
-    // 输出结果到文件
-    std::ofstream output_file(G_SETTINGS.output_file);
-    if (!output_file.is_open()) {
-        LOG_FATAL("Can't open output file: %s", G_SETTINGS.output_file.c_str());
-        delete program_stmt;
+    LOG_DEBUG("语义分析完成。");
+
+    // 代码生成
+    LOG_DEBUG("开始生成C代码...");
+    LOG_INFO("正在生成C代码...");
+    codegen::CodeGenerator generator(analyzer, analyzer.getSymbolTable());
+    std::string c_code = generator.generate(root);
+
+    // 写入输出文件
+    std::ofstream fout(SETTINGS.output_file);
+    if (!fout)
+    {
+        LOG_FATAL("无法打开输出文件: %s", SETTINGS.output_file.c_str());
+        delete root;
         return -1;
     }
-    
-    output_file << generatedCode;
-    output_file.close();
-    LOG_DEBUG("Generating target code done.");
-    
+    fout << c_code;
+    fout.close();
+    LOG_DEBUG("C代码生成完毕。");
+
     // 释放AST资源
-    delete program_stmt;
-    
+    delete root;
+
     return 0;
 }

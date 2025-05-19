@@ -9,22 +9,6 @@ namespace codegen {
 CodeGenerator::CodeGenerator(const semantic::SemanticAnalyzer& s, semantic::SymbolTable& st)
         : sema(s), symbolTable(st) { initTypeMapping(); }
 
-// 判断变量在当前作用域是否被使用
-bool CodeGenerator::isVariableUsedInScope(const std::string& varName) {
-    semantic::SymbolEntry* entry = symbolTable.lookupSymbol(varName);
-    if (!entry) {
-        return false;
-    }
-    
-    // 检查变量是否被使用
-    return !entry->usedLines.empty();
-}
-
-// 记录变量在当前作用域的使用
-void CodeGenerator::trackVariableUse(const std::string& varName) {
-    // 记录变量在当前作用域被使用
-    currentVars.insert(varName);
-}
 
 // 析构函数
 CodeGenerator::~CodeGenerator() {
@@ -75,7 +59,6 @@ std::string CodeGenerator::generate(ProgramNode* root) {
     indentLevel = 0;
     currentFunction = "";
     hasReturn = false;
-    currentVars.clear();
 
     // 头文件
     code << "#include <stdio.h>\n";
@@ -216,10 +199,6 @@ void CodeGenerator::visit(RelExprNode &stmt) {
                 case RelExprNode::RelExprType::GreaterEqual:
                     code << " >= ";
                     break;
-                case RelExprNode::RelExprType::In:
-                    // 'in'操作符需要特殊处理，这里简化为包含检查
-                    code << " /* in */ ";
-                    break;
                 default:
                     break;
             }
@@ -280,9 +259,6 @@ void CodeGenerator::visit(MulExprNode &stmt) {
                     break;
                 case MulExprNode::MulExprType::And:
                     code << " && ";
-                    break;
-                case MulExprNode::MulExprType::AndThen:
-                    code << " && /* and then */ ";
                     break;
                 default:
                     break;
@@ -404,6 +380,9 @@ void CodeGenerator::visit(LValueNode &stmt) {
 // 函数调用节点访问
 void CodeGenerator::visit(FuncCallNode &stmt) {
     bool inlineExpr = exprDepth > 0;
+    if (!inlineExpr) {
+        code << getIndent();
+    }
     code << stmt.id << "(";
     for (size_t i = 0; i < stmt.args.size(); ++i) {
         if (i) code << ", ";
@@ -491,9 +470,16 @@ void CodeGenerator::visit(VarDeclNode &stmt) {
             }
         }
         code << ";\n";
-        
-        // 记录当前作用域的变量
-        currentVars.insert(name);
+    }
+}
+
+// 函数声明节点访问
+void CodeGenerator::visit(FuncDeclNode &stmt) {
+    if (stmt.header) {
+        stmt.header->accept(*this);
+    }
+    if (stmt.body) {
+        stmt.body->accept(*this);
     }
 }
 
@@ -516,7 +502,7 @@ void CodeGenerator::visit(FuncHeadDeclNode &stmt) {
     code << returnType << " " << stmt.func_name << "(";
     
     // 处理函数参数
-    bool firstParam = true;
+    bool firstParam = true; // 标记是否是第一个参数
     for (const auto& arg : stmt.args) {
         for (const auto& arg_name : arg->id) {
             if (!firstParam) {
@@ -540,9 +526,6 @@ void CodeGenerator::visit(FuncHeadDeclNode &stmt) {
 void CodeGenerator::visit(FuncBodyDeclNode &stmt) {
     code << " {\n";
     indentLevel++;
-
-    // 清空当前作用域变量列表
-    currentVars.clear();
 
     // 处理常量声明
     if (stmt.const_decl) {
@@ -569,7 +552,7 @@ void CodeGenerator::visit(FuncBodyDeclNode &stmt) {
 
     // 只有没有 res 时才声明
     if (entry && entry->returnType != "void" && !hasRes) {
-        code << getIndent() << mapPascalTypeToC(entry->returnType) << " res = 0;\n";
+        code << getIndent() << mapPascalTypeToC(entry->returnType) << " res;\n";
     }
 
     // 处理函数体语句
@@ -590,15 +573,7 @@ void CodeGenerator::visit(FuncBodyDeclNode &stmt) {
     hasReturn = false;
 }
 
-// 函数声明节点访问
-void CodeGenerator::visit(FuncDeclNode &stmt) {
-    if (stmt.header) {
-        stmt.header->accept(*this);
-    }
-    if (stmt.body) {
-        stmt.body->accept(*this);
-    }
-}
+
 
 // 赋值语句节点访问
 void CodeGenerator::visit(AssignmentNode &stmt) {
@@ -617,13 +592,6 @@ void CodeGenerator::visit(AssignmentNode &stmt) {
     code << ";\n";
 }
 
-// 判断是否是简单表达式（变量、常量或简单运算）
-bool CodeGenerator::isSimpleExpression(ExprNode* expr) {
-    if (!expr || !expr->rel_expr) {
-        return false;
-    }
-    return expr->rel_expr->terms.size() <= 1;
-}
 
 // if语句节点访问
 void CodeGenerator::visit(IfNode &stmt) {
@@ -739,43 +707,11 @@ std::string CodeGenerator::type2fmt(const std::string& t) const {
     return "%d"; // 默认返回整数格式
 }
 
-// 推断表达式类型
-semantic::SymbolEntry* CodeGenerator::determineExpressionType(ExprNode* expr) {
-    if (!expr || !expr->rel_expr) {
-        return nullptr;
-    }
-    
-    // 使用临时stringstream以避免修改主要的code流
-    std::stringstream tempStream;
-    
-    try {
-        // 简单情况: 单个变量
-        if (expr->rel_expr->terms.size() == 1 && 
-            expr->rel_expr->terms[0].add_expr && 
-            expr->rel_expr->terms[0].add_expr->terms.size() == 1 &&
-            expr->rel_expr->terms[0].add_expr->terms[0].mul_expr &&
-            expr->rel_expr->terms[0].add_expr->terms[0].mul_expr->terms.size() == 1 &&
-            expr->rel_expr->terms[0].add_expr->terms[0].mul_expr->terms[0].unary_expr &&
-            expr->rel_expr->terms[0].add_expr->terms[0].mul_expr->terms[0].unary_expr->types.empty() &&
-            expr->rel_expr->terms[0].add_expr->terms[0].mul_expr->terms[0].unary_expr->primary_expr) {
-            auto primary = expr->rel_expr->terms[0].add_expr->terms[0].mul_expr->terms[0].unary_expr->primary_expr.get();
-            
-            if (primary->type == PrimaryExprNode::PrimaryExprType::Value && 
-                primary->value && 
-                primary->value->type == ValueNode::ValueType::LVal) {
-                return symbolTable.lookupSymbol(primary->value->lval->id);
-            }
-        }
-    } catch (...) {
-        // 忽略可能的异常，安全地返回nullptr
-    }
-    return nullptr;
-}
 
 // break语句节点访问
 void CodeGenerator::visit(BreakNode &stmt) {
     if (isInLoop) {
-        code << getIndent() << "break; // goto " << breakLabel << "\n";
+        code << getIndent() << "break;\n";
     } else {
         code << getIndent() << "// Error: break outside of loop\n";
     }
@@ -784,9 +720,19 @@ void CodeGenerator::visit(BreakNode &stmt) {
 // continue语句节点访问
 void CodeGenerator::visit(ContinueNode &stmt) {
     if (isInLoop) {
-        code << getIndent() << "continue; // goto " << continueLabel << "\n";
+        code << getIndent() << "continue;\n";
     } else {
         code << getIndent() << "// Error: continue outside of loop\n";
+    }
+}
+
+// 程序节点访问
+void CodeGenerator::visit(ProgramNode &stmt) {
+    if (stmt.head) {
+        stmt.head->accept(*this);
+    }
+    if (stmt.body) {
+        stmt.body->accept(*this);
     }
 }
 
@@ -830,15 +776,7 @@ void CodeGenerator::visit(ProgramBodyNode &stmt) {
     code << "}\n";
 }
 
-// 程序节点访问
-void CodeGenerator::visit(ProgramNode &stmt) {
-    if (stmt.head) {
-        stmt.head->accept(*this);
-    }
-    if (stmt.body) {
-        stmt.body->accept(*this);
-    }
-}
+
 
 // 表达式递归输出辅助
 void CodeGenerator::emitExpr(ExprNode* e) {

@@ -12,7 +12,7 @@ extern void yy_scan_string(const char *str);  // 在生成的 lex.yy.c 中定义
 
 int main() {
     // 遍历文件夹中的文件
-    const std::string folderPath = "../../../open_set"; 
+    const std::string folderPath = "../../../test_set"; 
     std::vector<std::string> files;
     DIR *dir;
     struct dirent *ent;

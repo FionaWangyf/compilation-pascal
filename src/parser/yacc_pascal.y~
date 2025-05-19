@@ -1661,7 +1661,7 @@ static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str,
     hadError = true;
     int res = 0;
     std::ostringstream buf;
-    buf << "\033[1;37m" << G_SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
+    buf << "\033[1;37m" << SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
         << ":" << yypcontext_location(ctx)->first_column + 1 << ":\033[0m";
     buf << " \033[1;31m" << "Syntax error:" << "\033[0m";
     bool have_expected = false;

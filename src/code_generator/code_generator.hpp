@@ -19,31 +19,16 @@ private:
     std::stringstream code;              // 生成的C代码
     int indentLevel = 0;                 // 缩进级别
     semantic::SymbolTable& symbolTable;  // 符号表（从语义分析器获取）
-    
     std::unordered_map<std::string, std::string> typeMapping; // Pascal到C类型映射
-    std::unordered_set<std::string> currentVars;              // 当前作用域的变量
-    
     std::string currentFunction;         // 当前处理的函数名
     bool hasReturn = false;              // 当前函数是否有返回语句
-    
     bool isInLoop = false;               // 是否在循环内
-    std::string breakLabel;              // break跳转标签
-    std::string continueLabel;           // continue跳转标签
     
     // 辅助函数
     std::string getIndent() const;
     std::string mapPascalTypeToC(const std::string& pascalType) const;
     std::string mapOperator(const std::string& pascalOp) const;
     void initTypeMapping();
-    
-    // 分析表达式类型的辅助函数
-    semantic::SymbolEntry* determineExpressionType(ExprNode* expr);
-    bool hasFloatingPointOperation(ExprNode* expr);
-    bool isSimpleExpression(ExprNode* expr);
-    
-    // 分析变量使用的辅助函数
-    bool isVariableUsedInScope(const std::string& varName);
-    void trackVariableUse(const std::string& varName);
     
     // 验证和清理生成的代码
     bool validateGeneratedCode();
@@ -98,9 +83,6 @@ public:
     void visit(ProgramHeadNode &stmt) override;
     void visit(ProgramBodyNode &stmt) override;
     void visit(ProgramNode &stmt) override;
-    
-    // 处理return语句
-    void handleReturn(ExprNode& expr);
 };
 
 } // namespace codegen

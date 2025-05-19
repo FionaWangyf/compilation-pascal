@@ -33,14 +33,8 @@ void Settings::parse_args(int argc, char *argv[])
                 say_help();
                 exit(0);
                 break;
-            case 'j':
-                thread_num = atoi(optarg);
-                break;
-            case 'O':
-                opt_level = 1;
-                break;
             default:
-                LOG_FATAL("Unknown option: %c", opt);
+                LOG_FATAL("未知操作: %c", opt);
                 say_help();
                 break;
         }
@@ -49,14 +43,12 @@ void Settings::parse_args(int argc, char *argv[])
 
 void Settings::say_help()
 {
-    LOG_INFO("Usage: ./pascc [options]");
-    LOG_INFO("Options:");
-    LOG_INFO("  -d <level>  Set log level(0-4: MIN-MAX)");
-    LOG_INFO("  -i <file>   Set input file");
-    LOG_INFO("  -o <file>   Set output file");
-    LOG_INFO("  -h          Show this help message");
-    LOG_INFO("  -O          Enable optimization");
-    LOG_INFO("  -D          Generate assembly code");
+    LOG_INFO("用法: ./pascc [选项]");
+    LOG_INFO("选项:");
+    LOG_INFO("  -d <等级>   设置日志等级(0-4: 最低-最高)");
+    LOG_INFO("  -i <文件>   指定输入文件");
+    LOG_INFO("  -o <文件>   指定输出文件");
+    LOG_INFO("  -h          显示此帮助信息");
 }
 
 } // namespace common

@@ -50,7 +50,7 @@ while (0);
 extern int atoi();
 extern double atof();
 
-#define RETURN_TOKEN(token) LOG_DEBUG("%s  %s, Line: %d, Column: %d", #token, yytext, yylloc->first_line, yylloc->first_column);return token
+#define RETURN_TOKEN(token) LOG_DEBUG("DEBUG: %s  %s, Line: %d, Column: %d", #token, yytext, yylloc->first_line, yylloc->first_column);return token
 
 char *strdup_tolower(const char *s) {
     char *d = (char *)malloc(strlen(s) + 1);

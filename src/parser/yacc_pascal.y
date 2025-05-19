@@ -1970,7 +1970,7 @@ static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str,
    std::ostringstream buf;  // 创建字符串流用于构建错误消息
    
    // 构建错误位置信息（高亮显示文件名和行号）
-   buf << "\033[1;37m" << G_SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
+   buf << "\033[1;37m" << SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
        << ":" << yypcontext_location(ctx)->first_column + 1 << ":\033[0m";
    buf << " \033[1;31m" << "Syntax error:" << "\033[0m";  // 添加红色的"Syntax error:"标记
    bool have_expected = false;  // 标记是否有期望的token信息

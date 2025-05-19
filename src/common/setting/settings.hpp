@@ -9,10 +9,8 @@ public:
     std::string output_file;
     std::string input_file;
     int log_level;
-    int opt_level;
-    int thread_num;
 
-    Settings() : output_file(""), input_file(""), log_level(-1), opt_level(0), thread_num(4) {}
+    Settings() : output_file(""), input_file(""), log_level(-1) {}
 
     /**
      * @brief 解析命令行参数
@@ -36,6 +34,6 @@ public:
     static Settings &get_instance();
 };
 
-#define G_SETTINGS common::Settings::get_instance()
+#define SETTINGS common::Settings::get_instance()
 
 } // namespace common
