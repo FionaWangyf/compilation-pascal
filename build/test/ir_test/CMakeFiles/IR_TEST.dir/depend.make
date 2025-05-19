@@ -5,10 +5,6 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/stmt.hp
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/visitor.hpp
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/stmt.cpp
 
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt.hpp
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.hpp
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
-
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.hpp
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.cpp
 
@@ -37,7 +33,6 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: ../src/pa
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: ../src/parser/yacc_pascal.hpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/ast/stmt.hpp
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/ast/stmt_test.hpp
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/common/log/log.hpp
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/common/setting/settings.hpp
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/lex_pascal.hpp

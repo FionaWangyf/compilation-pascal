@@ -5,10 +5,6 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/s
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/visitor.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/stmt.cpp
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
-
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.cpp
 
@@ -22,7 +18,6 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: ../
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: ../src/parser/yacc_pascal.hpp
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/ast/stmt.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/ast/stmt_test.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/common/log/log.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/common/setting/settings.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/lex_pascal.hpp
@@ -30,7 +25,6 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ..
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.hpp
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../src/ast/stmt.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../src/ast/stmt_test.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../src/common/log/log.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../test/bison_test/ASTPrettyPrinter.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../test/bison_test/main.cpp

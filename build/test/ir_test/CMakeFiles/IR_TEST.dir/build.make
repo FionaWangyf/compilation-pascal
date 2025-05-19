@@ -70,22 +70,9 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.s"
 	cd /src/build/test/ir_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt.cpp -o CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.s
 
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o"
-	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o -c /src/src/ast/stmt_test.cpp
-
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.i"
-	cd /src/build/test/ir_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ast/stmt_test.cpp > CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.i
-
-test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.s"
-	cd /src/build/test/ir_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt_test.cpp -o CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.s
-
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o -c /src/src/common/log/log.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.i: cmake_force
@@ -98,7 +85,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.s: cmake_force
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o: ../src/common/setting/settings.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o -c /src/src/common/setting/settings.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.i: cmake_force
@@ -111,7 +98,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.s: cma
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o: ../src/common/thpool/thpool.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o -c /src/src/common/thpool/thpool.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.i: cmake_force
@@ -124,7 +111,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.s: cmake_
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o: ../src/ir/ir.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.o -c /src/src/ir/ir.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.i: cmake_force
@@ -137,7 +124,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir.cpp.s: cmake_force
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o: ../src/ir/ir_gen.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.o -c /src/src/ir/ir_gen.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.i: cmake_force
@@ -150,7 +137,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ir/ir_gen.cpp.s: cmake_force
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: ../src/parser/lex_pascal.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.o -c /src/src/parser/lex_pascal.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.i: cmake_force
@@ -163,7 +150,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/lex_pascal.cpp.s: cmake_for
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o -c /src/src/parser/yacc_pascal.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.i: cmake_force
@@ -176,7 +163,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/parser/yacc_pascal.cpp.s: cmake_fo
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o: ../src/token/token.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.o -c /src/src/token/token.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.i: cmake_force
@@ -189,7 +176,7 @@ test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/token/token.cpp.s: cmake_force
 
 test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o: test/ir_test/CMakeFiles/IR_TEST.dir/flags.make
 test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o: ../test/ir_test/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o"
 	cd /src/build/test/ir_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/IR_TEST.dir/main.cpp.o -c /src/test/ir_test/main.cpp
 
 test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.i: cmake_force
@@ -203,7 +190,6 @@ test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.s: cmake_force
 # Object files for target IR_TEST
 IR_TEST_OBJECTS = \
 "CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o" \
-"CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o" \
 "CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o" \
 "CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o" \
 "CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o" \
@@ -218,7 +204,6 @@ IR_TEST_OBJECTS = \
 IR_TEST_EXTERNAL_OBJECTS =
 
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o
-../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o
@@ -230,7 +215,7 @@ IR_TEST_EXTERNAL_OBJECTS =
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/main.cpp.o
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/build.make
 ../bin/IR_TEST: test/ir_test/CMakeFiles/IR_TEST.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable ../../../bin/IR_TEST"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable ../../../bin/IR_TEST"
 	cd /src/build/test/ir_test && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/IR_TEST.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

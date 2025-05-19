@@ -5,7 +5,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/src/src/ast/stmt.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o"
-  "/src/src/ast/stmt_test.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o"
   "/src/src/common/log/log.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o"
   "/src/src/common/setting/settings.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
   "/src/src/parser/lex_pascal.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o"

@@ -8,11 +8,10 @@
 #include <vector>
 #include <map>
 #include <type_traits>
-
+#include <iostream>
 #include "common/log/log.hpp"//日志系统
 #include "common/setting/settings.hpp"//编译器设置
 #include "ast/stmt.hpp"//抽象语法树定义
-#include "ast/stmt_test.hpp"//ast测试
 #include "yacc_pascal.hpp"//bison生成的头文件
 #include "lex_pascal.hpp"//flex生成的头文件
 

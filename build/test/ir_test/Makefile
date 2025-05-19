@@ -163,33 +163,6 @@ __/__/src/ast/stmt.cpp.s:
 	cd /src/build && $(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.s
 .PHONY : __/__/src/ast/stmt.cpp.s
 
-__/__/src/ast/stmt_test.o: __/__/src/ast/stmt_test.cpp.o
-
-.PHONY : __/__/src/ast/stmt_test.o
-
-# target to build an object file
-__/__/src/ast/stmt_test.cpp.o:
-	cd /src/build && $(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o
-.PHONY : __/__/src/ast/stmt_test.cpp.o
-
-__/__/src/ast/stmt_test.i: __/__/src/ast/stmt_test.cpp.i
-
-.PHONY : __/__/src/ast/stmt_test.i
-
-# target to preprocess a source file
-__/__/src/ast/stmt_test.cpp.i:
-	cd /src/build && $(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.i
-.PHONY : __/__/src/ast/stmt_test.cpp.i
-
-__/__/src/ast/stmt_test.s: __/__/src/ast/stmt_test.cpp.s
-
-.PHONY : __/__/src/ast/stmt_test.s
-
-# target to generate assembly for a file
-__/__/src/ast/stmt_test.cpp.s:
-	cd /src/build && $(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.s
-.PHONY : __/__/src/ast/stmt_test.cpp.s
-
 __/__/src/common/log/log.o: __/__/src/common/log/log.cpp.o
 
 .PHONY : __/__/src/common/log/log.o
@@ -446,9 +419,6 @@ help:
 	@echo "... __/__/src/ast/stmt.o"
 	@echo "... __/__/src/ast/stmt.i"
 	@echo "... __/__/src/ast/stmt.s"
-	@echo "... __/__/src/ast/stmt_test.o"
-	@echo "... __/__/src/ast/stmt_test.i"
-	@echo "... __/__/src/ast/stmt_test.s"
 	@echo "... __/__/src/common/log/log.o"
 	@echo "... __/__/src/common/log/log.i"
 	@echo "... __/__/src/common/log/log.s"

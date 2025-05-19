@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "../../../bin/BISON_TEST"
   "../../../bin/BISON_TEST.pdb"
   "CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o"
-  "CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o"
   "CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o"
   "CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
   "CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o"

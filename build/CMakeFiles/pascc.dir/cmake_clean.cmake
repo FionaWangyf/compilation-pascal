@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "../bin/pascc"
   "../bin/pascc.pdb"
   "CMakeFiles/pascc.dir/src/ast/stmt.cpp.o"
-  "CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o"
   "CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
   "CMakeFiles/pascc.dir/src/common/log/log.cpp.o"
   "CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"

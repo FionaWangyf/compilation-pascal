@@ -5,7 +5,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/src/src/ast/stmt.cpp" "/src/build/CMakeFiles/pascc.dir/src/ast/stmt.cpp.o"
-  "/src/src/ast/stmt_test.cpp" "/src/build/CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o"
   "/src/src/builder/c/c_builder.cpp" "/src/build/CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o"
   "/src/src/common/log/log.cpp" "/src/build/CMakeFiles/pascc.dir/src/common/log/log.cpp.o"
   "/src/src/common/setting/settings.cpp" "/src/build/CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"

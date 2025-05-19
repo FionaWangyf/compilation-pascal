@@ -115,12 +115,12 @@ test/ir_test/clean: test/ir_test/CMakeFiles/IR_TEST.dir/clean
 CMakeFiles/pascc.dir/all:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/depend
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/src/build/CMakeFiles --progress-num=21,22,23,24,25,26,27,28,29,30,31,32,33,34 "Built target pascc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/src/build/CMakeFiles --progress-num=19,20,21,22,23,24,25,26,27,28,29,30,31 "Built target pascc"
 .PHONY : CMakeFiles/pascc.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/pascc.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 14
+	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 13
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/pascc.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 0
 .PHONY : CMakeFiles/pascc.dir/rule
@@ -142,12 +142,12 @@ CMakeFiles/pascc.dir/clean:
 test/bison_test/CMakeFiles/BISON_TEST.dir/all:
 	$(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/depend
 	$(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/src/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target BISON_TEST"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/src/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target BISON_TEST"
 .PHONY : test/bison_test/CMakeFiles/BISON_TEST.dir/all
 
 # Build rule for subdir invocation for target.
 test/bison_test/CMakeFiles/BISON_TEST.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 7
 	$(MAKE) -f CMakeFiles/Makefile2 test/bison_test/CMakeFiles/BISON_TEST.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 0
 .PHONY : test/bison_test/CMakeFiles/BISON_TEST.dir/rule
@@ -169,12 +169,12 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/clean:
 test/ir_test/CMakeFiles/IR_TEST.dir/all:
 	$(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/depend
 	$(MAKE) -f test/ir_test/CMakeFiles/IR_TEST.dir/build.make test/ir_test/CMakeFiles/IR_TEST.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/src/build/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19,20 "Built target IR_TEST"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/src/build/CMakeFiles --progress-num=8,9,10,11,12,13,14,15,16,17,18 "Built target IR_TEST"
 .PHONY : test/ir_test/CMakeFiles/IR_TEST.dir/all
 
 # Build rule for subdir invocation for target.
 test/ir_test/CMakeFiles/IR_TEST.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 12
+	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 11
 	$(MAKE) -f CMakeFiles/Makefile2 test/ir_test/CMakeFiles/IR_TEST.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /src/build/CMakeFiles 0
 .PHONY : test/ir_test/CMakeFiles/IR_TEST.dir/rule

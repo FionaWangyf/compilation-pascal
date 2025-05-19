@@ -12,7 +12,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(AST_SOURCE_FILES
     ../../src/ast/stmt.cpp
-    ../../src/ast/stmt_test.cpp
 )
 
 set(LOG_SOURCE_FILES

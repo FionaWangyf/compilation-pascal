@@ -187,33 +187,6 @@ src/ast/stmt.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt.cpp.s
 .PHONY : src/ast/stmt.cpp.s
 
-src/ast/stmt_test.o: src/ast/stmt_test.cpp.o
-
-.PHONY : src/ast/stmt_test.o
-
-# target to build an object file
-src/ast/stmt_test.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o
-.PHONY : src/ast/stmt_test.cpp.o
-
-src/ast/stmt_test.i: src/ast/stmt_test.cpp.i
-
-.PHONY : src/ast/stmt_test.i
-
-# target to preprocess a source file
-src/ast/stmt_test.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.i
-.PHONY : src/ast/stmt_test.cpp.i
-
-src/ast/stmt_test.s: src/ast/stmt_test.cpp.s
-
-.PHONY : src/ast/stmt_test.s
-
-# target to generate assembly for a file
-src/ast/stmt_test.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.s
-.PHONY : src/ast/stmt_test.cpp.s
-
 src/builder/c/c_builder.o: src/builder/c/c_builder.cpp.o
 
 .PHONY : src/builder/c/c_builder.o
@@ -526,9 +499,6 @@ help:
 	@echo "... src/ast/stmt.o"
 	@echo "... src/ast/stmt.i"
 	@echo "... src/ast/stmt.s"
-	@echo "... src/ast/stmt_test.o"
-	@echo "... src/ast/stmt_test.i"
-	@echo "... src/ast/stmt_test.s"
 	@echo "... src/builder/c/c_builder.o"
 	@echo "... src/builder/c/c_builder.i"
 	@echo "... src/builder/c/c_builder.s"

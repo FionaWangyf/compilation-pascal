@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "../../../bin/IR_TEST"
   "../../../bin/IR_TEST.pdb"
   "CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt.cpp.o"
-  "CMakeFiles/IR_TEST.dir/__/__/src/ast/stmt_test.cpp.o"
   "CMakeFiles/IR_TEST.dir/__/__/src/common/log/log.cpp.o"
   "CMakeFiles/IR_TEST.dir/__/__/src/common/setting/settings.cpp.o"
   "CMakeFiles/IR_TEST.dir/__/__/src/common/thpool/thpool.cpp.o"

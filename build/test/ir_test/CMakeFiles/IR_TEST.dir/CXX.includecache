@@ -18,14 +18,6 @@ utility
 vector
 -
 
-../src/ast/stmt_test.hpp
-iostream
--
-string
--
-ast/stmt.hpp
-../src/ast/ast/stmt.hpp
-
 ../src/ast/visitor.hpp
 
 ../src/common/exception/exception.hpp
@@ -127,14 +119,6 @@ ast/visitor.hpp
 /src/src/ast/ast/visitor.hpp
 ast/stmt.hpp
 /src/src/ast/ast/stmt.hpp
-
-/src/src/ast/stmt_test.cpp
-ast/stmt_test.hpp
-/src/src/ast/ast/stmt_test.hpp
-sstream
--
-thread
--
 
 /src/src/common/log/log.cpp
 common/log/log.hpp
@@ -263,14 +247,14 @@ map
 -
 type_traits
 -
+iostream
+-
 common/log/log.hpp
 /src/src/parser/common/log/log.hpp
 common/setting/settings.hpp
 /src/src/parser/common/setting/settings.hpp
 ast/stmt.hpp
 /src/src/parser/ast/stmt.hpp
-ast/stmt_test.hpp
-/src/src/parser/ast/stmt_test.hpp
 yacc_pascal.hpp
 /src/src/parser/yacc_pascal.hpp
 lex_pascal.hpp

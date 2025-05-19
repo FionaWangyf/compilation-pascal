@@ -109,22 +109,9 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s"
 	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o"
-	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o -c /src/src/ast/stmt_test.cpp
-
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.i"
-	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ast/stmt_test.cpp > CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.i
-
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.s"
-	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt_test.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.s
-
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o"
 	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o -c /src/src/common/log/log.cpp
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.i: cmake_force
@@ -137,7 +124,7 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.s: cmake_
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o: ../src/common/setting/settings.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
 	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o -c /src/src/common/setting/settings.cpp
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.i: cmake_force
@@ -154,7 +141,6 @@ BISON_TEST_OBJECTS = \
 "CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o" \
-"CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
 
@@ -165,12 +151,11 @@ BISON_TEST_EXTERNAL_OBJECTS =
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o
-../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt_test.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/build.make
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable ../../../bin/BISON_TEST"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable ../../../bin/BISON_TEST"
 	cd /src/build/test/bison_test && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/BISON_TEST.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

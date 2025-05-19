@@ -5,10 +5,6 @@ CMakeFiles/pascc.dir/src/ast/stmt.cpp.o: ../src/ast/stmt.hpp
 CMakeFiles/pascc.dir/src/ast/stmt.cpp.o: ../src/ast/visitor.hpp
 CMakeFiles/pascc.dir/src/ast/stmt.cpp.o: ../src/ast/stmt.cpp
 
-CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.hpp
-CMakeFiles/pascc.dir/src/ast/stmt_test.cpp.o: ../src/ast/stmt_test.cpp
-
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/ast/stmt.hpp
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/ast/visitor.hpp
 CMakeFiles/pascc.dir/src/builder/c/c_builder.cpp.o: ../src/builder/builder.hpp
@@ -67,7 +63,6 @@ CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o: ../src/parser/lex_pascal.cpp
 CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o: ../src/parser/yacc_pascal.hpp
 
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/ast/stmt.hpp
-CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/ast/stmt_test.hpp
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/common/log/log.hpp
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/common/setting/settings.hpp
 CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/parser/lex_pascal.hpp
