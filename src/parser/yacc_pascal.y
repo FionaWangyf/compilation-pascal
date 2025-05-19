@@ -482,6 +482,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 %type <stmt_list> statement_list        /* 语句列表 */
 %type <stmt_list> statement             /* 单个语句 */
 %type <func_call_stmt> procedure_call   /* 过程调用 */
+%type <stmt_list> else_part
 %type <lval_list> variable_list         /* 变量列表 */
 %type <lval> variable                   /* 单个变量引用 */
 
@@ -528,6 +529,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 //解决“悬空else”问题（类似于右结合）
 %nonassoc THEN //较低优先级
 %nonassoc ELSE //较高优先级
+%expect 1
 
 %%
 // 语法规则定义部分
@@ -1386,56 +1388,34 @@ statement
        GRAMMAR_TRACE("statement -> WHILE expression DO statement");  // 记录语法解析跟踪信息
    }
    
-   // 规则6：if语句（无else分支）
-   | IF expression THEN statement %prec THEN  {  // 匹配"if 条件 then 语句"形式
-                                                 // %prec THEN 指定规则6的优先级等于THEN终结符的优先级，用于解决else悬挂问题
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
-       
-       ifStmt->expr = std::unique_ptr<ExprStmt>($2);  // 设置条件表达式
-       
-       // 处理if条件为真时的语句
-       if ($4 != nullptr) {  // 如果then分支不为空
-           for (auto stmt : *$4) {  // 遍历then分支中的所有语句
-               ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
-           }
-       }
-       
-       delete $4;  // 释放语句列表容器（内容已转移）
-       stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
-       $$ = stmtList;  // 返回包含if语句的列表
-       
-       GRAMMAR_TRACE("statement -> IF expression THEN statement");  // 记录语法解析跟踪信息
-   }
-   
-   // 规则7：if-else语句
-   | IF expression THEN statement ELSE statement  {  // 匹配"if 条件 then 语句1 else 语句2"形式
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
-       
-       ifStmt->expr = std::unique_ptr<ExprStmt>($2);  // 设置条件表达式
-       
-       // 处理if条件为真时的语句
-       if ($4 != nullptr) {  // 如果then分支不为空
-           for (auto stmt : *$4) {  // 遍历then分支中的所有语句
-               ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
-           }
-       }
-       
-       // 处理if条件为假时的语句
-       if ($6 != nullptr) {  // 如果else分支不为空
-           for (auto stmt : *$6) {  // 遍历else分支中的所有语句
-               ifStmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的false分支
-           }
-       }
-       
-       stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
-       delete $4;  // 释放then分支语句列表容器（内容已转移）
-       delete $6;  // 释放else分支语句列表容器（内容已转移）
-       
-       $$ = stmtList;  // 返回包含if-else语句的列表
-       GRAMMAR_TRACE("statement -> IF expression THEN statement ELSE statement");  // 记录语法解析跟踪信息
-   }
+    // 规则6：if语句（带可选的else部分）
+    | IF expression THEN statement else_part {
+        auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+        auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
+        
+        ifStmt->expr = std::unique_ptr<ExprStmt>($2);  // 设置条件表达式
+        
+        // 处理if条件为真时的语句
+        if ($4 != nullptr) {  // 如果then分支不为空
+            for (auto stmt : *$4) {  // 遍历then分支中的所有语句
+                ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
+            }
+        }
+        
+        // 处理if条件为假时的语句（else部分）
+        if ($5 != nullptr) {  // 如果else分支不为空
+            for (auto stmt : *$5) {  // 遍历else分支中的所有语句
+                ifStmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的false分支
+            }
+        }
+        
+        stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
+        delete $4;  // 释放then分支语句列表容器（内容已转移）
+        delete $5;  // 释放else分支语句列表容器（内容已转移）
+        
+        $$ = stmtList;  // 返回包含if语句的列表
+        GRAMMAR_TRACE("statement -> IF expression THEN statement else_part");  // 记录语法解析跟踪信息
+    }
    
    // 规则8：for循环语句
    | FOR IDENTIFIER ASSIGNOP expression TO expression DO statement  {  // 匹配"for 变量:=初值 to 终值 do 循环体"形式
@@ -1641,6 +1621,21 @@ procedure_call
        GRAMMAR_TRACE("procedure_call -> IDENTIFIER '(' expression_list ')'");  // 记录语法解析跟踪信息
    }
    ;
+
+// else部分 - 定义可选的else分支
+else_part
+    // 规则1：空（无else分支）
+    : /*empty*/ {
+        $$ = nullptr;  // 返回空指针表示没有else分支
+        GRAMMAR_TRACE("else_part -> empty");  // 记录语法解析跟踪信息
+    }
+    
+    // 规则2：else分支
+    | ELSE statement {
+        $$ = $2;  // 直接返回else分支中的语句列表
+        GRAMMAR_TRACE("else_part -> ELSE statement");  // 记录语法解析跟踪信息
+    }
+    ;
 
 // 表达式列表 - 定义Pascal中由逗号分隔的表达式序列
 // 用于函数/过程调用的参数列表、数组索引和其他需要多个表达式的上下文
