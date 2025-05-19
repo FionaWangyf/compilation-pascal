@@ -1,144 +1,48 @@
-
 #include "ast/visitor.hpp"
 #include "ast/stmt.hpp"
 
+// 简化的访问者模式实现
+// 使用宏减少重复代码
+#define IMPLEMENT_ACCEPT(class_name) \
+    void class_name::accept(StmtVisitor& visitor) { \
+        visitor.visit(*this); \
+    }
 
-void ExprStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
+// 表达式语句
+IMPLEMENT_ACCEPT(ExprStmt)
+IMPLEMENT_ACCEPT(RelExprStmt)
+IMPLEMENT_ACCEPT(AddExprStmt)
+IMPLEMENT_ACCEPT(MulExprStmt)
+IMPLEMENT_ACCEPT(UnaryExprStmt)
+IMPLEMENT_ACCEPT(PrimaryExprStmt)
+IMPLEMENT_ACCEPT(ValueStmt)
+IMPLEMENT_ACCEPT(NumberStmt)
+IMPLEMENT_ACCEPT(StrStmt)
+IMPLEMENT_ACCEPT(LValStmt)
+IMPLEMENT_ACCEPT(FuncCallStmt)
 
-void RelExprStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
+// 声明语句
+IMPLEMENT_ACCEPT(PeriodStmt)
+IMPLEMENT_ACCEPT(ConstDeclStmt)
+IMPLEMENT_ACCEPT(VarDeclStmt)
+IMPLEMENT_ACCEPT(FuncHeadDeclStmt)
+IMPLEMENT_ACCEPT(FuncBodyDeclStmt)
+IMPLEMENT_ACCEPT(FuncDeclStmt)
 
-void AddExprStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
+// 功能语句
+IMPLEMENT_ACCEPT(AssignStmt)
+IMPLEMENT_ACCEPT(IfStmt)
+IMPLEMENT_ACCEPT(ForStmt)
+IMPLEMENT_ACCEPT(WhileStmt)
+IMPLEMENT_ACCEPT(ReadFuncStmt)
+IMPLEMENT_ACCEPT(WriteFuncStmt)
+IMPLEMENT_ACCEPT(BreakStmt)
+IMPLEMENT_ACCEPT(ContinueStmt)
 
-void MulExprStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
+// 主程序
+IMPLEMENT_ACCEPT(ProgramHeadStmt)
+IMPLEMENT_ACCEPT(ProgramBodyStmt)
+IMPLEMENT_ACCEPT(ProgramStmt)
 
-void UnaryExprStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void PrimaryExprStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ValueStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void NumberStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void StrStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void LValStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void FuncCallStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void PeriodStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ConstDeclStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void VarDeclStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void FuncHeadDeclStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void FuncBodyDeclStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void FuncDeclStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void AssignStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void IfStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ForStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void WhileStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ReadFuncStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void WriteFuncStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ProgramHeadStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ProgramBodyStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ProgramStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void BreakStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
-
-void ContinueStmt::accept(StmtVisitor &visitor)
-{
-    visitor.visit(*this);
-}
+// 清理宏定义，避免污染后续代码
+#undef IMPLEMENT_ACCEPT

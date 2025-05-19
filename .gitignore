@@ -1,0 +1,7 @@
+# 构建文件
+build/
+bin/
+
+# macOS元数据
+.DS_Store
+._*
