@@ -97,15 +97,14 @@ extern int yydebug;
     ORELSE = 298,                  /* ORELSE  */
     ANDTHEN = 299,                 /* ANDTHEN  */
     DOUBLE_DOT = 300,              /* DOUBLE_DOT  */
-    BRACE_PAIR = 301,              /* BRACE_PAIR  */
-    BREAK = 302,                   /* BREAK  */
-    CONTINUE = 303,                /* CONTINUE  */
-    IDENTIFIER = 304,              /* IDENTIFIER  */
-    INTEGER = 305,                 /* INTEGER  */
-    BOOLEAN = 306,                 /* BOOLEAN  */
-    REAL = 307,                    /* REAL  */
-    CHAR = 308,                    /* CHAR  */
-    STRING = 309                   /* STRING  */
+    BREAK = 301,                   /* BREAK  */
+    CONTINUE = 302,                /* CONTINUE  */
+    IDENTIFIER = 303,              /* IDENTIFIER  */
+    INTEGER = 304,                 /* INTEGER  */
+    BOOLEAN = 305,                 /* BOOLEAN  */
+    REAL = 306,                    /* REAL  */
+    CHAR = 307,                    /* CHAR  */
+    STRING = 308                   /* STRING  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -114,7 +113,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 370 "yacc_pascal.y"
+#line 368 "yacc_pascal.y"
 
     /* 程序结构相关类型 */
     ProgramStmt *                                   program_struct;   /* 整个程序的AST节点 */
@@ -177,7 +176,7 @@ union YYSTYPE
     char                                            charactor;        /* 字符值 */
     int                                             token;            /* 令牌值，用于某些特殊情况 */
 
-#line 181 "yacc_pascal.hpp"
+#line 180 "yacc_pascal.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

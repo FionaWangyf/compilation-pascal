@@ -278,7 +278,6 @@ enum class ParserContext {
     IdVarpart,          ///< 变量的附加部分，如数组索引 "[i, j]"
     
     ExpressionList,     ///< 表达式列表，如函数调用参数列表
-    ArrayIndexExpression, ///< 数组索引表达式，如 "a[i, j+1]" 中的索引部分
     BracketExpressionList, ///< 方括号表达式列表，用于多维数组索引
     
     Expression,         ///< 完整表达式，可包含关系运算符（如 "a > b"）
@@ -344,7 +343,6 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
     ORELSE      /* 短路逻辑或运算符 'orelse'（Pascal扩展） */
     ANDTHEN     /* 短路逻辑与运算符 'andthen'（Pascal扩展） */
     DOUBLE_DOT  /* 范围运算符 '..' */
-    BRACE_PAIR  /* 多维数组索引分隔符 */
     BREAK       /* 跳出循环关键字 'break'（Pascal扩展） */
     CONTINUE    /* 继续循环关键字 'continue'（Pascal扩展） */
 
@@ -491,7 +489,6 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 /* 表达式相关非终结符 */
 %type <expr_list> id_varpart            /* 变量的附加部分（如数组索引） */
 %type <expr_list> expression_list       /* 表达式列表 */
-%type <expr_list> array_index_expression /* 数组索引表达式 */
 %type <expr> expression                 /* 完整表达式 */
 %type <add_expr> simple_expression      /* 简单表达式（含加法级运算） */
 %type <mul_expr> term                   /* 项（含乘法级运算） */
@@ -1584,404 +1581,459 @@ variable
    ;
 
 // 定义Pascal中变量引用时可选的数组索引部分，处理不同形式的数组下标表示法，包括单维数组、多维数组
+// 4.4 变量附加部分（数组下标）- 定义Pascal中变量引用时可选的数组索引部分
+// 简化版：只处理标准形式的数组下标
 id_varpart 
-   // 规则1：空规则 - 处理没有数组下标的普通变量
-   : /*empty*/  {  // 匹配没有数组下标的情况，如简单变量"x"
-       $$ = nullptr;  // 返回空指针，表示没有数组下标
-       GRAMMAR_TRACE("id_varpart -> empty");  // 记录语法解析跟踪信息
+    // 规则1：空规则 - 处理没有数组下标的普通变量
+    : /*empty*/  {  // 匹配没有数组下标的情况，如简单变量"x"
+        $$ = nullptr;  // 返回空指针，表示没有数组下标
+        GRAMMAR_TRACE("id_varpart -> empty");  // 记录语法解析跟踪信息
+    }
+    
+    // 规则2：标准数组下标 - 方括号内的表达式列表
+    | '[' expression_list ']'  {  // 匹配"[表达式列表]"形式，如"[i]"或"[i, j]"
+        currentParserContext = ParserContext::IdVarpart;  // 设置当前解析上下文为变量附加部分
+        
+        if ($2 != nullptr) {  // 如果表达式列表不为空
+            $$ = $2;  // 直接使用expression_list返回的表达式列表作为结果    
+        } else {  // 如果表达式列表为空（语法错误）
+            yyerror(&@2, "code_str", program, scanner, "数组下标定义出错 请检查是否符合规范");  // 报告错误：数组下标定义有误
+        }
+        
+        GRAMMAR_TRACE("id_varpart -> '[' expression_list ']'");  // 记录语法解析跟踪信息
+    }
+    ;
+
+
+// 过程调用 - 定义Pascal中过程调用的语法结构
+// 支持两种形式：不带参数的简单调用和带参数列表的调用
+// 生成函数调用语句的AST节点，用于后续代码生成
+procedure_call 
+   // 规则1：不带参数的过程调用
+   : IDENTIFIER  {  // 匹配单个标识符，如"WriteLn"或"Initialize"
+       currentParserContext = ParserContext::ProcedureCall;  // 设置当前解析上下文为过程调用
+       auto procCall = allocateNode<FuncCallStmt>();  // 创建函数调用语句节点
+       
+       procCall->id = std::string($1);  // 设置过程名称
+       free($1);  // 释放词法分析器分配的标识符字符串（已复制到节点中）
+       $$ = procCall;  // 返回创建的函数调用节点
+       
+       GRAMMAR_TRACE("procedure_call -> IDENTIFIER");  // 记录语法解析跟踪信息
    }
    
-   // 规则2：标准数组下标 - 方括号内的表达式列表
-   | '[' expression_list ']'  {  // 匹配"[表达式列表]"形式，如"[i]"或"[i, j]"
-       currentParserContext = ParserContext::IdVarpart;  // 设置当前解析上下文为变量附加部分
+   // 规则2：带参数的过程调用
+   | IDENTIFIER '(' expression_list ')'  {  // 匹配"标识符(参数列表)"形式，如"WriteLn(x, y+1)"
+       currentParserContext = ParserContext::ProcedureCall;  // 设置当前解析上下文为过程调用
+       auto procCall = allocateNode<FuncCallStmt>();  // 创建函数调用语句节点
        
-       if ($2 != nullptr) {  // 如果表达式列表不为空
-           $$ = $2;  // 直接使用expression_list返回的表达式列表作为结果    
-       } else {  // 如果表达式列表为空（语法错误）
-           yyerror(&@2, "code_str", program, scanner, "数组下标定义出错 请检查是否符合规范");  // 报告错误：数组下标定义有误
+       procCall->id = std::string($1);  // 设置过程名称
+       
+       // 处理参数表达式列表
+       if ($3 != nullptr) {  // 如果参数列表不为空
+           for (auto expr : *$3) {  // 遍历所有参数表达式
+               procCall->args.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个参数表达式添加到函数调用的参数列表
+           }
+           delete $3;  // 释放表达式列表容器（内容已转移到函数调用节点）
        }
        
-       GRAMMAR_TRACE("id_varpart -> '[' expression_list ']'");  // 记录语法解析跟踪信息
-   }
-   
-   // 规则3：特殊格式的多维数组下标
-   | '[' expression BRACE_PAIR array_index_expression  {  // 匹配特殊的多维数组索引形式
-                                                          // BRACE_PAIR可能是逗号或其他分隔符
-       currentParserContext = ParserContext::IdVarpart;  // 设置当前解析上下文为变量附加部分
+       free($1);  // 释放词法分析器分配的标识符字符串
+       $$ = procCall;  // 返回创建的函数调用节点
        
-       if ($4 != nullptr) {  // 如果后续的数组索引表达式不为空
-           $$ = $4;  // 使用array_index_expression返回的表达式列表
-           $$->emplace_back($2);  // 添加第一个表达式到列表末尾
-           std::reverse($$->begin(), $$->end());  // 反转列表顺序，使索引按正确顺序排列
-       } else {  // 如果数组索引表达式为空（错误情况）
-           // 错误处理
-           $$ = nullptr;  // 返回空指针，表示解析失败
-       }
-       
-       GRAMMAR_TRACE("id_varpart -> '[' expression BRACE_PAIR array_index_expression");  // 记录语法解析跟踪信息
+       GRAMMAR_TRACE("procedure_call -> IDENTIFIER '(' expression_list ')'");  // 记录语法解析跟踪信息
    }
    ;
 
-// 4.5 数组索引表达式
-array_index_expression
-    : expression ']'  {
-        currentParserContext = ParserContext::ArrayIndexExpression;
-        auto exprList = allocateNode<std::vector<ExprStmt *>>();
-        
-        exprList->emplace_back($1);
-        $$ = exprList;
-        
-        GRAMMAR_TRACE("array_index_expression -> expression_list");
-    }
-    | expression BRACE_PAIR array_index_expression  {
-        currentParserContext = ParserContext::ArrayIndexExpression;
-        
-        $3->emplace_back($1);
-        $$ = $3;
-        
-        GRAMMAR_TRACE("array_index_expression -> array_index_expression BRACE_PAIR expression ']'");
-    }
-    ;
-
-// 5.1 过程调用
-procedure_call 
-    : IDENTIFIER  {
-        currentParserContext = ParserContext::ProcedureCall;
-        auto procCall = allocateNode<FuncCallStmt>();
-        
-        procCall->id = std::string($1);
-        free($1);
-        $$ = procCall;
-        
-        GRAMMAR_TRACE("procedure_call -> IDENTIFIER");
-    }
-    | IDENTIFIER '(' expression_list ')'  {
-        currentParserContext = ParserContext::ProcedureCall;
-        auto procCall = allocateNode<FuncCallStmt>();
-        
-        procCall->id = std::string($1);
-        
-        // 处理参数表达式列表
-        if ($3 != nullptr) {
-            for (auto expr : *$3) {
-                procCall->args.emplace_back(std::unique_ptr<ExprStmt>(expr));
-            }
-            delete $3;
-        }
-        
-        free($1);
-        $$ = procCall;
-        
-        GRAMMAR_TRACE("procedure_call -> IDENTIFIER '(' expression_list ')'");
-    }
-    ;
-
-// 5.3 表达式列表
+// 表达式列表 - 定义Pascal中由逗号分隔的表达式序列
+// 用于函数/过程调用的参数列表、数组索引和其他需要多个表达式的上下文
+// 支持空列表、单个表达式和多个表达式，构建表示表达式序列的数据结构
 expression_list 
-    : /*empty*/  {
-        $$ = nullptr;
-        GRAMMAR_TRACE("expression_list -> empty");
-    }
-    | expression  {
-        currentParserContext = ParserContext::ExpressionList;
-        auto exprList = allocateNode<std::vector<ExprStmt *>>();
-        
-        exprList->emplace_back($1);
-        $$ = exprList;
-        
-        GRAMMAR_TRACE("expression_list -> expression");
-    }
-    | expression_list ',' expression  {
-        currentParserContext = ParserContext::ExpressionList;
-        
-        $1->emplace_back($3);
-        $$ = $1;
-        
-        GRAMMAR_TRACE("expression_list -> expression_list ',' expression");
-    }
-    ;
+   // 规则1：空表达式列表
+   : /*empty*/  {  // 匹配空表达式列表，如"()"或"[]"中没有内容
+       $$ = nullptr;  // 返回空指针，表示空列表
+       GRAMMAR_TRACE("expression_list -> empty");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则2：单个表达式
+   | expression  {  // 匹配单个表达式，如"(x)"或"[i]"
+       currentParserContext = ParserContext::ExpressionList;  // 设置当前解析上下文为表达式列表
+       auto exprList = allocateNode<std::vector<ExprStmt *>>();  // 创建表达式列表容器
+       
+       exprList->emplace_back($1);  // 将表达式添加到列表中
+       $$ = exprList;  // 返回包含单个表达式的列表
+       
+       GRAMMAR_TRACE("expression_list -> expression");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则3：已有表达式列表后添加新表达式
+   | expression_list ',' expression  {  // 匹配"已有表达式列表,新表达式"形式，如"x, y, z"
+       currentParserContext = ParserContext::ExpressionList;  // 设置当前解析上下文为表达式列表
+       
+       $1->emplace_back($3);  // 将新表达式添加到已有列表末尾
+       $$ = $1;  // 返回更新后的表达式列表
+       
+       GRAMMAR_TRACE("expression_list -> expression_list ',' expression");  // 记录语法解析跟踪信息
+   }
+   ;
 
-// 5.4 表达式
+// 表达式 - 定义Pascal语言中的表达式语法结构
+// 处理简单表达式和关系表达式（使用关系运算符如=, <>, <, <=, >, >=, in连接的表达式）
+// 生成表达式的AST节点，支持条件判断、赋值和其他需要表达式的上下文
 expression 
-    : simple_expression  {
-        currentParserContext = ParserContext::Expression;
-        $$ = ExprFactory::createFromSimpleExpr($1);
-        
-        GRAMMAR_TRACE("expression -> simple_expression");
-    }
-    | expression relop simple_expression  {
-        currentParserContext = ParserContext::Expression;
-        auto expr = $1;
-        RelExprStmt::Term term;
-        
-        term.type = getRelationOperator($2);
-        term.add_expr = std::unique_ptr<AddExprStmt>($3);
-        expr->rel_expr->terms.emplace_back(std::move(term));
-        
-        $$ = expr;
-        GRAMMAR_TRACE("expression -> simple_expression relop simple_expression");
-    }
-    ;
+   // 规则1：简单表达式
+   : simple_expression  {  // 匹配不包含关系运算符的表达式，如"x+y"或"a*b-c"
+       currentParserContext = ParserContext::Expression;  // 设置当前解析上下文为表达式
+       $$ = ExprFactory::createFromSimpleExpr($1);  // 使用工厂方法将简单表达式转换为完整表达式
+                                                    // 创建包含简单表达式的表达式节点结构
+       
+       GRAMMAR_TRACE("expression -> simple_expression");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则2：关系表达式
+   | expression relop simple_expression  {  // 匹配"表达式 关系运算符 简单表达式"形式，如"a > b"或"x = y+1"
+       currentParserContext = ParserContext::Expression;  // 设置当前解析上下文为表达式
+       auto expr = $1;  // 获取左侧已解析的表达式
+       RelExprStmt::Term term;  // 创建新的关系表达式项结构
+       
+       term.type = getRelationOperator($2);  // 设置关系运算符类型（通过将语法分析器的token转换为枚举值）
+       term.add_expr = std::unique_ptr<AddExprStmt>($3);  // 设置右侧的简单表达式，使用智能指针管理内存
+       expr->rel_expr->terms.emplace_back(std::move(term));  // 将新的关系表达式项添加到表达式节点中
+                                                             // 使用std::move转移所有权
+       
+       $$ = expr;  // 返回更新后的表达式节点作为规则结果
+       GRAMMAR_TRACE("expression -> simple_expression relop simple_expression");  // 记录语法解析跟踪信息
+                                                                                 // 注意：跟踪信息不准确，应为"expression relop simple_expression"
+   }
+   ;
 
-// 5.5 简单表达式
+// 简单表达式 - 定义Pascal中简单表达式的语法结构
+// 处理由加法级运算符(+, -, or)连接的项(term)序列
+// 构建简单表达式的AST节点，作为完整表达式的组成部分
 simple_expression 
-    : term  {
-        currentParserContext = ParserContext::SimpleExpression;
-        $$ = ExprFactory::createFromTerm($1);
-        
-        GRAMMAR_TRACE("simple_expression -> term");
-    }
-    | simple_expression addop term  {
-        currentParserContext = ParserContext::SimpleExpression;
-        auto addExpr = $1;
-        AddExprStmt::Term term;
-        
-        term.type = getArithmeticOperator($2);
-        term.mul_expr = std::unique_ptr<MulExprStmt>($3);
-        addExpr->terms.emplace_back(std::move(term));
-        
-        $$ = addExpr;
-        GRAMMAR_TRACE("simple_expression -> simple_expression %lld term\n");
-    }
-    ;
+   // 规则1：单个项
+   : term  {  // 匹配单个项，如"a*b"或"x"
+       currentParserContext = ParserContext::SimpleExpression;  // 设置当前解析上下文为简单表达式
+       $$ = ExprFactory::createFromTerm($1);  // 使用工厂方法将项转换为简单表达式
+                                             // 创建包含单个项的简单表达式节点
+       
+       GRAMMAR_TRACE("simple_expression -> term");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则2：加法表达式
+   | simple_expression addop term  {  // 匹配"简单表达式 加法运算符 项"形式，如"a+b"或"x-y*z"
+       currentParserContext = ParserContext::SimpleExpression;  // 设置当前解析上下文为简单表达式
+       auto addExpr = $1;  // 获取左侧已解析的简单表达式
+       AddExprStmt::Term term;  // 创建新的加法表达式项
+       
+       term.type = getArithmeticOperator($2);  // 设置加法运算符类型（如Plus、Minus、Or）
+       term.mul_expr = std::unique_ptr<MulExprStmt>($3);  // 将右侧的项转换为智能指针并存储
+       addExpr->terms.emplace_back(std::move(term));  // 将新的加法表达式项添加到简单表达式节点
+                                                      // 使用std::move转移所有权
+       
+       $$ = addExpr;  // 返回更新后的简单表达式节点
+       GRAMMAR_TRACE("simple_expression -> simple_expression %lld term\n");  // 记录语法解析跟踪信息
+                                                                             // 注意：跟踪信息中有格式化问题，应使用运算符符号而非%lld
+   }
+   ;
 
-// 5.6 项
+// 项 - 定义Pascal语言中项(term)的语法结构
+// 处理由乘法级运算符(*, /, div, mod, and, andthen)连接的因子(factor)序列
+// 构建项的AST节点，作为简单表达式的组成部分，实现乘法运算优先级高于加法运算
 term 
-    : factor  {
-        currentParserContext = ParserContext::Term;
-        $$ = ExprFactory::createFromFactor($1);
-        
-        GRAMMAR_TRACE("term -> factor");
-    }
-    | term mulop factor  {
-        currentParserContext = ParserContext::Term;
-        auto mulExpr = $1;
-        MulExprStmt::Term term;
-        
-        term.type = getTermOperator($2);
-        term.unary_expr = std::unique_ptr<UnaryExprStmt>($3);
-        mulExpr->terms.emplace_back(std::move(term));
-        
-        $$ = mulExpr;
-        GRAMMAR_TRACE("term -> term mulop factor");
-    }
-    ;
+   // 规则1：单个因子
+   : factor  {  // 匹配单个因子，如"x"或"(a+b)"
+       currentParserContext = ParserContext::Term;  // 设置当前解析上下文为项
+       $$ = ExprFactory::createFromFactor($1);  // 使用工厂方法将因子转换为项
+                                               // 创建包含单个因子的项节点
+       
+       GRAMMAR_TRACE("term -> factor");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则2：乘法表达式
+   | term mulop factor  {  // 匹配"项 乘法运算符 因子"形式，如"a*b"或"x/y"
+       currentParserContext = ParserContext::Term;  // 设置当前解析上下文为项
+       auto mulExpr = $1;  // 获取左侧已解析的项
+       MulExprStmt::Term term;  // 创建新的乘法表达式项结构
+       
+       term.type = getTermOperator($2);  // 设置乘法运算符类型（如Mul、Div、Mod、And、AndThen）
+       term.unary_expr = std::unique_ptr<UnaryExprStmt>($3);  // 将右侧的因子转换为智能指针并存储
+       mulExpr->terms.emplace_back(std::move(term));  // 将新的乘法表达式项添加到项节点
+                                                      // 使用std::move转移所有权
+       
+       $$ = mulExpr;  // 返回更新后的项节点
+       GRAMMAR_TRACE("term -> term mulop factor");  // 记录语法解析跟踪信息
+   }
+   ;
 
-// 5.7 因子
+// 因子 - 定义Pascal语言中因子(factor)的语法结构
+// 因子是表达式的基本构建单元，包括常量、变量、函数调用、括号表达式和一元运算
+// 处理各种类型的基本值和带一元运算符(+, -, not)的表达式，构建表达式层次结构的底层
 factor 
-    : INTEGER  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
-        
-        unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();
-        unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        setupNumberNode(unaryExpr->primary_expr->value->number, $1);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> INTEGER");
-    }
-    | REAL  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
-        
-        unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();
-        unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        
-        double val = atof($1);
-        setupNumberNode(unaryExpr->primary_expr->value->number, val);
-        unaryExpr->primary_expr->value->number->literal = std::string($1);
-        
-        free($1);
-        $$ = unaryExpr;
-        
-        GRAMMAR_TRACE("factor -> REAL");
-    }
-    | BOOLEAN  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
-        
-        unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();
-        unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        
-        long long int val = $1 ? 1 : 0;
-        setupNumberNode(unaryExpr->primary_expr->value->number, val);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> BOOLEAN");
-    }
-    | CHAR  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
-        
-        unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();
-        unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();
-        
-        setupNumberNode(unaryExpr->primary_expr->value->number, $1);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> CHAR");
-    }
-    | variable  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
-        
-        unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();
-        unaryExpr->primary_expr->value->type = ValueStmt::ValueType::LVal;
-        unaryExpr->primary_expr->value->lval = std::unique_ptr<LValStmt>($1);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> variable");
-    }
-    | '(' expression ')'  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Parentheses);
-        
-        unaryExpr->primary_expr->expr = std::unique_ptr<ExprStmt>($2);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> '(' expression ')'");
-    }
-    | IDENTIFIER '(' expression_list ')'  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);
-        
-        unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();
-        unaryExpr->primary_expr->value->type = ValueStmt::ValueType::FuncCall;
-        unaryExpr->primary_expr->value->func_call = std::make_unique<FuncCallStmt>();
-        unaryExpr->primary_expr->value->func_call->id = std::string($1);
-        
-        // 处理函数参数
-        if ($3 != nullptr) {
-            for (auto expr : *$3) {
-                unaryExpr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));
-            }
-            delete $3;
-        }
-        
-        free($1);
-        $$ = unaryExpr;
-        
-        GRAMMAR_TRACE("factor -> IDENTIFIER '(' expression_list ')'");
-    }
-    | NOT factor  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = $2;
-        
-        unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Not);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> NOT factor");
-    }
-    | '+' factor  {
-        currentParserContext = ParserContext::Factor;
-        $$ = $2;  // 正号不改变值
-        
-        GRAMMAR_TRACE("factor -> '+' factor");
-    }
-    | '-' factor  {
-        currentParserContext = ParserContext::Factor;
-        auto unaryExpr = $2;
-        
-        unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus);
-        
-        $$ = unaryExpr;
-        GRAMMAR_TRACE("factor -> '-' factor");
-    }
-    ;
+   // 规则1：整数常量
+   : INTEGER  {  // 匹配整数字面量，如"42"或"1024"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       
+       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       setupNumberNode(unaryExpr->primary_expr->value->number, $1);  // 设置数字节点的值和类型信息
+       
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       GRAMMAR_TRACE("factor -> INTEGER");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则2：实数常量
+   | REAL  {  // 匹配实数字面量，如"3.14"或"2.71828"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       
+       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       
+       double val = atof($1);  // 将字符串转换为双精度浮点数
+       setupNumberNode(unaryExpr->primary_expr->value->number, val);  // 设置数字节点的值和类型信息
+       unaryExpr->primary_expr->value->number->literal = std::string($1);  // 保存原始字面量字符串
+       
+       free($1);  // 释放词法分析器分配的字符串内存
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       
+       GRAMMAR_TRACE("factor -> REAL");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则3：布尔常量
+   | BOOLEAN  {  // 匹配布尔字面量，如"true"或"false"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       
+       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       
+       long long int val = $1 ? 1 : 0;  // 将布尔值转换为整数（true=1, false=0）
+       setupNumberNode(unaryExpr->primary_expr->value->number, val);  // 设置数字节点的值和类型信息
+       
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       GRAMMAR_TRACE("factor -> BOOLEAN");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则4：字符常量
+   | CHAR  {  // 匹配字符字面量，如"'A'"或"'z'"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       
+       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       
+       setupNumberNode(unaryExpr->primary_expr->value->number, $1);  // 设置数字节点的值和类型信息
+       
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       GRAMMAR_TRACE("factor -> CHAR");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则5：变量引用
+   | variable  {  // 匹配变量引用，如"x"或"array[i]"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       
+       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::LVal;  // 设置值类型为左值
+       unaryExpr->primary_expr->value->lval = std::unique_ptr<LValStmt>($1);  // 设置左值节点
+       
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       GRAMMAR_TRACE("factor -> variable");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则6：括号表达式
+   | '(' expression ')'  {  // 匹配括号表达式，如"(a+b)"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Parentheses);  // 创建一元表达式节点，类型为括号表达式
+       
+       unaryExpr->primary_expr->expr = std::unique_ptr<ExprStmt>($2);  // 设置括号内的表达式
+       
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       GRAMMAR_TRACE("factor -> '(' expression ')'");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则7：函数调用
+   | IDENTIFIER '(' expression_list ')'  {  // 匹配函数调用，如"Sqrt(x)"或"Max(a, b)"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       
+       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::FuncCall;  // 设置值类型为函数调用
+       unaryExpr->primary_expr->value->func_call = std::make_unique<FuncCallStmt>();  // 创建函数调用节点
+       unaryExpr->primary_expr->value->func_call->id = std::string($1);  // 设置函数名
+       
+       // 处理函数参数
+       if ($3 != nullptr) {  // 如果有参数列表
+           for (auto expr : *$3) {  // 遍历所有参数表达式
+               unaryExpr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 添加参数
+           }
+           delete $3;  // 释放参数列表容器
+       }
+       
+       free($1);  // 释放函数名字符串
+       $$ = unaryExpr;  // 返回创建的一元表达式节点
+       
+       GRAMMAR_TRACE("factor -> IDENTIFIER '(' expression_list ')'");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则8：逻辑非运算
+   | NOT factor  {  // 匹配逻辑非表达式，如"not flag"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = $2;  // 获取操作数（已解析的因子）
+       
+       unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Not);  // 添加逻辑非运算符类型
+       
+       $$ = unaryExpr;  // 返回更新后的一元表达式节点
+       GRAMMAR_TRACE("factor -> NOT factor");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则9：正号运算
+   | '+' factor  {  // 匹配带正号的因子，如"+5"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       $$ = $2;  // 正号不改变值，直接使用操作数（因正号不影响值）
+       
+       GRAMMAR_TRACE("factor -> '+' factor");  // 记录语法解析跟踪信息
+   }
+   
+   // 规则10：负号运算
+   | '-' factor  {  // 匹配带负号的因子，如"-x"或"-5"
+       currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
+       auto unaryExpr = $2;  // 获取操作数（已解析的因子）
+       
+       unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus);  // 添加负号运算符类型
+       
+       $$ = unaryExpr;  // 返回更新后的一元表达式节点
+       GRAMMAR_TRACE("factor -> '-' factor");  // 记录语法解析跟踪信息
+   }
+   ;
 
-// 运算符定义
-addop : '+' { $$ = 0; } | '-' { $$ = 1; } | OR { $$ = 2; }
+// 运算符定义 - 将Pascal语言中的各类运算符映射为数值常量
+// 通过数值表示不同的运算符类型，简化语法规则和运算符处理
+// 加法级运算符定义 (+, -, or)
+addop 
+   : '+' { $$ = 0; }  // 加号运算符映射为0
+   | '-' { $$ = 1; }  // 减号运算符映射为1
+   | OR  { $$ = 2; }  // 逻辑或运算符映射为2
+   ;
 
-relop : '=' { $$ = 0; } | NE { $$ = 1; } | '<' { $$ = 2; } | LE { $$ = 3; } | '>' { $$ = 4; } | GE { $$ = 5; } | IN { $$ = 6; }
+// 关系运算符定义 (=, <>, <, <=, >, >=, in)
+relop 
+   : '=' { $$ = 0; }  // 等于运算符映射为0
+   | NE  { $$ = 1; }  // 不等于运算符(<>)映射为1
+   | '<' { $$ = 2; }  // 小于运算符映射为2
+   | LE  { $$ = 3; }  // 小于等于运算符(<=)映射为3
+   | '>' { $$ = 4; }  // 大于运算符映射为4
+   | GE  { $$ = 5; }  // 大于等于运算符(>=)映射为5
+   | IN  { $$ = 6; }  // 集合成员测试运算符(in)映射为6
+   ;
 
-mulop : '*' { $$ = 0; } | '/' { $$ = 1; } | DIV { $$ = 1; } | MOD { $$ = 2; } | AND { $$ = 3; } | ANDTHEN { $$ = 4; } 
+// 乘法级运算符定义 (*, /, div, mod, and, andthen)
+mulop 
+   : '*'     { $$ = 0; }  // 乘法运算符映射为0
+   | '/'     { $$ = 1; }  // 浮点除法运算符映射为1
+   | DIV     { $$ = 1; }  // 整数除法运算符也映射为1（与浮点除法共用编号）
+   | MOD     { $$ = 2; }  // 取模运算符映射为2
+   | AND     { $$ = 3; }  // 逻辑与运算符映射为3
+   | ANDTHEN { $$ = 4; }  // 短路逻辑与运算符映射为4
+   ;
 
 // 错误恢复
+// 跳过错误部分直到分号，允许编译器识别并报告多个错误而不是在第一个错误处停止
 error_recovery 
-    : error ';'  {
+    : error ';'  {// 匹配从错误标记到分号的任何内容
         yyerrok;
     }
     ;
 
 %%
-// 此处书写相关函数，会添加在生成的代码中
+// 语法分析辅助函数 - 提供Pascal编译器中的错误处理和语法分析功能
+// 包含错误报告、详细错误信息格式化、源代码位置定位和语法分析入口函数
+
+// 声明外部函数，用于将输入字符串加载到词法分析器中进行处理
 extern void scan_string(const char *str, yyscan_t scanner);
 
-// 相关所需的函数，可能包含一些错误处理函数
+// 基本错误处理函数 - 由Bison在遇到语法错误时自动调用
 int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg)
 {
-    (void)program;
-    (void)scanner;
-    (void)msg;
-    syntaxErrorFlag = true;
-    LOG_ERROR("[Syntax Error] at line %d, column %d: %s", llocp->first_line, llocp->first_column + 1, msg);
-    return 0;
+   (void)program;  // 未使用的参数，使用void转换避免编译警告
+   (void)scanner;  // 未使用的参数，使用void转换避免编译警告
+   (void)msg;      // 未使用的参数，使用void转换避免编译警告
+   
+   syntaxErrorFlag = true;  // 设置全局错误标志，表示发生了语法错误
+   LOG_ERROR("[Syntax Error] at line %d, column %d: %s", llocp->first_line, llocp->first_column + 1, msg);  // 记录错误信息到日志
+   return 0;  // 返回0表示错误已处理但不终止解析
 }
 
+// 详细语法错误报告函数 - 为用户提供更直观的错误信息
 static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramStmt ** program, void * scanner)
 {
-    syntaxErrorFlag = true;
-    int res = 0;
-    std::ostringstream buf;
-    
-    buf << "\033[1;37m" << G_SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
-        << ":" << yypcontext_location(ctx)->first_column + 1 << ":\033[0m";
-    buf << " \033[1;31m" << "Syntax error:" << "\033[0m";
-    bool have_expected = false;
-    
-    // 报告此处期望的token
-    {
-        enum { TOKENMAX = 5 };
-        yysymbol_kind_t expected[TOKENMAX];
-        int n = yypcontext_expected_tokens(ctx, expected, TOKENMAX);
-        
-        if (n < 0) {
-            // 向yyparse传递错误
-            res = n;
-        } else {
-            for (int i = 0; i < n; ++i)
-                buf << (i == 0 ? " expected" : " or") << " " << yysymbol_name(expected[i]);
-            
-            if (n > 0)
-                have_expected = true;
-        }
-    }
-    
-    // 报告意外的token
-    {
-        yysymbol_kind_t lookahead = yypcontext_token(ctx);
-        if (lookahead != YYSYMBOL_YYEMPTY)
-            buf << " before " << yysymbol_name(lookahead);
-    }
-    
-    std::string error_note;
-    std::string msg;
-    
-    locateErrorPosition(code_str, yypcontext_location(ctx), error_note, msg, have_expected);
-    
-    if (have_expected)
-        buf << " but found \"" << error_note << "\"";
-    
-    std::cerr << buf.str() << std::endl;
-    std::cerr << msg << std::endl;
-    
-    return res;
+   syntaxErrorFlag = true;  // 设置全局错误标志
+   int res = 0;  // 初始化返回值
+   std::ostringstream buf;  // 创建字符串流用于构建错误消息
+   
+   // 构建错误位置信息（高亮显示文件名和行号）
+   buf << "\033[1;37m" << G_SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
+       << ":" << yypcontext_location(ctx)->first_column + 1 << ":\033[0m";
+   buf << " \033[1;31m" << "Syntax error:" << "\033[0m";  // 添加红色的"Syntax error:"标记
+   bool have_expected = false;  // 标记是否有期望的token信息
+   
+   // 报告此处期望的token（最多显示5个）
+   {
+       enum { TOKENMAX = 5 };  // 最多显示5个期望的token
+       yysymbol_kind_t expected[TOKENMAX];  // 存储期望的token类型
+       int n = yypcontext_expected_tokens(ctx, expected, TOKENMAX);  // 获取期望的token
+       
+       if (n < 0) {  // 如果获取失败
+           // 向yyparse传递错误
+           res = n;  // 设置返回值表示错误
+       } else {  // 成功获取期望的token
+           for (int i = 0; i < n; ++i)  // 遍历所有期望的token
+               buf << (i == 0 ? " expected" : " or") << " " << yysymbol_name(expected[i]);  // 格式化显示
+           
+           if (n > 0)  // 如果有期望的token
+               have_expected = true;  // 设置标志
+       }
+   }
+   
+   // 报告意外的token（实际遇到的token）
+   {
+       yysymbol_kind_t lookahead = yypcontext_token(ctx);  // 获取当前查看的token
+       if (lookahead != YYSYMBOL_YYEMPTY)  // 如果不是空token
+           buf << " before " << yysymbol_name(lookahead);  // 添加到错误信息中
+   }
+   
+   std::string error_note;  // 存储错误部分的文本
+   std::string msg;  // 存储完整的错误消息
+   
+   // 调用辅助函数定位错误在源代码中的位置，并生成可视化的错误显示
+   locateErrorPosition(code_str, yypcontext_location(ctx), error_note, msg, have_expected);
+   
+   // 如果有期望的token，添加"但发现了xxx"的信息
+   if (have_expected)
+       buf << " but found \"" << error_note << "\"";
+   
+   // 输出错误信息
+   std::cerr << buf.str() << std::endl;  // 输出基本错误信息
+   std::cerr << msg << std::endl;  // 输出错误位置的可视化显示
+   
+   return res;  // 返回结果
 }
 
+// 主解析函数 - 语法分析的入口点，初始化词法分析器并执行解析
 int code_parse(const char * code_str, ProgramStmt ** program) {
-    yyscan_t scanner;
-    yylex_init(&scanner);
-    scan_string(code_str, scanner);
+   yyscan_t scanner;  // 词法分析器状态
+   yylex_init(&scanner);  // 初始化词法分析器
+   scan_string(code_str, scanner);  // 加载源代码字符串到词法分析器
 
-    int ret = yyparse(code_str, program, scanner);
-    
-    yylex_destroy(scanner);
-    if (syntaxErrorFlag) {
-        return -1;
-    }
-    return ret;
+   int ret = yyparse(code_str, program, scanner);  // 执行语法分析，构建AST
+   
+   yylex_destroy(scanner);  // 销毁词法分析器，释放资源
+   if (syntaxErrorFlag) {  // 检查是否发生了语法错误
+       return -1;  // 如果有错误，返回-1
+   }
+   return ret;  // 否则返回yyparse的结果（通常成功为0）
 }

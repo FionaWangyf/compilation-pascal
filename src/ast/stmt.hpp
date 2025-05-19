@@ -139,7 +139,7 @@ class ValueStmt : public BaseStmt {
 public:
     enum class ValueType {
         NULL_TYPE,
-        Number, // 立即数
+        Number, // 数值、字符、布尔值
         Str, // 字符串
         LVal, // 左值
         FuncCall, // 函数调用
