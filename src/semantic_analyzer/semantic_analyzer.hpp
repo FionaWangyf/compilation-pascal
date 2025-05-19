@@ -36,8 +36,22 @@ struct SymbolEntry {
     std::string returnType;       // 函数返回类型
     int lineOfDeclaration;        // 定义所在行
     std::vector<int> usedLines;   // 记录被引用的行号
+    bool isInitialized;           // 是否已初始化
     
     void addUsage(int line) { usedLines.push_back(line); }
+    
+    SymbolEntry() : isInitialized(false) {}
+    
+    SymbolEntry(std::string name, SymbolType type, ScopeType scope, 
+                std::string dataType, bool isArray, std::vector<int> dimensions,
+                bool isReference, std::vector<std::string> paramTypes, 
+                std::string returnType, int lineOfDeclaration, 
+                std::vector<int> usedLines, bool isInitialized = false)
+        : name(name), type(type), scope(scope), dataType(dataType), 
+          isArray(isArray), dimensions(dimensions), isReference(isReference),
+          paramTypes(paramTypes), returnType(returnType), 
+          lineOfDeclaration(lineOfDeclaration), usedLines(usedLines),
+          isInitialized(isInitialized) {}
 };
 
 // 符号表
@@ -70,11 +84,29 @@ private:
     std::string currentFunction;
     std::string currentReturnType;
     bool inLoop = false;
+    bool functionHasReturn = false; // 跟踪函数是否有返回值
+
+    // PASCAL-S标准函数
+    void addStandardFunctions();
     
     // 类型检查辅助函数
     bool checkTypeConsistency(const std::string& leftType, const std::string& rightType);
     std::string getBinaryExprType(const std::string& leftType, const std::string& rightType, const std::string& op);
     std::string getUnaryExprType(const std::string& exprType, const std::string& op);
+    
+    // PASCAL-S类型检查辅助函数
+    bool isOrdinalType(const std::string& type); // 检查是否为序数类型（整数、字符、布尔、枚举）
+    bool isRealType(const std::string& type);    // 检查是否为实数类型
+    bool checkArrayIndex(const std::string& indexType); // 检查数组索引类型
+    bool isConstantModification(const std::string& name); // 检查是否修改常量
+    
+    // 变量初始化跟踪
+    void markInitialized(const std::string& name);
+    bool checkInitialized(const std::string& name);
+    
+    // 标准函数/过程检查
+    bool isPascalStandardFunction(const std::string& name);
+    bool isPascalStandardProcedure(const std::string& name);
     
     void setType(const BaseNode* n, const std::string& t) { inferredType[n] = t; }
 public:
