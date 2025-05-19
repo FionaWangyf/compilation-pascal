@@ -56,6 +56,9 @@ private:
     void emitExpr(ExprStmt *e);
     
     bool isLastStmtInFuncBody = false;
+
+    void emitExprWithType(ExprStmt* expr, const std::string& expectType);
+    std::string currentExprType; // 用于跟踪当前表达式类型
 public:
     CodeGenerator(const semantic::SemanticAnalyzer& s, semantic::SymbolTable& st);
     ~CodeGenerator();

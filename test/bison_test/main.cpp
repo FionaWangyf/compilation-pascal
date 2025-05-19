@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "ast/stmt.hpp"
-#include "ast/stmt_test.hpp"
 #include "common/log/log.hpp"
 #include "ASTPrettyPrinter.hpp"
 

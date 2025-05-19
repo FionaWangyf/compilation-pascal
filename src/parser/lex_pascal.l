@@ -93,7 +93,6 @@ ANNO_MULTILINE            (\/\*([^*]|\*[^/])*\*\/)
 ANNO_STAR_BRACKET     (\(\*([^*]|\*[^\)])*\*\))
 UNCLOSED_COMMENT   (\{[^\}]*$)|(\/\*([^*]|\*[^/])*$)|(\(\*([^*]|\*[^\)])*$)
 
-BRACE_PAIR                (\]\[)
 OTHER_SIGN                     [\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!]
 
 ILLEGAL_CHAR       [^a-zA-Z0-9_\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!\t\n\r\ ]
@@ -154,7 +153,6 @@ ILLEGAL_CHAR       [^a-zA-Z0-9_\~\;\:\.\,\+\-\*\/\(\)\[\]\=\>\<\&\|\!\t\n\r\ ]
 "or else"                        RETURN_TOKEN(ORELSE);
 "and then"                             RETURN_TOKEN(ANDTHEN);
 
-{BRACE_PAIR}                            RETURN_TOKEN(BRACE_PAIR);
 ".."                                       RETURN_TOKEN(DOUBLE_DOT);
 
 {OTHER_SIGN}                            RETURN_TOKEN(yytext[0]);

@@ -613,7 +613,7 @@ void CodeGenerator::visit(FuncHeadDeclStmt &stmt) {
 // }
 
 void CodeGenerator::visit(FuncBodyDeclStmt &stmt) {
-    
+
     code << " {\n";
     indentLevel++;
 
@@ -790,13 +790,64 @@ void CodeGenerator::visit(WhileStmt &stmt) {
     
 //     code << ");\n";
 // }
+
+// void CodeGenerator::visit(ReadFuncStmt &stmt) {
+//     for (const auto& lvalStmt : stmt.lval) {
+//         // 查找变量类型
+//         std::string varName = (lvalStmt->id == currentFunction) ? "res" : lvalStmt->id;
+//         semantic::SymbolEntry* entry = symbolTable.lookupSymbol(varName);
+//         std::string fmt = "%lf"; // 默认int
+//         if (entry) {
+//             if (entry->dataType == "float" || entry->dataType == "real") {
+//                 fmt = "%f";
+//             } else if (entry->dataType == "char") {
+//                 fmt = "%c";
+//             } else if (entry->dataType == "string") {
+//                 fmt = "%s";
+//             }
+//         }
+//         if (lvalStmt->id == currentFunction) {
+//             code << getIndent() << "scanf(\"" << fmt << "\", &res);\n";
+//         } else {
+//             code << getIndent() << "scanf(\"" << fmt << "\", &";
+//             lvalStmt->accept(*this);
+//             code << ");\n";
+//         }
+//     }
+// }
+
 void CodeGenerator::visit(ReadFuncStmt &stmt) {
     for (const auto& lvalStmt : stmt.lval) {
-        // 如果是函数返回值变量
+        std::string fmt = "%d"; // 默认int
+        semantic::SymbolEntry* entry = symbolTable.lookupSymbol(lvalStmt->id);
         if (lvalStmt->id == currentFunction) {
-            code << getIndent() << "scanf(\"%d\", &res);\n";
+            // 是函数返回值，判断 returnType
+            if (entry) {
+                if (entry->returnType == "float" || entry->returnType == "real" ) {
+                    fmt = "%f";
+                } else if (entry->returnType == "char") {
+                    fmt = "%c";
+                } else if (entry->returnType == "string") {
+                    fmt = "%s";
+                } else if (entry->returnType == "int" || entry->returnType == "bool") {
+                    fmt = "%d";
+                }
+            }
+            code << getIndent() << "scanf(\"" << fmt << "\", &res);\n";
         } else {
-            code << getIndent() << "scanf(\"%d\", &";
+            // 普通变量，判断 dataType
+            if (entry) {
+                if (entry->dataType == "float" || entry->dataType == "real" ) {
+                    fmt = "%f";
+                } else if (entry->dataType == "char") {
+                    fmt = "%c";
+                } else if (entry->dataType == "string") {
+                    fmt = "%s";
+                } else if (entry->dataType == "int" || entry->dataType == "bool") {
+                    fmt = "%d";
+                }
+            }
+            code << getIndent() << "scanf(\"" << fmt << "\", &";
             lvalStmt->accept(*this);
             code << ");\n";
         }
