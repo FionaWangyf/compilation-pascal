@@ -29,7 +29,7 @@ public:
     ASTPrettyPrinter() = default;
     
     // 打印整个程序AST
-    std::string printProgram(const ProgramStmt* program) {
+    std::string printProgram(const ProgramNode* program) {
         if (!program) return "NULL Program";
         
         std::stringstream ss;
@@ -96,7 +96,7 @@ public:
     }
     
     // 打印常量声明
-    void printConstDeclarations(std::stringstream& ss, const ConstDeclStmt* constDecl) {
+    void printConstDeclarations(std::stringstream& ss, const ConstDeclNode* constDecl) {
         for (const auto& pair : constDecl->pairs) {
             ss << getIndent() << "ConstDeclaration: " << pair.first << std::endl;
             increaseIndent();
@@ -104,7 +104,7 @@ public:
             // 获取常量的值
             std::string valueStr = "Unknown";
             if (pair.second) {
-                if (pair.second->type == ValueStmt::ValueType::Number && pair.second->number) {
+                if (pair.second->type == ValueNode::ValueType::Number && pair.second->number) {
                     if (pair.second->number->is_real) {
                         valueStr = "REAL " + std::to_string(pair.second->number->real_val);
                     } else if (pair.second->number->is_char) {
@@ -112,7 +112,7 @@ public:
                     } else {
                         valueStr = "INTEGER " + std::to_string(pair.second->number->int_val);
                     }
-                } else if (pair.second->type == ValueStmt::ValueType::Str && pair.second->str) {
+                } else if (pair.second->type == ValueNode::ValueType::Str && pair.second->str) {
                     valueStr = "STRING '" + pair.second->str->val + "'";
                 }
             }
@@ -123,7 +123,7 @@ public:
     }
     
     // 打印变量声明
-    void printVarDeclaration(std::stringstream& ss, const VarDeclStmt* varDecl) {
+    void printVarDeclaration(std::stringstream& ss, const VarDeclNode* varDecl) {
         if (!varDecl) return;
         
         for (const auto& id : varDecl->id) {
@@ -171,7 +171,7 @@ public:
     }
     
     // 打印函数声明
-    void printFunctionDeclaration(std::stringstream& ss, const FuncDeclStmt* funcDecl) {
+    void printFunctionDeclaration(std::stringstream& ss, const FuncDeclNode* funcDecl) {
         if (!funcDecl || !funcDecl->header) return;
         
         bool isFunction = (funcDecl->header->ret_type != BasicType::VOID);
@@ -249,27 +249,27 @@ public:
     }
 
     // 打印语句
-    void printStatement(std::stringstream& ss, const BaseStmt* stmt) {
+    void printStatement(std::stringstream& ss, const BaseNode* stmt) {
         if (!stmt) return;
         
         // 根据语句类型调用相应的打印函数
-        if (const AssignStmt* assignStmt = dynamic_cast<const AssignStmt*>(stmt)) {
-            printAssignStatement(ss, assignStmt);
-        } else if (const IfStmt* ifStmt = dynamic_cast<const IfStmt*>(stmt)) {
-            printIfStatement(ss, ifStmt);
-        } else if (const WhileStmt* whileStmt = dynamic_cast<const WhileStmt*>(stmt)) {
-            printWhileStatement(ss, whileStmt);
-        } else if (const ForStmt* forStmt = dynamic_cast<const ForStmt*>(stmt)) {
-            printForStatement(ss, forStmt);
-        } else if (const ReadFuncStmt* readStmt = dynamic_cast<const ReadFuncStmt*>(stmt)) {
+        if (const AssignmentNode* assignmentNode = dynamic_cast<const AssignmentNode*>(stmt)) {
+            printAssignStatement(ss, assignmentNode);
+        } else if (const IfNode* ifNode = dynamic_cast<const IfNode*>(stmt)) {
+            printIfStatement(ss, ifNode);
+        } else if (const WhileNode* whileNode = dynamic_cast<const WhileNode*>(stmt)) {
+            printWhileStatement(ss, whileNode);
+        } else if (const ForNode* forNode = dynamic_cast<const ForNode*>(stmt)) {
+            printForStatement(ss, forNode);
+        } else if (const ReadFuncNode* readStmt = dynamic_cast<const ReadFuncNode*>(stmt)) {
             printReadStatement(ss, readStmt);
-        } else if (const WriteFuncStmt* writeStmt = dynamic_cast<const WriteFuncStmt*>(stmt)) {
+        } else if (const WriteFuncNode* writeStmt = dynamic_cast<const WriteFuncNode*>(stmt)) {
             printWriteStatement(ss, writeStmt);
-        } else if (const FuncCallStmt* funcCallStmt = dynamic_cast<const FuncCallStmt*>(stmt)) {
-            printFunctionCallStatement(ss, funcCallStmt);
-        } else if (const BreakStmt* breakStmt = dynamic_cast<const BreakStmt*>(stmt)) {
+        } else if (const FuncCallNode* funcCallNode = dynamic_cast<const FuncCallNode*>(stmt)) {
+            printFunctionCallStatement(ss, funcCallNode);
+        } else if (const BreakNode* breakNode = dynamic_cast<const BreakNode*>(stmt)) {
             ss << getIndent() << "BreakStatement" << std::endl;
-        } else if (const ContinueStmt* continueStmt = dynamic_cast<const ContinueStmt*>(stmt)) {
+        } else if (const ContinueNode* continueNode = dynamic_cast<const ContinueNode*>(stmt)) {
             ss << getIndent() << "ContinueStatement" << std::endl;
         } else {
             ss << getIndent() << "UnknownStatement" << std::endl;
@@ -277,8 +277,8 @@ public:
     }
     
     // 打印赋值语句
-    void printAssignStatement(std::stringstream& ss, const AssignStmt* assignStmt) {
-        if (!assignStmt) return;
+    void printAssignStatement(std::stringstream& ss, const AssignmentNode* assignmentNode) {
+        if (!assignmentNode) return;
         
         ss << getIndent() << "Assignment:" << std::endl;
         increaseIndent();
@@ -287,12 +287,12 @@ public:
         ss << getIndent() << "Target:" << std::endl;
         increaseIndent();
         
-        if (assignStmt->lval) {
-            ss << getIndent() << "Identifier: " << assignStmt->lval->id << std::endl;
+        if (assignmentNode->lval) {
+            ss << getIndent() << "Identifier: " << assignmentNode->lval->id << std::endl;
             
             // 数组索引
-            if (!assignStmt->lval->array_index.empty()) {
-                for (const auto& index : assignStmt->lval->array_index) {
+            if (!assignmentNode->lval->array_index.empty()) {
+                for (const auto& index : assignmentNode->lval->array_index) {
                     ss << getIndent() << "Index:" << std::endl;
                     increaseIndent();
                     printExpression(ss, index.get());
@@ -306,15 +306,15 @@ public:
         // 表达式（右值）
         ss << getIndent() << "Expression:" << std::endl;
         increaseIndent();
-        printExpression(ss, assignStmt->expr.get());
+        printExpression(ss, assignmentNode->expr.get());
         decreaseIndent();
         
         decreaseIndent();
     }
     
     // 打印if语句
-    void printIfStatement(std::stringstream& ss, const IfStmt* ifStmt) {
-        if (!ifStmt) return;
+    void printIfStatement(std::stringstream& ss, const IfNode* ifNode) {
+        if (!ifNode) return;
         
         ss << getIndent() << "IfStatement:" << std::endl;
         increaseIndent();
@@ -322,26 +322,26 @@ public:
         // 条件
         ss << getIndent() << "Condition:" << std::endl;
         increaseIndent();
-        printExpression(ss, ifStmt->expr.get());
+        printExpression(ss, ifNode->expr.get());
         decreaseIndent();
         
         // Then部分
-        if (!ifStmt->true_stmt.empty()) {
+        if (!ifNode->true_stmt.empty()) {
             ss << getIndent() << "Then:" << std::endl;
             increaseIndent();
             
-            if (ifStmt->true_stmt.size() > 1) {
+            if (ifNode->true_stmt.size() > 1) {
                 ss << getIndent() << "CompoundStatement:" << std::endl;
                 increaseIndent();
                 ss << getIndent() << "Statements:" << std::endl;
                 increaseIndent();
             }
             
-            for (const auto& stmt : ifStmt->true_stmt) {
+            for (const auto& stmt : ifNode->true_stmt) {
                 printStatement(ss, stmt.get());
             }
             
-            if (ifStmt->true_stmt.size() > 1) {
+            if (ifNode->true_stmt.size() > 1) {
                 decreaseIndent();
                 decreaseIndent();
             }
@@ -350,22 +350,22 @@ public:
         }
         
         // Else部分
-        if (!ifStmt->false_stmt.empty()) {
+        if (!ifNode->false_stmt.empty()) {
             ss << getIndent() << "Else:" << std::endl;
             increaseIndent();
             
-            if (ifStmt->false_stmt.size() > 1) {
+            if (ifNode->false_stmt.size() > 1) {
                 ss << getIndent() << "CompoundStatement:" << std::endl;
                 increaseIndent();
                 ss << getIndent() << "Statements:" << std::endl;
                 increaseIndent();
             }
             
-            for (const auto& stmt : ifStmt->false_stmt) {
+            for (const auto& stmt : ifNode->false_stmt) {
                 printStatement(ss, stmt.get());
             }
             
-            if (ifStmt->false_stmt.size() > 1) {
+            if (ifNode->false_stmt.size() > 1) {
                 decreaseIndent();
                 decreaseIndent();
             }
@@ -377,8 +377,8 @@ public:
     }
     
     // 打印while语句
-    void printWhileStatement(std::stringstream& ss, const WhileStmt* whileStmt) {
-        if (!whileStmt) return;
+    void printWhileStatement(std::stringstream& ss, const WhileNode* whileNode) {
+        if (!whileNode) return;
         
         ss << getIndent() << "WhileStatement:" << std::endl;
         increaseIndent();
@@ -386,26 +386,26 @@ public:
         // 条件
         ss << getIndent() << "Condition:" << std::endl;
         increaseIndent();
-        printExpression(ss, whileStmt->expr.get());
+        printExpression(ss, whileNode->expr.get());
         decreaseIndent();
         
         // 循环体
-        if (!whileStmt->stmt.empty()) {
+        if (!whileNode->stmt.empty()) {
             ss << getIndent() << "Body:" << std::endl;
             increaseIndent();
             
-            if (whileStmt->stmt.size() > 1) {
+            if (whileNode->stmt.size() > 1) {
                 ss << getIndent() << "CompoundStatement:" << std::endl;
                 increaseIndent();
                 ss << getIndent() << "Statements:" << std::endl;
                 increaseIndent();
             }
             
-            for (const auto& stmt : whileStmt->stmt) {
+            for (const auto& stmt : whileNode->stmt) {
                 printStatement(ss, stmt.get());
             }
             
-            if (whileStmt->stmt.size() > 1) {
+            if (whileNode->stmt.size() > 1) {
                 decreaseIndent();
                 decreaseIndent();
             }
@@ -417,44 +417,44 @@ public:
     }
     
     // 打印for语句
-    void printForStatement(std::stringstream& ss, const ForStmt* forStmt) {
-        if (!forStmt) return;
+    void printForStatement(std::stringstream& ss, const ForNode* forNode) {
+        if (!forNode) return;
         
         ss << getIndent() << "ForStatement:" << std::endl;
         increaseIndent();
         
         // 循环变量
-        ss << getIndent() << "LoopVariable: " << forStmt->id << std::endl;
+        ss << getIndent() << "LoopVariable: " << forNode->id << std::endl;
         
         // 起始值
         ss << getIndent() << "InitialValue:" << std::endl;
         increaseIndent();
-        printExpression(ss, forStmt->begin.get());
+        printExpression(ss, forNode->begin.get());
         decreaseIndent();
         
         // 结束值
         ss << getIndent() << "FinalValue:" << std::endl;
         increaseIndent();
-        printExpression(ss, forStmt->end.get());
+        printExpression(ss, forNode->end.get());
         decreaseIndent();
         
         // 循环体
-        if (!forStmt->stmt.empty()) {
+        if (!forNode->stmt.empty()) {
             ss << getIndent() << "Body:" << std::endl;
             increaseIndent();
             
-            if (forStmt->stmt.size() > 1) {
+            if (forNode->stmt.size() > 1) {
                 ss << getIndent() << "CompoundStatement:" << std::endl;
                 increaseIndent();
                 ss << getIndent() << "Statements:" << std::endl;
                 increaseIndent();
             }
             
-            for (const auto& stmt : forStmt->stmt) {
+            for (const auto& stmt : forNode->stmt) {
                 printStatement(ss, stmt.get());
             }
             
-            if (forStmt->stmt.size() > 1) {
+            if (forNode->stmt.size() > 1) {
                 decreaseIndent();
                 decreaseIndent();
             }
@@ -466,7 +466,7 @@ public:
     }
     
     // 打印read语句
-    void printReadStatement(std::stringstream& ss, const ReadFuncStmt* readStmt) {
+    void printReadStatement(std::stringstream& ss, const ReadFuncNode* readStmt) {
         if (!readStmt) return;
         
         ss << getIndent() << "ReadStatement:" << std::endl;
@@ -497,7 +497,7 @@ public:
     }
     
     // 打印write语句
-    void printWriteStatement(std::stringstream& ss, const WriteFuncStmt* writeStmt) {
+    void printWriteStatement(std::stringstream& ss, const WriteFuncNode* writeStmt) {
         if (!writeStmt) return;
         
         ss << getIndent() << "WriteStatement:" << std::endl;
@@ -516,18 +516,18 @@ public:
     }
     
     // 打印函数调用语句
-    void printFunctionCallStatement(std::stringstream& ss, const FuncCallStmt* funcCallStmt) {
-        if (!funcCallStmt) return;
+    void printFunctionCallStatement(std::stringstream& ss, const FuncCallNode* funcCallNode) {
+        if (!funcCallNode) return;
         
-        ss << getIndent() << "FunctionCall: " << funcCallStmt->id << std::endl;
+        ss << getIndent() << "FunctionCall: " << funcCallNode->id << std::endl;
         increaseIndent();
         
         // 参数列表
-        if (!funcCallStmt->args.empty()) {
+        if (!funcCallNode->args.empty()) {
             ss << getIndent() << "Arguments:" << std::endl;
             increaseIndent();
             
-            for (const auto& arg : funcCallStmt->args) {
+            for (const auto& arg : funcCallNode->args) {
                 printExpression(ss, arg.get());
             }
             
@@ -538,10 +538,10 @@ public:
     }
     
     // 打印表达式
-    void printExpression(std::stringstream& ss, const ExprStmt* exprStmt) {
+    void printExpression(std::stringstream& ss, const ExprNode* exprStmt) {
         if (!exprStmt || !exprStmt->rel_expr) return;
         
-        const RelExprStmt* relExpr = exprStmt->rel_expr.get();
+        const RelExprNode* relExpr = exprStmt->rel_expr.get();
         
         // 单项关系表达式
         if (relExpr->terms.size() == 1) {
@@ -552,13 +552,13 @@ public:
         // 双项或多项关系表达式
         std::string opStr;
         switch (relExpr->terms[1].type) {
-            case RelExprStmt::RelExprType::Equal: opStr = "="; break;
-            case RelExprStmt::RelExprType::NotEqual: opStr = "<>"; break;
-            case RelExprStmt::RelExprType::Less: opStr = "<"; break;
-            case RelExprStmt::RelExprType::LessEqual: opStr = "<="; break;
-            case RelExprStmt::RelExprType::Greater: opStr = ">"; break;
-            case RelExprStmt::RelExprType::GreaterEqual: opStr = ">="; break;
-            case RelExprStmt::RelExprType::In: opStr = "in"; break;
+            case RelExprNode::RelExprType::Equal: opStr = "="; break;
+            case RelExprNode::RelExprType::NotEqual: opStr = "<>"; break;
+            case RelExprNode::RelExprType::Less: opStr = "<"; break;
+            case RelExprNode::RelExprType::LessEqual: opStr = "<="; break;
+            case RelExprNode::RelExprType::Greater: opStr = ">"; break;
+            case RelExprNode::RelExprType::GreaterEqual: opStr = ">="; break;
+            case RelExprNode::RelExprType::In: opStr = "in"; break;
             default: opStr = "?"; break;
         }
         
@@ -572,7 +572,7 @@ public:
     }
     
     // 打印加法表达式
-    void printAddExpression(std::stringstream& ss, const AddExprStmt* addExpr) {
+    void printAddExpression(std::stringstream& ss, const AddExprNode* addExpr) {
         if (!addExpr) return;
         
         // 单项加法表达式
@@ -584,9 +584,9 @@ public:
         // 双项或多项加法表达式
         std::string opStr;
         switch (addExpr->terms[1].type) {
-            case AddExprStmt::AddExprType::Plus: opStr = "+"; break;
-            case AddExprStmt::AddExprType::Minus: opStr = "-"; break;
-            case AddExprStmt::AddExprType::Or: opStr = "or"; break;
+            case AddExprNode::AddExprType::Plus: opStr = "+"; break;
+            case AddExprNode::AddExprType::Minus: opStr = "-"; break;
+            case AddExprNode::AddExprType::Or: opStr = "or"; break;
             default: opStr = "?"; break;
         }
         
@@ -600,7 +600,7 @@ public:
     }
     
     // 打印乘法表达式
-    void printMulExpression(std::stringstream& ss, const MulExprStmt* mulExpr) {
+    void printMulExpression(std::stringstream& ss, const MulExprNode* mulExpr) {
         if (!mulExpr) return;
         
         // 单项乘法表达式
@@ -612,11 +612,11 @@ public:
         // 双项或多项乘法表达式
         std::string opStr;
         switch (mulExpr->terms[1].type) {
-            case MulExprStmt::MulExprType::Mul: opStr = "*"; break;
-            case MulExprStmt::MulExprType::Div: opStr = "/"; break;
-            case MulExprStmt::MulExprType::Mod: opStr = "mod"; break;
-            case MulExprStmt::MulExprType::And: opStr = "and"; break;
-            case MulExprStmt::MulExprType::AndThen: opStr = "and then"; break;
+            case MulExprNode::MulExprType::Mul: opStr = "*"; break;
+            case MulExprNode::MulExprType::Div: opStr = "/"; break;
+            case MulExprNode::MulExprType::Mod: opStr = "mod"; break;
+            case MulExprNode::MulExprType::And: opStr = "and"; break;
+            case MulExprNode::MulExprType::AndThen: opStr = "and then"; break;
             default: opStr = "?"; break;
         }
         
@@ -630,11 +630,11 @@ public:
     }
     
     // 打印一元表达式
-    void printUnaryExpression(std::stringstream& ss, const UnaryExprStmt* unaryExpr) {
+    void printUnaryExpression(std::stringstream& ss, const UnaryExprNode* unaryExpr) {
         if (!unaryExpr || !unaryExpr->primary_expr) return;
         
         // 没有一元操作符
-        if (unaryExpr->types.empty() || unaryExpr->types[0] == UnaryExprStmt::UnaryExprType::NULL_TYPE) {
+        if (unaryExpr->types.empty() || unaryExpr->types[0] == UnaryExprNode::UnaryExprType::NULL_TYPE) {
             printPrimaryExpression(ss, unaryExpr->primary_expr.get());
             return;
         }
@@ -642,8 +642,8 @@ public:
         // 有一元操作符
         std::string opStr;
         switch (unaryExpr->types[0]) {
-            case UnaryExprStmt::UnaryExprType::Not: opStr = "not"; break;
-            case UnaryExprStmt::UnaryExprType::Minus: opStr = "-"; break;
+            case UnaryExprNode::UnaryExprType::Not: opStr = "not"; break;
+            case UnaryExprNode::UnaryExprType::Minus: opStr = "-"; break;
             default: opStr = "?"; break;
         }
         
@@ -656,15 +656,15 @@ public:
     }
     
     // 打印基本表达式
-    void printPrimaryExpression(std::stringstream& ss, const PrimaryExprStmt* primaryExpr) {
+    void printPrimaryExpression(std::stringstream& ss, const PrimaryExprNode* primaryExpr) {
         if (!primaryExpr) return;
         
         // 值
-        if (primaryExpr->type == PrimaryExprStmt::PrimaryExprType::Value && primaryExpr->value) {
+        if (primaryExpr->type == PrimaryExprNode::PrimaryExprType::Value && primaryExpr->value) {
             printValue(ss, primaryExpr->value.get());
         } 
         // 括号内的表达式
-        else if (primaryExpr->type == PrimaryExprStmt::PrimaryExprType::Parentheses && primaryExpr->expr) {
+        else if (primaryExpr->type == PrimaryExprNode::PrimaryExprType::Parentheses && primaryExpr->expr) {
             ss << getIndent() << "ParenExpr:" << std::endl;
             increaseIndent();
             
@@ -675,30 +675,30 @@ public:
     }
     
     // 打印值
-    void printValue(std::stringstream& ss, const ValueStmt* valueStmt) {
-        if (!valueStmt) return;
+    void printValue(std::stringstream& ss, const ValueNode* valueNode) {
+        if (!valueNode) return;
         
         // 数字
-        if (valueStmt->type == ValueStmt::ValueType::Number && valueStmt->number) {
-            if (valueStmt->number->is_real) {
-                ss << getIndent() << "Literal: REAL " << valueStmt->number->real_val << std::endl;
-            } else if (valueStmt->number->is_char) {
-                ss << getIndent() << "Literal: CHAR '" << valueStmt->number->char_val << "'" << std::endl;
+        if (valueNode->type == ValueNode::ValueType::Number && valueNode->number) {
+            if (valueNode->number->is_real) {
+                ss << getIndent() << "Literal: REAL " << valueNode->number->real_val << std::endl;
+            } else if (valueNode->number->is_char) {
+                ss << getIndent() << "Literal: CHAR '" << valueNode->number->char_val << "'" << std::endl;
             } else {
-                ss << getIndent() << "Literal: INTEGER " << valueStmt->number->int_val << std::endl;
+                ss << getIndent() << "Literal: INTEGER " << valueNode->number->int_val << std::endl;
             }
         } 
         // 字符串
-        else if (valueStmt->type == ValueStmt::ValueType::Str && valueStmt->str) {
-            ss << getIndent() << "Literal: STRING '" << valueStmt->str->val << "'" << std::endl;
+        else if (valueNode->type == ValueNode::ValueType::Str && valueNode->str) {
+            ss << getIndent() << "Literal: STRING '" << valueNode->str->val << "'" << std::endl;
         } 
         // 左值
-        else if (valueStmt->type == ValueStmt::ValueType::LVal && valueStmt->lval) {
-            ss << getIndent() << "Identifier: " << valueStmt->lval->id << std::endl;
+        else if (valueNode->type == ValueNode::ValueType::LVal && valueNode->lval) {
+            ss << getIndent() << "Identifier: " << valueNode->lval->id << std::endl;
             
             // 数组索引
-            if (!valueStmt->lval->array_index.empty()) {
-                for (const auto& index : valueStmt->lval->array_index) {
+            if (!valueNode->lval->array_index.empty()) {
+                for (const auto& index : valueNode->lval->array_index) {
                     ss << getIndent() << "Index:" << std::endl;
                     increaseIndent();
                     printExpression(ss, index.get());
@@ -707,16 +707,16 @@ public:
             }
         } 
         // 函数调用
-        else if (valueStmt->type == ValueStmt::ValueType::FuncCall && valueStmt->func_call) {
-            ss << getIndent() << "FunctionCall: " << valueStmt->func_call->id << std::endl;
+        else if (valueNode->type == ValueNode::ValueType::FuncCall && valueNode->func_call) {
+            ss << getIndent() << "FunctionCall: " << valueNode->func_call->id << std::endl;
             
             // 参数列表
-            if (!valueStmt->func_call->args.empty()) {
+            if (!valueNode->func_call->args.empty()) {
                 increaseIndent();
                 ss << getIndent() << "Arguments:" << std::endl;
                 increaseIndent();
                 
-                for (const auto& arg : valueStmt->func_call->args) {
+                for (const auto& arg : valueNode->func_call->args) {
                     printExpression(ss, arg.get());
                 }
                 

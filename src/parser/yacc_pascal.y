@@ -23,28 +23,28 @@ namespace {
     #define GRAMMAR_ERROR(rule)    LOG_DEBUG("ERROR: " rule)
     
     // 运算符类型映射表
-    const std::map<long long, RelExprStmt::RelExprType> relOperatorMap = {
-        {0, RelExprStmt::RelExprType::Equal},
-        {1, RelExprStmt::RelExprType::NotEqual},
-        {2, RelExprStmt::RelExprType::Less},
-        {3, RelExprStmt::RelExprType::LessEqual},
-        {4, RelExprStmt::RelExprType::Greater},
-        {5, RelExprStmt::RelExprType::GreaterEqual},
-        {6, RelExprStmt::RelExprType::In}
+    const std::map<long long, RelExprNode::RelExprType> relOperatorMap = {
+        {0, RelExprNode::RelExprType::Equal},
+        {1, RelExprNode::RelExprType::NotEqual},
+        {2, RelExprNode::RelExprType::Less},
+        {3, RelExprNode::RelExprType::LessEqual},
+        {4, RelExprNode::RelExprType::Greater},
+        {5, RelExprNode::RelExprType::GreaterEqual},
+        {6, RelExprNode::RelExprType::In}
     };
 
-    const std::map<long long, AddExprStmt::AddExprType> addOperatorMap = {
-        {0, AddExprStmt::AddExprType::Plus},
-        {1, AddExprStmt::AddExprType::Minus},
-        {2, AddExprStmt::AddExprType::Or}
+    const std::map<long long, AddExprNode::AddExprType> addOperatorMap = {
+        {0, AddExprNode::AddExprType::Plus},
+        {1, AddExprNode::AddExprType::Minus},
+        {2, AddExprNode::AddExprType::Or}
     };
 
-    const std::map<long long, MulExprStmt::MulExprType> mulOperatorMap = {
-        {0, MulExprStmt::MulExprType::Mul},
-        {1, MulExprStmt::MulExprType::Div},
-        {2, MulExprStmt::MulExprType::Mod},
-        {3, MulExprStmt::MulExprType::And},
-        {4, MulExprStmt::MulExprType::AndThen}
+    const std::map<long long, MulExprNode::MulExprType> mulOperatorMap = {
+        {0, MulExprNode::MulExprType::Mul},
+        {1, MulExprNode::MulExprType::Div},
+        {2, MulExprNode::MulExprType::Mod},
+        {3, MulExprNode::MulExprType::And},
+        {4, MulExprNode::MulExprType::AndThen}
     };
 
     // 从映射表中获取运算符枚举类型
@@ -59,21 +59,21 @@ namespace {
 
     // 特化版本
     //关系运算符 (=, <>, <, <=, >, >=, in)
-    RelExprStmt::RelExprType getRelationOperator(long long op) {
-        return getOperatorKind<RelExprStmt::RelExprType>(op, relOperatorMap);
+    RelExprNode::RelExprType getRelationOperator(long long op) {
+        return getOperatorKind<RelExprNode::RelExprType>(op, relOperatorMap);
     }
     //加法级运算符 (+, -, or)
-    AddExprStmt::AddExprType getArithmeticOperator(long long op) {
-        return getOperatorKind<AddExprStmt::AddExprType>(op, addOperatorMap);
+    AddExprNode::AddExprType getArithmeticOperator(long long op) {
+        return getOperatorKind<AddExprNode::AddExprType>(op, addOperatorMap);
     }
     //乘法级运算符 (*, /, div, mod, and, andthen)
-    MulExprStmt::MulExprType getTermOperator(long long op) {
-        return getOperatorKind<MulExprStmt::MulExprType>(op, mulOperatorMap);
+    MulExprNode::MulExprType getTermOperator(long long op) {
+        return getOperatorKind<MulExprNode::MulExprType>(op, mulOperatorMap);
     }
 
     // 填充数值节点函数
     template<typename T>
-    void setupNumberNode(std::unique_ptr<NumberStmt>& numNode, T val) {
+    void setupNumberNode(std::unique_ptr<NumberNode>& numNode, T val) {
         numNode->is_signed = true;
         numNode->is_real = std::is_same<T, double>::value;////在编译时检测类型，并相应设置 is_real 和 is_char 标志
         numNode->is_char = std::is_same<T, char>::value;
@@ -113,37 +113,37 @@ namespace {
     // 值节点工厂类：用于创建不同类型的值节点对象
     class ValueFactory {
     public:
-        //创建整数值节点，返回包含整数值的ValueStmt指针
-        static ValueStmt* makeInteger(long long val) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        //创建整数值节点，返回包含整数值的ValueNode指针
+        static ValueNode* makeInteger(long long val) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             setupNumberNode(value->number, val);
             return value;
         }
-        //创建实数值节点，返回包含实数值的ValueStmt指针
-        static ValueStmt* makeReal(const char* str) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        //创建实数值节点，返回包含实数值的ValueNode指针
+        static ValueNode* makeReal(const char* str) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             double val = atof(str);//将字符串转换为双精度浮点数
             setupNumberNode(value->number, val);
             value->number->literal = std::string(str);
             return value;
         }
-        //创建字符值节点，返回包含字符值的ValueStmt指针
-        static ValueStmt* makeChar(char val) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        //创建字符值节点，返回包含字符值的ValueNode指针
+        static ValueNode* makeChar(char val) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             setupNumberNode(value->number, val);
             return value;
         }
-        //创建字符串值节点，返回包含字符串值的ValueStmt指针
-        static ValueStmt* makeString(const char* str) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Str;
-            value->str = std::make_unique<StrStmt>();
+        //创建字符串值节点，返回包含字符串值的ValueNode指针
+        static ValueNode* makeString(const char* str) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Str;
+            value->str = std::make_unique<StringNode>();
             value->str->val = std::string(str).substr(1, std::string(str).length() - 2);//从输入字符串中提取内容，去掉首尾的引号
             return value;
         }
@@ -154,39 +154,39 @@ namespace {
     class ExprFactory {
     public:
         //将简单表达式转换为完整表达式节点
-        static ExprStmt* createFromSimpleExpr(AddExprStmt* simpleExpr) {
-            ExprStmt* expr = new ExprStmt();
-            expr->rel_expr = std::make_unique<RelExprStmt>();
-            RelExprStmt::Term term;
-            term.type = RelExprStmt::RelExprType::NULL_TYPE;
-            term.add_expr = std::unique_ptr<AddExprStmt>(simpleExpr);
+        static ExprNode* createFromSimpleExpr(AddExprNode* simpleExpr) {
+            ExprNode* expr = new ExprNode();
+            expr->rel_expr = std::make_unique<RelExprNode>();
+            RelExprNode::Term term;
+            term.type = RelExprNode::RelExprType::NULL_TYPE;
+            term.add_expr = std::unique_ptr<AddExprNode>(simpleExpr);
             expr->rel_expr->terms.emplace_back(std::move(term));
             return expr;
         }
         //将项(term)转换为简单表达式节点
-        static AddExprStmt* createFromTerm(MulExprStmt* term) {
-            AddExprStmt* addExpr = new AddExprStmt();
-            AddExprStmt::Term termStruct;
-            termStruct.type = AddExprStmt::AddExprType::NULL_TYPE;
-            termStruct.mul_expr = std::unique_ptr<MulExprStmt>(term);
+        static AddExprNode* createFromTerm(MulExprNode* term) {
+            AddExprNode* addExpr = new AddExprNode();
+            AddExprNode::Term termStruct;
+            termStruct.type = AddExprNode::AddExprType::NULL_TYPE;
+            termStruct.mul_expr = std::unique_ptr<MulExprNode>(term);
             addExpr->terms.emplace_back(std::move(termStruct));
             return addExpr;
         }
         //将因子(factor)转换为项节点
-        static MulExprStmt* createFromFactor(UnaryExprStmt* factor) {
-            MulExprStmt* mulExpr = new MulExprStmt();
-            MulExprStmt::Term term;
-            term.type = MulExprStmt::MulExprType::NULL_TYPE;
-            term.unary_expr = std::unique_ptr<UnaryExprStmt>(factor);
+        static MulExprNode* createFromFactor(UnaryExprNode* factor) {
+            MulExprNode* mulExpr = new MulExprNode();
+            MulExprNode::Term term;
+            term.type = MulExprNode::MulExprType::NULL_TYPE;
+            term.unary_expr = std::unique_ptr<UnaryExprNode>(factor);
             mulExpr->terms.emplace_back(std::move(term));
             return mulExpr;
         }
     };
 
     // 创建一元表达式的函数
-    UnaryExprStmt* makeUnaryExpr(PrimaryExprStmt::PrimaryExprType type) {
-        UnaryExprStmt* unary = new UnaryExprStmt();
-        unary->primary_expr = std::make_unique<PrimaryExprStmt>();
+    UnaryExprNode* makeUnaryExpr(PrimaryExprNode::PrimaryExprType type) {
+        UnaryExprNode* unary = new UnaryExprNode();
+        unary->primary_expr = std::make_unique<PrimaryExprNode>();
         unary->primary_expr->type = type;
         return unary;
     }
@@ -292,7 +292,7 @@ void resetSyntaxError() {
     syntaxErrorFlag = false; // 重置错误标志，为下一次解析准备
 }
 //当语法分析器检测到语法错误时，Bison会自动调用此函数报告错误。
-int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg);
+int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg);
 
 %}
 
@@ -352,7 +352,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 %define parse.trace
 %lex-param { yyscan_t scanner }
 %parse-param { const char * code_str }
-%parse-param { ProgramStmt ** program}
+%parse-param { ProgramNode ** program}
 %parse-param { void * scanner }
 
 // 定义初始动作
@@ -366,57 +366,57 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 //由于C++的限制，联合体成员只能是POD（Plain Old Data）类型，因此所有复杂类型都使用指针表示。
 %union {
     /* 程序结构相关类型 */
-    ProgramStmt *                                   program_struct;   /* 整个程序的AST节点 */
-    ProgramHeadStmt *                               program_head;     /* 程序头部AST节点 */
-    ProgramBodyStmt *                               program_body;     /* 程序主体AST节点 */
+    ProgramNode *                                   program_struct;   /* 整个程序的AST节点 */
+    ProgramHeadNode *                               program_head;     /* 程序头部AST节点 */
+    ProgramBodyNode *                               program_body;     /* 程序主体AST节点 */
     std::vector<std::string> *                      id_list;          /* 标识符列表，用于程序参数、变量声明等 */
     
     /* 常量声明相关类型 */
-    ConstDeclStmt *                                 const_decls;      /* 常量声明AST节点 */
-    std::pair<std::string, ValueStmt *> *           kv_pair;          /* 常量名称-值对 */
-    std::vector<std::pair<std::string, ValueStmt *>*> * kv_pair_list; /* 常量名称-值对列表 */
-    ValueStmt *                                     value;            /* 值AST节点，表示常量值 */
+    ConstDeclNode *                                 const_decls;      /* 常量声明AST节点 */
+    std::pair<std::string, ValueNode *> *           kv_pair;          /* 常量名称-值对 */
+    std::vector<std::pair<std::string, ValueNode *>*> * kv_pair_list; /* 常量名称-值对列表 */
+    ValueNode *                                     value;            /* 值AST节点，表示常量值 */
     
     /* 变量声明相关类型 */
-    std::vector<VarDeclStmt *> *                    var_decls;        /* 变量声明列表 */
-    VarDeclStmt *                                   var_decl;         /* 单个变量声明AST节点 */
+    std::vector<VarDeclNode *> *                    var_decls;        /* 变量声明列表 */
+    VarDeclNode *                                   var_decl;         /* 单个变量声明AST节点 */
     DataType                                        var_type;         /* 变量数据类型枚举 */
     BasicType                                       basic_type;       /* 基本类型枚举（int, real等） */
     
     /* 数组范围相关类型 */
-    std::vector<PeriodStmt *> *                     period_list;      /* 数组索引范围列表 */
-    PeriodStmt *                                    period;           /* 单个数组索引范围 */
+    std::vector<PeriodNode *> *                     period_list;      /* 数组索引范围列表 */
+    PeriodNode *                                    period;           /* 单个数组索引范围 */
     
     /* 函数/过程声明相关类型 */
-    std::vector<FuncDeclStmt *> *                   func_decl_list;   /* 函数声明列表 */
-    FuncDeclStmt *                                  func_decl;        /* 单个函数声明AST节点 */
-    FuncHeadDeclStmt *                              func_head;        /* 函数头部AST节点 */
-    FuncBodyDeclStmt *                              func_body;        /* 函数主体AST节点 */
+    std::vector<FuncDeclNode *> *                   func_decl_list;   /* 函数声明列表 */
+    FuncDeclNode *                                  func_decl;        /* 单个函数声明AST节点 */
+    FuncHeadDeclNode *                              func_head;        /* 函数头部AST节点 */
+    FuncBodyDeclNode *                              func_body;        /* 函数主体AST节点 */
     
     /* 语句相关类型 */
-    std::vector<BaseStmt *> *                       stmt_list;        /* 语句列表 */
-    AssignStmt *                                    assign_stmt;      /* 赋值语句AST节点 */
-    IfStmt *                                        if_stmt;          /* 条件语句AST节点 */
-    ForStmt *                                       for_stmt;         /* For循环语句AST节点 */
-    ReadFuncStmt *                                  read_stmt;        /* 读取语句AST节点 */
-    WriteFuncStmt *                                 write_stmt;       /* 写入语句AST节点 */
-    FuncCallStmt *                                  func_call_stmt;   /* 函数调用语句AST节点 */
-    std::vector<LValStmt *> *                       lval_list;        /* 左值表达式列表（用于变量引用） */
-    LValStmt *                                      lval;             /* 单个左值表达式AST节点 */
-    BaseStmt *                                      stmt;             /* 基本语句AST节点 */
+    std::vector<BaseNode *> *                       stmt_list;        /* 语句列表 */
+    AssignmentNode *                                    assign_stmt;      /* 赋值语句AST节点 */
+    IfNode *                                        if_stmt;          /* 条件语句AST节点 */
+    ForNode *                                       for_stmt;         /* For循环语句AST节点 */
+    ReadFuncNode *                                  read_stmt;        /* 读取语句AST节点 */
+    WriteFuncNode *                                 write_stmt;       /* 写入语句AST节点 */
+    FuncCallNode *                                  func_call_stmt;   /* 函数调用语句AST节点 */
+    std::vector<LValueNode *> *                       lval_list;        /* 左值表达式列表（用于变量引用） */
+    LValueNode *                                      lval;             /* 单个左值表达式AST节点 */
+    BaseNode *                                      stmt;             /* 基本语句AST节点 */
 
     /* 表达式相关类型 */
-    std::vector<ExprStmt *> *                       expr_list;        /* 表达式列表 */
-    ExprStmt *                                      expr;             /* 完整表达式AST节点 */
-    RelExprStmt *                                   rel_expr;         /* 关系表达式AST节点 */
-    AddExprStmt *                                   add_expr;         /* 加法表达式AST节点 */
-    MulExprStmt *                                   mul_expr;         /* 乘法表达式AST节点 */
-    UnaryExprStmt *                                 unary_expr;       /* 一元表达式AST节点 */
-    PrimaryExprStmt *                               primary_expr;     /* 基本表达式AST节点 */
+    std::vector<ExprNode *> *                       expr_list;        /* 表达式列表 */
+    ExprNode *                                      expr;             /* 完整表达式AST节点 */
+    RelExprNode *                                   rel_expr;         /* 关系表达式AST节点 */
+    AddExprNode *                                   add_expr;         /* 加法表达式AST节点 */
+    MulExprNode *                                   mul_expr;         /* 乘法表达式AST节点 */
+    UnaryExprNode *                                 unary_expr;       /* 一元表达式AST节点 */
+    PrimaryExprNode *                               primary_expr;     /* 基本表达式AST节点 */
 
     /* 控制流相关类型 */
-    BreakStmt *                                     break_stmt;       /* Break语句AST节点 */
-    ContinueStmt *                                  continue_stmt;    /* Continue语句AST节点 */
+    BreakNode *                                     break_stmt;       /* Break语句AST节点 */
+    ContinueNode *                                  continue_stmt;    /* Continue语句AST节点 */
 
     /* 基本数据类型 */
     char *                                          string;           /* 字符串，用于标识符和字符串字面量 */
@@ -540,9 +540,9 @@ programstruct
     //正常语法规则-完整的程序结构
     : program_head  ';'  program_body '.'  {
         currentParserContext = ParserContext::ProgramStruct;//设置当前解析上下文为程序结构
-        ProgramStmt* programStruct = allocateNode<ProgramStmt>();//创建程序结构AST节点
-        programStruct->head = std::unique_ptr<ProgramHeadStmt>($1);//设置程序头部，使用智能指针管理内存
-        programStruct->body = std::unique_ptr<ProgramBodyStmt>($3);//设置程序主体，使用智能指针管理内存 
+        ProgramNode* programStruct = allocateNode<ProgramNode>();//创建程序结构AST节点
+        programStruct->head = std::unique_ptr<ProgramHeadNode>($1);//设置程序头部，使用智能指针管理内存
+        programStruct->body = std::unique_ptr<ProgramBodyNode>($3);//设置程序主体，使用智能指针管理内存 
         
         GRAMMAR_TRACE("programstruct -> program_head ';' program_body '.'");
         *program = programStruct;//将构建的AST根节点存储到输出参数中
@@ -550,21 +550,21 @@ programstruct
     }
     //错误恢复规则1-程序头部有错误
     | error  ';'  program_body '.'  {
-        *program = allocateNode<ProgramStmt>();//创建空的程序结构作为恢复
+        *program = allocateNode<ProgramNode>();//创建空的程序结构作为恢复
         delete $3;//释放已解析的程序主体
         $$ = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' program_body '.'");
     }
     //错误恢复规则2-程序主体有错误
     | program_head  ';'  error  {
-        *program = allocateNode<ProgramStmt>();
+        *program = allocateNode<ProgramNode>();
         delete $1;
         $$ = nullptr;
         GRAMMAR_ERROR("programstruct -> program_head ';' error");
     }
     //错误恢复规则3：程序头部和主体都有错误
     | error  ';'  error  {
-        *program = allocateNode<ProgramStmt>();
+        *program = allocateNode<ProgramNode>();
         $$ = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' error");
     }
@@ -576,7 +576,7 @@ program_head
     // 规则1：完整形式，带参数列表的程序头 - program Name(param1, param2, ...)
     : PROGRAM IDENTIFIER '(' idlist ')'  {  // 匹配 "program 标识符 ( 标识符列表 )"
         currentParserContext = ParserContext::ProgramHead;  // 设置当前解析上下文为程序头
-        $$ = allocateNode<ProgramHeadStmt>();  // 创建新的程序头AST节点
+        $$ = allocateNode<ProgramHeadNode>();  // 创建新的程序头AST节点
         $$->id_list.push_back(std::string($2));  // 先添加程序名
         $$->id_list.insert($$->id_list.end(), $4->begin(), $4->end());  // 再添加参数
         //$$->id_list = *$4; 将标识符列表（参数）复制到程序头节点
@@ -589,7 +589,7 @@ program_head
     // 规则2：简化形式，不带参数列表的程序头 - program Name
     | PROGRAM IDENTIFIER  {  // 匹配 "program 标识符"
         currentParserContext = ParserContext::ProgramHead;  // 设置当前解析上下文为程序头
-        $$ = allocateNode<ProgramHeadStmt>();  // 创建新的程序头AST节点
+        $$ = allocateNode<ProgramHeadNode>();  // 创建新的程序头AST节点
         $$->id_list.emplace_back(std::string($2));  // 将程序名称作为参数添加到id_list中
         
         GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER");  // 记录语法跟踪日志
@@ -612,12 +612,12 @@ program_body
         currentParserContext = ParserContext::ProgramBody;
         
         // 创建程序体AST节点
-        ProgramBodyStmt* programBody = allocateNode<ProgramBodyStmt>();
+        ProgramBodyNode* programBody = allocateNode<ProgramBodyNode>();
         
         // 处理常量声明部分
         if($1 != nullptr) {  // 如果有常量声明
             // 将常量声明节点转移到程序体节点中，使用智能指针管理内存
-            programBody->const_decl = std::unique_ptr<ConstDeclStmt>($1);
+            programBody->const_decl = std::unique_ptr<ConstDeclNode>($1);
         }
         
         // 处理变量声明部分
@@ -625,7 +625,7 @@ program_body
             // 遍历变量声明列表，将每个声明转移到程序体节点中
             for(auto varDecl : *$2) {
                 // 使用智能指针封装每个变量声明，并添加到程序体的变量声明列表中
-                programBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));
+                programBody->var_decl.emplace_back(std::unique_ptr<VarDeclNode>(varDecl));
             }
             // 释放变量声明列表容器（内部元素已被转移到程序体节点）
             delete $2;
@@ -636,7 +636,7 @@ program_body
             // 遍历子程序声明列表，将每个声明转移到程序体节点中
             for(auto funcDecl : *$3) {
                 // 使用智能指针封装每个函数声明，并添加到程序体的函数声明列表中
-                programBody->func_decl.emplace_back(std::unique_ptr<FuncDeclStmt>(funcDecl));
+                programBody->func_decl.emplace_back(std::unique_ptr<FuncDeclNode>(funcDecl));
             }
             // 释放子程序声明列表容器
             delete $3;
@@ -647,7 +647,7 @@ program_body
             // 遍历语句列表，将每个语句转移到程序体节点中
             for(auto stmt : *$4) {
                 // 使用智能指针封装每个语句，并添加到程序体的语句列表中
-                programBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
+                programBody->comp_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));
             }
             // 释放语句列表容器
             delete $4;
@@ -744,7 +744,7 @@ const_declarations
     // 规则2：正常的常量声明，以CONST关键字开始
     | CONST const_declaration ';'  {  // 匹配 "const 常量定义列表;" 形式
         currentParserContext = ParserContext::ConstDeclarations;  // 设置当前解析上下文为常量声明
-        ConstDeclStmt* constDecls = allocateNode<ConstDeclStmt>();  // 创建常量声明AST节点
+        ConstDeclNode* constDecls = allocateNode<ConstDeclNode>();  // 创建常量声明AST节点
         
         // 将声明列表中的键值对转移到常量声明对象中
         for(auto kvPair : *$2) {  // 遍历解析得到的常量定义键值对列表
@@ -779,8 +779,8 @@ const_declaration
     // 规则1：单个常量定义 - 标识符 = 常量值
     : IDENTIFIER '=' const_value  {  // 匹配 "标识符 = 常量值" 形式，如 "PI = 3.14159"
         currentParserContext = ParserContext::ConstDeclaration;  // 设置当前解析上下文为常量声明
-        auto constDecls = allocateNode<std::vector<std::pair<std::string, ValueStmt *>*>>();  // 创建存储键值对指针的向量
-        auto kvPair = allocateNode<std::pair<std::string, ValueStmt *>>($1, $3);  // 创建键值对，存储常量名和值
+        auto constDecls = allocateNode<std::vector<std::pair<std::string, ValueNode *>*>>();  // 创建存储键值对指针的向量
+        auto kvPair = allocateNode<std::pair<std::string, ValueNode *>>($1, $3);  // 创建键值对，存储常量名和值
         
         constDecls->emplace_back(kvPair);  // 将键值对指针添加到向量中
         free($1);  // 释放标识符字符串（已复制到键值对中）
@@ -790,7 +790,7 @@ const_declaration
     // 规则2：在已有常量声明列表后添加新的常量定义
     | const_declaration ';' IDENTIFIER '=' const_value  {  // 匹配 "已有声明; 标识符 = 常量值" 形式
         currentParserContext = ParserContext::ConstDeclaration;  // 设置当前解析上下文
-        $1->emplace_back(allocateNode<std::pair<std::string, ValueStmt *>>($3, $5));  // 创建新键值对并添加到现有列表
+        $1->emplace_back(allocateNode<std::pair<std::string, ValueNode *>>($3, $5));  // 创建新键值对并添加到现有列表
         
         free($3);  // 释放标识符字符串
         $$ = $1;  // 返回更新后的常量声明列表
@@ -839,7 +839,7 @@ const_value
     
     // 规则6：带负号的实数常量
     | '-' REAL  {  // 匹配带负号的实数，如 "-3.14159"
-        ValueStmt* value = ValueFactory::makeReal($2);  // 先创建实数值对象
+        ValueNode* value = ValueFactory::makeReal($2);  // 先创建实数值对象
         // 处理负号：将实数值设为负数
         value->number->real_val *= -1;  // 将实数值取负（直接修改对象中的值）
         
@@ -891,8 +891,8 @@ var_declaration
     // 规则1：单个变量声明 - 标识符列表:类型
     : idlist ':' type  {  // 匹配 "标识符列表 : 类型" 形式，如 "x, y : integer"
         currentParserContext = ParserContext::VarDeclaration;  // 设置当前解析上下文为变量声明
-        auto varDecls = allocateNode<std::vector<VarDeclStmt *>>();  // 创建变量声明列表容器
-        auto varDecl = allocateNode<VarDeclStmt>();  // 创建单个变量声明对象
+        auto varDecls = allocateNode<std::vector<VarDeclNode *>>();  // 创建变量声明列表容器
+        auto varDecl = allocateNode<VarDeclNode>();  // 创建单个变量声明对象
         
         // 将标识符列表中的所有标识符复制到变量声明中
         varDecl->id.insert(varDecl->id.end(), $1->begin(), $1->end());  // 添加所有标识符到变量声明对象
@@ -913,7 +913,7 @@ var_declaration
     // 规则2：在已有变量声明列表后添加新的变量声明
     | var_declaration ';' idlist ':' type  {  // 匹配 "已有声明; 标识符列表 : 类型" 形式
         currentParserContext = ParserContext::VarDeclaration;  // 设置当前解析上下文
-        auto varDecl = allocateNode<VarDeclStmt>();  // 创建新的变量声明对象
+        auto varDecl = allocateNode<VarDeclNode>();  // 创建新的变量声明对象
         
         // 将标识符列表中的所有标识符复制到变量声明中
         varDecl->id.insert(varDecl->id.end(), $3->begin(), $3->end());  // 添加所有标识符到变量声明对象
@@ -949,7 +949,7 @@ type
     // 规则1：基本类型
     : basic_type  {  // 匹配基本类型，如 "integer"、"real"、"boolean"、"char"
         currentParserContext = ParserContext::Type;  // 设置当前解析上下文为类型
-        auto typeStmt = allocateNode<VarDeclStmt>();  // 创建变量声明对象用于存储类型信息
+        auto typeStmt = allocateNode<VarDeclNode>();  // 创建变量声明对象用于存储类型信息
         typeStmt->data_type = DataType::BasicType;  // 设置数据类型为基本类型
         typeStmt->basic_type = $1;  // 设置具体的基本类型（integer, real等）
         
@@ -960,13 +960,13 @@ type
     // 规则2：数组类型
     | ARRAY '[' period_list ']' OF basic_type  {  // 匹配 "array [范围列表] of 基本类型"
         currentParserContext = ParserContext::Type;  // 设置当前解析上下文为类型
-        auto typeStmt = allocateNode<VarDeclStmt>();  // 创建变量声明对象用于存储类型信息
+        auto typeStmt = allocateNode<VarDeclNode>();  // 创建变量声明对象用于存储类型信息
         typeStmt->data_type = DataType::ArrayType;  // 设置数据类型为数组类型
         typeStmt->basic_type = $6;  // 设置数组元素的基本类型
         
         // 转移数组范围信息
         for(auto period : *$3) {  // 遍历范围列表
-            typeStmt->array_range.emplace_back(std::unique_ptr<PeriodStmt>(period));  // 将每个范围添加到数组范围容器
+            typeStmt->array_range.emplace_back(std::unique_ptr<PeriodNode>(period));  // 将每个范围添加到数组范围容器
         }
         
         delete $3;  // 释放原始范围列表容器
@@ -1008,8 +1008,8 @@ basic_type
 period_list
     // 规则1：单个索引范围
     : INTEGER DOUBLE_DOT INTEGER  {  // 匹配 "整数 .. 整数" 形式，如 "1..10"
-        auto periodList = allocateNode<std::vector<PeriodStmt *>>();  // 创建范围列表容器
-        auto period = allocateNode<PeriodStmt>();  // 创建单个范围对象
+        auto periodList = allocateNode<std::vector<PeriodNode *>>();  // 创建范围列表容器
+        auto period = allocateNode<PeriodNode>();  // 创建单个范围对象
         
         period->begin = $1;  // 设置范围起始值
         period->end = $3;    // 设置范围结束值
@@ -1021,7 +1021,7 @@ period_list
     
     // 规则2：添加新的索引范围（用于多维数组）
     | period_list ',' INTEGER DOUBLE_DOT INTEGER  {  // 匹配 "已有范围列表, 整数 .. 整数" 形式
-        auto period = allocateNode<PeriodStmt>();  // 创建新的范围对象
+        auto period = allocateNode<PeriodNode>();  // 创建新的范围对象
         period->begin = $3;  // 设置范围起始值
         period->end = $5;    // 设置范围结束值
         
@@ -1046,7 +1046,7 @@ subprogram_declarations
         currentParserContext = ParserContext::SubprogramDeclarations;  // 设置当前解析上下文
         
         if ($1 == nullptr) {  // 如果这是第一个子程序声明
-            auto funcDeclList = allocateNode<std::vector<FuncDeclStmt *>>();  // 创建新的函数声明列表
+            auto funcDeclList = allocateNode<std::vector<FuncDeclNode *>>();  // 创建新的函数声明列表
             funcDeclList->emplace_back($2);  // 添加新的子程序声明    
             $$ = funcDeclList;  // 返回新创建的列表
         } else {  // 如果已经有子程序声明
@@ -1064,10 +1064,10 @@ subprogram
     // 子程序由头部、分号和主体组成
     : subprogram_head ';' subprogram_body  {  // 匹配 "子程序头部; 子程序主体" 形式
         currentParserContext = ParserContext::Subprogram;  // 设置当前解析上下文为子程序
-        auto subprogram = allocateNode<FuncDeclStmt>();  // 创建函数声明AST节点
+        auto subprogram = allocateNode<FuncDeclNode>();  // 创建函数声明AST节点
         
-        subprogram->header = std::unique_ptr<FuncHeadDeclStmt>($1);  // 设置子程序头部，使用智能指针管理内存
-        subprogram->body = std::unique_ptr<FuncBodyDeclStmt>($3);  // 设置子程序主体，使用智能指针管理内存
+        subprogram->header = std::unique_ptr<FuncHeadDeclNode>($1);  // 设置子程序头部，使用智能指针管理内存
+        subprogram->body = std::unique_ptr<FuncBodyDeclNode>($3);  // 设置子程序主体，使用智能指针管理内存
         
         $$ = subprogram;  // 返回创建的子程序声明节点
         GRAMMAR_TRACE("subprogram -> subprogram_head ';' subprogram_body");  // 记录语法跟踪日志
@@ -1080,7 +1080,7 @@ subprogram_head
     // 规则1：过程头部 - procedure 标识符 (参数列表)
     : PROCEDURE IDENTIFIER formal_parameter  {  // 匹配 "procedure 名称 (参数列表)" 形式
         currentParserContext = ParserContext::SubprogramHead;  // 设置当前解析上下文为子程序头部
-        auto subHead = allocateNode<FuncHeadDeclStmt>();  // 创建函数头部声明节点
+        auto subHead = allocateNode<FuncHeadDeclNode>();  // 创建函数头部声明节点
         
         subHead->func_name = std::string($2);  // 设置函数名称
         subHead->ret_type = BasicType::VOID;  // 设置返回类型为VOID（表示过程）
@@ -1088,7 +1088,7 @@ subprogram_head
         // 处理形式参数
         if ($3 != nullptr) {  // 如果有参数列表
             for (auto formalParameter : *$3) {  // 遍历参数列表
-                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));  // 将参数添加到函数头部
+                subHead->args.emplace_back(std::unique_ptr<VarDeclNode>(formalParameter));  // 将参数添加到函数头部
             }
             delete $3;  // 释放原始参数列表容器
         }
@@ -1101,7 +1101,7 @@ subprogram_head
     // 规则2：函数头部 - function 标识符 (参数列表) : 返回类型
     | FUNCTION IDENTIFIER formal_parameter ':' basic_type  {  // 匹配 "function 名称 (参数列表) : 类型" 形式
         currentParserContext = ParserContext::SubprogramHead;  // 设置当前解析上下文为子程序头部
-        auto subHead = allocateNode<FuncHeadDeclStmt>();  // 创建函数头部声明节点
+        auto subHead = allocateNode<FuncHeadDeclNode>();  // 创建函数头部声明节点
         
         subHead->func_name = std::string($2);  // 设置函数名称
         subHead->ret_type = $5;  // 设置返回类型（由basic_type规则提供）
@@ -1109,7 +1109,7 @@ subprogram_head
         // 处理形式参数
         if ($3 != nullptr) {  // 如果有参数列表
             for (auto formalParameter : *$3) {  // 遍历参数列表
-                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));  // 将参数添加到函数头部
+                subHead->args.emplace_back(std::unique_ptr<VarDeclNode>(formalParameter));  // 将参数添加到函数头部
             }
             delete $3;  // 释放原始参数列表容器
         }
@@ -1162,7 +1162,7 @@ parameter_list
     
     // 规则2：单个参数
     | parameter  {  // 匹配单个参数，如 "x: integer" 或 "var a: real"
-        auto paramList = allocateNode<std::vector<VarDeclStmt *>>();  // 创建参数列表容器
+        auto paramList = allocateNode<std::vector<VarDeclNode *>>();  // 创建参数列表容器
         paramList->emplace_back($1);  // 将参数添加到列表中
         
         $$ = paramList;  // 返回参数列表
@@ -1207,7 +1207,7 @@ var_parameter
 // 值参数
 value_parameter
     : idlist ':' basic_type  {  // 匹配"标识符列表:类型"形式的参数定义
-        auto varDecl = allocateNode<VarDeclStmt>();  // 创建新的变量声明节点
+        auto varDecl = allocateNode<VarDeclNode>();  // 创建新的变量声明节点
         
         varDecl->id.insert(varDecl->id.end(), $1->begin(), $1->end());  // 将标识符列表中的所有标识符添加到变量声明中
         varDecl->data_type = DataType::BasicType;  // 设置数据类型为基本类型
@@ -1226,17 +1226,17 @@ value_parameter
 subprogram_body 
    : const_declarations var_declarations compound_statement  {  // 匹配常量声明、变量声明和复合语句组成的子程序体
        currentParserContext = ParserContext::SubprogramBody;  // 设置当前解析上下文为子程序体
-       auto funcBody = allocateNode<FuncBodyDeclStmt>();  // 创建函数体声明节点
+       auto funcBody = allocateNode<FuncBodyDeclNode>();  // 创建函数体声明节点
        
        // 处理常量声明
        if ($1 != nullptr) {  // 如果存在常量声明部分
-           funcBody->const_decl = std::unique_ptr<ConstDeclStmt>($1);  // 将常量声明添加到函数体，使用智能指针管理内存
+           funcBody->const_decl = std::unique_ptr<ConstDeclNode>($1);  // 将常量声明添加到函数体，使用智能指针管理内存
        }
        
        // 处理变量声明
        if ($2 != nullptr) {  // 如果存在变量声明部分
            for (auto varDecl : *$2) {  // 遍历所有变量声明
-               funcBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));  // 将每个变量声明添加到函数体
+               funcBody->var_decl.emplace_back(std::unique_ptr<VarDeclNode>(varDecl));  // 将每个变量声明添加到函数体
            }
            delete $2;  // 释放变量声明列表容器（内容已转移到函数体节点中）
        }
@@ -1244,7 +1244,7 @@ subprogram_body
        // 处理复合语句
        if ($3 != nullptr) {  // 如果存在复合语句部分
            for (auto stmt : *$3) {  // 遍历所有语句
-               funcBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到函数体
+               funcBody->comp_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到函数体
            }
            delete $3;  // 释放语句列表容器（内容已转移到函数体节点中）
        }
@@ -1340,13 +1340,13 @@ statement
    
    // 规则2：赋值语句
    | variable ASSIGNOP expression  {  // 匹配"变量 := 表达式"形式，如"x := y + 1"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto assignStmt = allocateNode<AssignStmt>();  // 创建赋值语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto assignmentNode = allocateNode<AssignmentNode>();  // 创建赋值语句节点
        
-       assignStmt->lval = std::unique_ptr<LValStmt>($1);  // 设置左值（赋值目标）
-       assignStmt->expr = std::unique_ptr<ExprStmt>($3);  // 设置右值表达式
+       assignmentNode->lval = std::unique_ptr<LValueNode>($1);  // 设置左值（赋值目标）
+       assignmentNode->expr = std::unique_ptr<ExprNode>($3);  // 设置右值表达式
        
-       stmtList->emplace_back(assignStmt);  // 将赋值语句添加到语句列表
+       stmtList->emplace_back(assignmentNode);  // 将赋值语句添加到语句列表
        $$ = stmtList;  // 返回包含赋值语句的列表
        
        GRAMMAR_TRACE("statement -> variable ASSIGNOP expression");  // 记录语法解析跟踪信息
@@ -1354,7 +1354,7 @@ statement
    
    // 规则3：过程调用语句
    | procedure_call  {  // 匹配过程调用，如"WriteLn(x)"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
        stmtList->emplace_back($1);  // 将过程调用添加到语句列表
        
        $$ = stmtList;  // 返回包含过程调用的列表
@@ -1369,20 +1369,20 @@ statement
    
    // 规则5：while循环语句
    | WHILE expression DO statement  {  // 匹配"while 条件表达式 do 循环体"形式
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto whileStmt = allocateNode<WhileStmt>();  // 创建while语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto whileNode = allocateNode<WhileNode>();  // 创建while语句节点
        
-       whileStmt->expr = std::unique_ptr<ExprStmt>($2);  // 设置循环条件表达式
+       whileNode->expr = std::unique_ptr<ExprNode>($2);  // 设置循环条件表达式
        
        // 处理循环体语句
        if ($4 != nullptr) {  // 如果循环体不为空
            for (auto stmt : *$4) {  // 遍历循环体中的所有语句
-               whileStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到while语句的循环体
+               whileNode->stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到while语句的循环体
            }
            delete $4;  // 释放语句列表容器（内容已转移）
        }
        
-       stmtList->emplace_back(whileStmt);  // 将while语句添加到语句列表
+       stmtList->emplace_back(whileNode);  // 将while语句添加到语句列表
        $$ = stmtList;  // 返回包含while语句的列表
        
        GRAMMAR_TRACE("statement -> WHILE expression DO statement");  // 记录语法解析跟踪信息
@@ -1390,26 +1390,26 @@ statement
    
     // 规则6：if语句（带可选的else部分）
     | IF expression THEN statement else_part {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-        auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
+        auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+        auto ifNode = allocateNode<IfNode>();  // 创建if语句节点
         
-        ifStmt->expr = std::unique_ptr<ExprStmt>($2);  // 设置条件表达式
+        ifNode->expr = std::unique_ptr<ExprNode>($2);  // 设置条件表达式
         
         // 处理if条件为真时的语句
         if ($4 != nullptr) {  // 如果then分支不为空
             for (auto stmt : *$4) {  // 遍历then分支中的所有语句
-                ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
+                ifNode->true_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到if语句的true分支
             }
         }
         
         // 处理if条件为假时的语句（else部分）
         if ($5 != nullptr) {  // 如果else分支不为空
             for (auto stmt : *$5) {  // 遍历else分支中的所有语句
-                ifStmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的false分支
+                ifNode->false_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到if语句的false分支
             }
         }
         
-        stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
+        stmtList->emplace_back(ifNode);  // 将if语句添加到语句列表
         delete $4;  // 释放then分支语句列表容器（内容已转移）
         delete $5;  // 释放else分支语句列表容器（内容已转移）
         
@@ -1419,21 +1419,21 @@ statement
    
    // 规则8：for循环语句
    | FOR IDENTIFIER ASSIGNOP expression TO expression DO statement  {  // 匹配"for 变量:=初值 to 终值 do 循环体"形式
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto forStmt = allocateNode<ForStmt>();  // 创建for语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto forNode = allocateNode<ForNode>();  // 创建for语句节点
        
-       forStmt->id = std::string($2);  // 设置循环变量名
-       forStmt->begin = std::unique_ptr<ExprStmt>($4);  // 设置循环初始值表达式
-       forStmt->end = std::unique_ptr<ExprStmt>($6);  // 设置循环终止值表达式
+       forNode->id = std::string($2);  // 设置循环变量名
+       forNode->begin = std::unique_ptr<ExprNode>($4);  // 设置循环初始值表达式
+       forNode->end = std::unique_ptr<ExprNode>($6);  // 设置循环终止值表达式
        
        // 处理循环体语句
        if ($8 != nullptr) {  // 如果循环体不为空
            for (auto stmt : *$8) {  // 遍历循环体中的所有语句
-               forStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到for语句的循环体
+               forNode->stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到for语句的循环体
            }
        }
        
-       stmtList->emplace_back(forStmt);  // 将for语句添加到语句列表
+       stmtList->emplace_back(forNode);  // 将for语句添加到语句列表
        free($2);  // 释放循环变量名字符串
        delete $8;  // 释放循环体语句列表容器（内容已转移）
        
@@ -1443,12 +1443,12 @@ statement
    
    // 规则9：读取语句
    | READ '(' variable_list ')'  {  // 匹配"read(变量列表)"形式，如"read(x, y, z)"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto readStmt = allocateNode<ReadFuncStmt>();  // 创建读取语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto readStmt = allocateNode<ReadFuncNode>();  // 创建读取语句节点
        
        // 处理变量列表
        for (auto lval : *$3) {  // 遍历变量列表中的所有变量
-           readStmt->lval.emplace_back(std::unique_ptr<LValStmt>(lval));  // 将每个变量添加到读取语句的变量列表
+           readStmt->lval.emplace_back(std::unique_ptr<LValueNode>(lval));  // 将每个变量添加到读取语句的变量列表
        }
        
        delete $3;  // 释放变量列表容器（内容已转移）
@@ -1460,13 +1460,13 @@ statement
    
    // 规则10：写入语句
    | WRITE '(' expression_list ')'  {  // 匹配"write(表达式列表)"形式，如"write(x+y, 'hello')"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto writeStmt = allocateNode<WriteFuncStmt>();  // 创建写入语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto writeStmt = allocateNode<WriteFuncNode>();  // 创建写入语句节点
        
        // 处理表达式列表
        if ($3 != nullptr) {  // 如果表达式列表不为空
            for (auto expr : *$3) {  // 遍历表达式列表中的所有表达式
-               writeStmt->expr.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个表达式添加到写入语句的表达式列表
+               writeStmt->expr.emplace_back(std::unique_ptr<ExprNode>(expr));  // 将每个表达式添加到写入语句的表达式列表
            }
        }
        
@@ -1479,10 +1479,10 @@ statement
    
    // 规则11：break语句
    | BREAK  {  // 匹配break关键字
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto breakStmt = allocateNode<BreakStmt>();  // 创建break语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto breakNode = allocateNode<BreakNode>();  // 创建break语句节点
        
-       stmtList->emplace_back(breakStmt);  // 将break语句添加到语句列表
+       stmtList->emplace_back(breakNode);  // 将break语句添加到语句列表
        $$ = stmtList;  // 返回包含break语句的列表
        
        GRAMMAR_TRACE("statement -> BREAK");  // 记录语法解析跟踪信息
@@ -1490,10 +1490,10 @@ statement
    
    // 规则12：continue语句
    | CONTINUE  {  // 匹配continue关键字
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto continueStmt = allocateNode<ContinueStmt>();  // 创建continue语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto continueNode = allocateNode<ContinueNode>();  // 创建continue语句节点
        
-       stmtList->emplace_back(continueStmt);  // 将continue语句添加到语句列表
+       stmtList->emplace_back(continueNode);  // 将continue语句添加到语句列表
        $$ = stmtList;  // 返回包含continue语句的列表
        
        GRAMMAR_TRACE("statement -> CONTINUE");  // 记录语法解析跟踪信息
@@ -1506,7 +1506,7 @@ variable_list
    // 规则1：单个变量
    : variable  {  // 匹配单个变量引用，如"x"或"arr[i]"
        currentParserContext = ParserContext::VariableList;  // 设置当前解析上下文为变量列表
-       auto lvalList = allocateNode<std::vector<LValStmt *>>();  // 创建左值列表容器，变量列表中的元素必须是可赋值的目标（左值）
+       auto lvalList = allocateNode<std::vector<LValueNode *>>();  // 创建左值列表容器，变量列表中的元素必须是可赋值的目标（左值）
        
        lvalList->emplace_back($1);  // 将变量添加到左值列表中
        $$ = lvalList;  // 返回包含单个变量的左值列表
@@ -1540,14 +1540,14 @@ variable_list
 variable 
    : IDENTIFIER id_varpart  {  // 匹配"标识符 可选的数组下标"形式，如"x"或"array[i, j+1]"
        currentParserContext = ParserContext::Variable;  // 设置当前解析上下文为变量
-       auto lval = allocateNode<LValStmt>();  // 创建左值语句节点
+       auto lval = allocateNode<LValueNode>();  // 创建左值语句节点
        
        lval->id = std::string($1);  // 设置变量的标识符名称
        
        // 处理变量的数组下标部分
        if ($2 != nullptr) {  // 如果有数组下标部分
            for (auto expr : *$2) {  // 遍历所有下标表达式
-               lval->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个下标表达式添加到左值的数组索引列表
+               lval->array_index.emplace_back(std::unique_ptr<ExprNode>(expr));  // 将每个下标表达式添加到左值的数组索引列表
            }
            delete $2;  // 释放下标表达式列表容器（内容已转移）
        }
@@ -1591,7 +1591,7 @@ procedure_call
    // 规则1：不带参数的过程调用
    : IDENTIFIER  {  // 匹配单个标识符，如"WriteLn"或"Initialize"
        currentParserContext = ParserContext::ProcedureCall;  // 设置当前解析上下文为过程调用
-       auto procCall = allocateNode<FuncCallStmt>();  // 创建函数调用语句节点
+       auto procCall = allocateNode<FuncCallNode>();  // 创建函数调用语句节点
        
        procCall->id = std::string($1);  // 设置过程名称
        free($1);  // 释放词法分析器分配的标识符字符串（已复制到节点中）
@@ -1603,14 +1603,14 @@ procedure_call
    // 规则2：带参数的过程调用
    | IDENTIFIER '(' expression_list ')'  {  // 匹配"标识符(参数列表)"形式，如"WriteLn(x, y+1)"
        currentParserContext = ParserContext::ProcedureCall;  // 设置当前解析上下文为过程调用
-       auto procCall = allocateNode<FuncCallStmt>();  // 创建函数调用语句节点
+       auto procCall = allocateNode<FuncCallNode>();  // 创建函数调用语句节点
        
        procCall->id = std::string($1);  // 设置过程名称
        
        // 处理参数表达式列表
        if ($3 != nullptr) {  // 如果参数列表不为空
            for (auto expr : *$3) {  // 遍历所有参数表达式
-               procCall->args.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个参数表达式添加到函数调用的参数列表
+               procCall->args.emplace_back(std::unique_ptr<ExprNode>(expr));  // 将每个参数表达式添加到函数调用的参数列表
            }
            delete $3;  // 释放表达式列表容器（内容已转移到函数调用节点）
        }
@@ -1650,7 +1650,7 @@ expression_list
    // 规则2：单个表达式
    | expression  {  // 匹配单个表达式，如"(x)"或"[i]"
        currentParserContext = ParserContext::ExpressionList;  // 设置当前解析上下文为表达式列表
-       auto exprList = allocateNode<std::vector<ExprStmt *>>();  // 创建表达式列表容器
+       auto exprList = allocateNode<std::vector<ExprNode *>>();  // 创建表达式列表容器
        
        exprList->emplace_back($1);  // 将表达式添加到列表中
        $$ = exprList;  // 返回包含单个表达式的列表
@@ -1686,10 +1686,10 @@ expression
    | expression relop simple_expression  {  // 匹配"表达式 关系运算符 简单表达式"形式，如"a > b"或"x = y+1"
        currentParserContext = ParserContext::Expression;  // 设置当前解析上下文为表达式
        auto expr = $1;  // 获取左侧已解析的表达式
-       RelExprStmt::Term term;  // 创建新的关系表达式项结构
+       RelExprNode::Term term;  // 创建新的关系表达式项结构
        
        term.type = getRelationOperator($2);  // 设置关系运算符类型（通过将语法分析器的token转换为枚举值）
-       term.add_expr = std::unique_ptr<AddExprStmt>($3);  // 设置右侧的简单表达式，使用智能指针管理内存
+       term.add_expr = std::unique_ptr<AddExprNode>($3);  // 设置右侧的简单表达式，使用智能指针管理内存
        expr->rel_expr->terms.emplace_back(std::move(term));  // 将新的关系表达式项添加到表达式节点中
                                                              // 使用std::move转移所有权
        
@@ -1716,10 +1716,10 @@ simple_expression
    | simple_expression addop term  {  // 匹配"简单表达式 加法运算符 项"形式，如"a+b"或"x-y*z"
        currentParserContext = ParserContext::SimpleExpression;  // 设置当前解析上下文为简单表达式
        auto addExpr = $1;  // 获取左侧已解析的简单表达式
-       AddExprStmt::Term term;  // 创建新的加法表达式项
+       AddExprNode::Term term;  // 创建新的加法表达式项
        
        term.type = getArithmeticOperator($2);  // 设置加法运算符类型（如Plus、Minus、Or）
-       term.mul_expr = std::unique_ptr<MulExprStmt>($3);  // 将右侧的项转换为智能指针并存储
+       term.mul_expr = std::unique_ptr<MulExprNode>($3);  // 将右侧的项转换为智能指针并存储
        addExpr->terms.emplace_back(std::move(term));  // 将新的加法表达式项添加到简单表达式节点
                                                       // 使用std::move转移所有权
        
@@ -1746,10 +1746,10 @@ term
    | term mulop factor  {  // 匹配"项 乘法运算符 因子"形式，如"a*b"或"x/y"
        currentParserContext = ParserContext::Term;  // 设置当前解析上下文为项
        auto mulExpr = $1;  // 获取左侧已解析的项
-       MulExprStmt::Term term;  // 创建新的乘法表达式项结构
+       MulExprNode::Term term;  // 创建新的乘法表达式项结构
        
        term.type = getTermOperator($2);  // 设置乘法运算符类型（如Mul、Div、Mod、And、AndThen）
-       term.unary_expr = std::unique_ptr<UnaryExprStmt>($3);  // 将右侧的因子转换为智能指针并存储
+       term.unary_expr = std::unique_ptr<UnaryExprNode>($3);  // 将右侧的因子转换为智能指针并存储
        mulExpr->terms.emplace_back(std::move(term));  // 将新的乘法表达式项添加到项节点
                                                       // 使用std::move转移所有权
        
@@ -1765,11 +1765,11 @@ factor
    // 规则1：整数常量
    : INTEGER  {  // 匹配整数字面量，如"42"或"1024"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        setupNumberNode(unaryExpr->primary_expr->value->number, $1);  // 设置数字节点的值和类型信息
        
        $$ = unaryExpr;  // 返回创建的一元表达式节点
@@ -1779,11 +1779,11 @@ factor
    // 规则2：实数常量
    | REAL  {  // 匹配实数字面量，如"3.14"或"2.71828"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        
        double val = atof($1);  // 将字符串转换为双精度浮点数
        setupNumberNode(unaryExpr->primary_expr->value->number, val);  // 设置数字节点的值和类型信息
@@ -1798,11 +1798,11 @@ factor
    // 规则3：布尔常量
    | BOOLEAN  {  // 匹配布尔字面量，如"true"或"false"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        
        long long int val = $1 ? 1 : 0;  // 将布尔值转换为整数（true=1, false=0）
        setupNumberNode(unaryExpr->primary_expr->value->number, val);  // 设置数字节点的值和类型信息
@@ -1814,11 +1814,11 @@ factor
    // 规则4：字符常量
    | CHAR  {  // 匹配字符字面量，如"'A'"或"'z'"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        
        setupNumberNode(unaryExpr->primary_expr->value->number, $1);  // 设置数字节点的值和类型信息
        
@@ -1829,11 +1829,11 @@ factor
    // 规则5：变量引用
    | variable  {  // 匹配变量引用，如"x"或"array[i]"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::LVal;  // 设置值类型为左值
-       unaryExpr->primary_expr->value->lval = std::unique_ptr<LValStmt>($1);  // 设置左值节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::LVal;  // 设置值类型为左值
+       unaryExpr->primary_expr->value->lval = std::unique_ptr<LValueNode>($1);  // 设置左值节点
        
        $$ = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> variable");  // 记录语法解析跟踪信息
@@ -1842,9 +1842,9 @@ factor
    // 规则6：括号表达式
    | '(' expression ')'  {  // 匹配括号表达式，如"(a+b)"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Parentheses);  // 创建一元表达式节点，类型为括号表达式
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Parentheses);  // 创建一元表达式节点，类型为括号表达式
        
-       unaryExpr->primary_expr->expr = std::unique_ptr<ExprStmt>($2);  // 设置括号内的表达式
+       unaryExpr->primary_expr->expr = std::unique_ptr<ExprNode>($2);  // 设置括号内的表达式
        
        $$ = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> '(' expression ')'");  // 记录语法解析跟踪信息
@@ -1853,17 +1853,17 @@ factor
    // 规则7：函数调用
    | IDENTIFIER '(' expression_list ')'  {  // 匹配函数调用，如"Sqrt(x)"或"Max(a, b)"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::FuncCall;  // 设置值类型为函数调用
-       unaryExpr->primary_expr->value->func_call = std::make_unique<FuncCallStmt>();  // 创建函数调用节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::FuncCall;  // 设置值类型为函数调用
+       unaryExpr->primary_expr->value->func_call = std::make_unique<FuncCallNode>();  // 创建函数调用节点
        unaryExpr->primary_expr->value->func_call->id = std::string($1);  // 设置函数名
        
        // 处理函数参数
        if ($3 != nullptr) {  // 如果有参数列表
            for (auto expr : *$3) {  // 遍历所有参数表达式
-               unaryExpr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 添加参数
+               unaryExpr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprNode>(expr));  // 添加参数
            }
            delete $3;  // 释放参数列表容器
        }
@@ -1879,7 +1879,7 @@ factor
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
        auto unaryExpr = $2;  // 获取操作数（已解析的因子）
        
-       unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Not);  // 添加逻辑非运算符类型
+       unaryExpr->types.emplace_back(UnaryExprNode::UnaryExprType::Not);  // 添加逻辑非运算符类型
        
        $$ = unaryExpr;  // 返回更新后的一元表达式节点
        GRAMMAR_TRACE("factor -> NOT factor");  // 记录语法解析跟踪信息
@@ -1898,7 +1898,7 @@ factor
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
        auto unaryExpr = $2;  // 获取操作数（已解析的因子）
        
-       unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus);  // 添加负号运算符类型
+       unaryExpr->types.emplace_back(UnaryExprNode::UnaryExprType::Minus);  // 添加负号运算符类型
        
        $$ = unaryExpr;  // 返回更新后的一元表达式节点
        GRAMMAR_TRACE("factor -> '-' factor");  // 记录语法解析跟踪信息
@@ -1951,7 +1951,7 @@ error_recovery
 extern void scan_string(const char *str, yyscan_t scanner);
 
 // 基本错误处理函数 - 由Bison在遇到语法错误时自动调用
-int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg)
+int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg)
 {
    (void)program;  // 未使用的参数，使用void转换避免编译警告
    (void)scanner;  // 未使用的参数，使用void转换避免编译警告
@@ -1963,7 +1963,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 }
 
 // 详细语法错误报告函数 - 为用户提供更直观的错误信息
-static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramStmt ** program, void * scanner)
+static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramNode ** program, void * scanner)
 {
    syntaxErrorFlag = true;  // 设置全局错误标志
    int res = 0;  // 初始化返回值
@@ -2018,7 +2018,7 @@ static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str,
 }
 
 // 主解析函数 - 语法分析的入口点，初始化词法分析器并执行解析
-int code_parse(const char * code_str, ProgramStmt ** program) {
+int code_parse(const char * code_str, ProgramNode ** program) {
    yyscan_t scanner;  // 词法分析器状态
    yylex_init(&scanner);  // 初始化词法分析器
    scan_string(code_str, scanner);  // 加载源代码字符串到词法分析器

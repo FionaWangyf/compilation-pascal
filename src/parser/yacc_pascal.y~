@@ -31,48 +31,48 @@ namespace {
     }
 
     // 关系运算符映射表
-    const std::map<long long, RelExprStmt::RelExprType> relExprTypeMap = {
-        {0, RelExprStmt::RelExprType::Equal},
-        {1, RelExprStmt::RelExprType::NotEqual},
-        {2, RelExprStmt::RelExprType::Less},
-        {3, RelExprStmt::RelExprType::LessEqual},
-        {4, RelExprStmt::RelExprType::Greater},
-        {5, RelExprStmt::RelExprType::GreaterEqual},
-        {6, RelExprStmt::RelExprType::In}
+    const std::map<long long, RelExprNode::RelExprType> relExprTypeMap = {
+        {0, RelExprNode::RelExprType::Equal},
+        {1, RelExprNode::RelExprType::NotEqual},
+        {2, RelExprNode::RelExprType::Less},
+        {3, RelExprNode::RelExprType::LessEqual},
+        {4, RelExprNode::RelExprType::Greater},
+        {5, RelExprNode::RelExprType::GreaterEqual},
+        {6, RelExprNode::RelExprType::In}
     };
 
     // 加法级运算符映射表
-    const std::map<long long, AddExprStmt::AddExprType> addExprTypeMap = {
-        {0, AddExprStmt::AddExprType::Plus},
-        {1, AddExprStmt::AddExprType::Minus},
-        {2, AddExprStmt::AddExprType::Or}
+    const std::map<long long, AddExprNode::AddExprType> addExprTypeMap = {
+        {0, AddExprNode::AddExprType::Plus},
+        {1, AddExprNode::AddExprType::Minus},
+        {2, AddExprNode::AddExprType::Or}
     };
 
     // 乘法级运算符映射表
-    const std::map<long long, MulExprStmt::MulExprType> mulExprTypeMap = {
-        {0, MulExprStmt::MulExprType::Mul},
-        {1, MulExprStmt::MulExprType::Div},
-        {2, MulExprStmt::MulExprType::Mod},
-        {3, MulExprStmt::MulExprType::And},
-        {4, MulExprStmt::MulExprType::AndThen}
+    const std::map<long long, MulExprNode::MulExprType> mulExprTypeMap = {
+        {0, MulExprNode::MulExprType::Mul},
+        {1, MulExprNode::MulExprType::Div},
+        {2, MulExprNode::MulExprType::Mod},
+        {3, MulExprNode::MulExprType::And},
+        {4, MulExprNode::MulExprType::AndThen}
     };
 
     // 获取各类运算符类型的函数
-    RelExprStmt::RelExprType get_rel_expr_type(long long op) {
-        return get_operator_type<RelExprStmt::RelExprType>(op, relExprTypeMap);
+    RelExprNode::RelExprType get_rel_expr_type(long long op) {
+        return get_operator_type<RelExprNode::RelExprType>(op, relExprTypeMap);
     }
 
-    AddExprStmt::AddExprType get_add_expr_type(long long op) {
-        return get_operator_type<AddExprStmt::AddExprType>(op, addExprTypeMap);
+    AddExprNode::AddExprType get_add_expr_type(long long op) {
+        return get_operator_type<AddExprNode::AddExprType>(op, addExprTypeMap);
     }
 
-    MulExprStmt::MulExprType get_mul_expr_type(long long op) {
-        return get_operator_type<MulExprStmt::MulExprType>(op, mulExprTypeMap);
+    MulExprNode::MulExprType get_mul_expr_type(long long op) {
+        return get_operator_type<MulExprNode::MulExprType>(op, mulExprTypeMap);
     }
 
     // 填充数值节点的统一函数
     template<typename T>
-    void fill_number_stmt(std::unique_ptr<NumberStmt>& num_value, T val) {
+    void fill_number_stmt(std::unique_ptr<NumberNode>& num_value, T val) {
         num_value->is_signed = true;
         num_value->is_real = std::is_same<T, double>::value;
         num_value->is_char = std::is_same<T, char>::value;
@@ -117,36 +117,36 @@ namespace {
     // 值节点工厂
     class ValueNodeFactory {
     public:
-        static ValueStmt* create_integer(long long val) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        static ValueNode* create_integer(long long val) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             fill_number_stmt(value->number, val);
             return value;
         }
 
-        static ValueStmt* create_real(const char* str) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        static ValueNode* create_real(const char* str) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             double val = atof(str);
             fill_number_stmt(value->number, val);
             value->number->literal = std::string(str);
             return value;
         }
 
-        static ValueStmt* create_char(char val) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        static ValueNode* create_char(char val) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             fill_number_stmt(value->number, val);
             return value;
         }
 
-        static ValueStmt* create_string(const char* str) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Str;
-            value->str = std::make_unique<StrStmt>();
+        static ValueNode* create_string(const char* str) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Str;
+            value->str = std::make_unique<StringNode>();
             value->str->val = std::string(str).substr(1, std::string(str).length() - 2);
             return value;
         }
@@ -155,39 +155,39 @@ namespace {
     // 表达式节点工厂
     class ExprNodeFactory {
     public:
-        static ExprStmt* create_from_simple_expr(AddExprStmt* simple_expr) {
-            ExprStmt* expr = new ExprStmt();
-            expr->rel_expr = std::make_unique<RelExprStmt>();
-            RelExprStmt::Term term;
-            term.type = RelExprStmt::RelExprType::NULL_TYPE;
-            term.add_expr = std::unique_ptr<AddExprStmt>(simple_expr);
+        static ExprNode* create_from_simple_expr(AddExprNode* simple_expr) {
+            ExprNode* expr = new ExprNode();
+            expr->rel_expr = std::make_unique<RelExprNode>();
+            RelExprNode::Term term;
+            term.type = RelExprNode::RelExprType::NULL_TYPE;
+            term.add_expr = std::unique_ptr<AddExprNode>(simple_expr);
             expr->rel_expr->terms.emplace_back(std::move(term));
             return expr;
         }
 
-        static AddExprStmt* create_from_term(MulExprStmt* term) {
-            AddExprStmt* add_expr = new AddExprStmt();
-            AddExprStmt::Term term_struct;
-            term_struct.type = AddExprStmt::AddExprType::NULL_TYPE;
-            term_struct.mul_expr = std::unique_ptr<MulExprStmt>(term);
+        static AddExprNode* create_from_term(MulExprNode* term) {
+            AddExprNode* add_expr = new AddExprNode();
+            AddExprNode::Term term_struct;
+            term_struct.type = AddExprNode::AddExprType::NULL_TYPE;
+            term_struct.mul_expr = std::unique_ptr<MulExprNode>(term);
             add_expr->terms.emplace_back(std::move(term_struct));
             return add_expr;
         }
 
-        static MulExprStmt* create_from_factor(UnaryExprStmt* factor) {
-            MulExprStmt* mul_expr = new MulExprStmt();
-            MulExprStmt::Term term;
-            term.type = MulExprStmt::MulExprType::NULL_TYPE;
-            term.unary_expr = std::unique_ptr<UnaryExprStmt>(factor);
+        static MulExprNode* create_from_factor(UnaryExprNode* factor) {
+            MulExprNode* mul_expr = new MulExprNode();
+            MulExprNode::Term term;
+            term.type = MulExprNode::MulExprType::NULL_TYPE;
+            term.unary_expr = std::unique_ptr<UnaryExprNode>(factor);
             mul_expr->terms.emplace_back(std::move(term));
             return mul_expr;
         }
     };
 
     // 创建一元表达式的函数
-    UnaryExprStmt* create_unary_expr(PrimaryExprStmt::PrimaryExprType type) {
-        UnaryExprStmt* unary = new UnaryExprStmt();
-        unary->primary_expr = std::make_unique<PrimaryExprStmt>();
+    UnaryExprNode* create_unary_expr(PrimaryExprNode::PrimaryExprType type) {
+        UnaryExprNode* unary = new UnaryExprNode();
+        unary->primary_expr = std::make_unique<PrimaryExprNode>();
         unary->primary_expr->type = type;
         return unary;
     }
@@ -297,7 +297,7 @@ void resetErrorFlag() {
     hadError = false; // 重置错误标志，为下一次解析准备
 }
 
-int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg);
+int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg);
 
 %}
 
@@ -357,7 +357,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 %define parse.trace
 %lex-param { yyscan_t scanner }
 %parse-param { const char * code_str }
-%parse-param { ProgramStmt ** program}
+%parse-param { ProgramNode ** program}
 %parse-param { void * scanner }
 
 // 定义初始动作
@@ -369,45 +369,45 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 
 /** union 中定义各种数据类型，真实生成的代码也是union类型，所以不能有非POD类型的数据 **/
 %union {
-    ProgramStmt *                                   program_struct;
-    ProgramHeadStmt *                               program_head;
-    ProgramBodyStmt *                               program_body;
+    ProgramNode *                                   program_struct;
+    ProgramHeadNode *                               program_head;
+    ProgramBodyNode *                               program_body;
     std::vector<std::string> *                      id_list;
-    ConstDeclStmt *                                 const_decls;
-    std::pair<std::string, ValueStmt *> *            kv_pair;
-    std::vector<std::pair<std::string, ValueStmt *>*> * kv_pair_list;
-    ValueStmt *                                    value;
-    std::vector<VarDeclStmt *> *                    var_decls;
-    VarDeclStmt *                                   var_decl;
+    ConstDeclNode *                                 const_decls;
+    std::pair<std::string, ValueNode *> *            kv_pair;
+    std::vector<std::pair<std::string, ValueNode *>*> * kv_pair_list;
+    ValueNode *                                    value;
+    std::vector<VarDeclNode *> *                    var_decls;
+    VarDeclNode *                                   var_decl;
     DataType                                        var_type;
     BasicType                                       basic_type;
-    std::vector<PeriodStmt *> *                     period_list;
-    PeriodStmt *                                    period;
-    std::vector<FuncDeclStmt *> *                   func_decl_list;
-    FuncDeclStmt *                                  func_decl;
-    FuncHeadDeclStmt *                              func_head;
-    FuncBodyDeclStmt *                              func_body;
+    std::vector<PeriodNode *> *                     period_list;
+    PeriodNode *                                    period;
+    std::vector<FuncDeclNode *> *                   func_decl_list;
+    FuncDeclNode *                                  func_decl;
+    FuncHeadDeclNode *                              func_head;
+    FuncBodyDeclNode *                              func_body;
     std::vector<BaseStmt *> *                       stmt_list;
-    AssignStmt *                                    assign_stmt;
-    IfStmt *                                        if_stmt;
-    ForStmt *                                       for_stmt;
-    ReadFuncStmt *                                      read_stmt;
-    WriteFuncStmt *                                     write_stmt;
-    FuncCallStmt *                                  func_call_stmt;
-    std::vector<LValStmt *> *                       lval_list;
-    LValStmt *                                      lval;
+    AssignmentNode *                                    assign_stmt;
+    IfNode *                                        if_stmt;
+    ForNode *                                       for_stmt;
+    ReadFuncNode *                                      read_stmt;
+    WriteFuncNode *                                     write_stmt;
+    FuncCallNode *                                  func_call_stmt;
+    std::vector<LValueNode *> *                       lval_list;
+    LValueNode *                                      lval;
     BaseStmt *                                      stmt;
 
-    std::vector<ExprStmt *> *                       expr_list;
-    ExprStmt *                                      expr;
-    RelExprStmt *                                   rel_expr;
-    AddExprStmt *                                   add_expr;
-    MulExprStmt *                                   mul_expr;
-    UnaryExprStmt *                                 unary_expr;
-    PrimaryExprStmt *                               primary_expr;
+    std::vector<ExprNode *> *                       expr_list;
+    ExprNode *                                      expr;
+    RelExprNode *                                   rel_expr;
+    AddExprNode *                                   add_expr;
+    MulExprNode *                                   mul_expr;
+    UnaryExprNode *                                 unary_expr;
+    PrimaryExprNode *                               primary_expr;
 
-    BreakStmt *                                     break_stmt;
-    ContinueStmt *                                  continue_stmt;
+    BreakNode *                                     break_stmt;
+    ContinueNode *                                  continue_stmt;
 
     char *                                          string;
     long long                                       number;
@@ -498,30 +498,30 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 programstruct : program_head  ';'  program_body '.'
     {
         current_rule = CurrentRule::ProgramStruct;
-        ProgramStmt * program_struct = create_node<ProgramStmt>();
-        program_struct->head = std::unique_ptr<ProgramHeadStmt>($1);
-        program_struct->body = std::unique_ptr<ProgramBodyStmt>($3);
+        ProgramNode * program_struct = create_node<ProgramNode>();
+        program_struct->head = std::unique_ptr<ProgramHeadNode>($1);
+        program_struct->body = std::unique_ptr<ProgramBodyNode>($3);
         LOG_RULE("programstruct -> program_head ';' program_body '.'");
         *program = program_struct;
         $$ = nullptr; // 防止报错
     }
     | error  ';'  program_body '.'
     {
-        *program = create_node<ProgramStmt>();
+        *program = create_node<ProgramNode>();
         delete $3;
         $$ = nullptr;
         LOG_ERROR_RULE("programstruct -> error ';' program_body '.'");
     }
     | program_head  ';'  error
     {
-        *program = create_node<ProgramStmt>();
+        *program = create_node<ProgramNode>();
         delete $1;
         $$ = nullptr;
         LOG_ERROR_RULE("programstruct -> program_head ';' error");
     }
     | error  ';'  error
     {
-        *program = create_node<ProgramStmt>();
+        *program = create_node<ProgramNode>();
         $$ = nullptr;
         LOG_ERROR_RULE("programstruct -> error ';' error");
     }
@@ -531,7 +531,7 @@ programstruct : program_head  ';'  program_body '.'
 program_head : PROGRAM IDENTIFIER '(' idlist ')'
     {
         current_rule = CurrentRule::ProgramHead;
-        $$ = create_node<ProgramHeadStmt>();
+        $$ = create_node<ProgramHeadNode>();
         $$->id_list = *$4;
         delete $4;
         free($2);
@@ -540,7 +540,7 @@ program_head : PROGRAM IDENTIFIER '(' idlist ')'
     | PROGRAM IDENTIFIER
     {
         current_rule = CurrentRule::ProgramHead;
-        $$ = create_node<ProgramHeadStmt>();
+        $$ = create_node<ProgramHeadNode>();
         $$->id_list.emplace_back(std::string($2));
         LOG_RULE("program_head -> PROGRAM IDENTIFIER");
         free($2);
@@ -557,17 +557,17 @@ program_head : PROGRAM IDENTIFIER '(' idlist ')'
 program_body : const_declarations var_declarations subprogram_declarations compound_statement
     {
         current_rule = CurrentRule::ProgramBody;
-        ProgramBodyStmt* program_body = create_node<ProgramBodyStmt>();
+        ProgramBodyNode* program_body = create_node<ProgramBodyNode>();
         
         // 处理常量声明
         if($1 != nullptr) {
-            program_body->const_decl = std::unique_ptr<ConstDeclStmt>($1);
+            program_body->const_decl = std::unique_ptr<ConstDeclNode>($1);
         }
         
         // 处理变量声明
         if($2 != nullptr) {
             for(auto var_decl : *$2) {
-                program_body->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(var_decl));
+                program_body->var_decl.emplace_back(std::unique_ptr<VarDeclNode>(var_decl));
             }
             delete $2;
         }
@@ -575,7 +575,7 @@ program_body : const_declarations var_declarations subprogram_declarations compo
         // 处理子程序声明
         if($3 != nullptr) {
             for(auto func_decl : *$3) {
-                program_body->func_decl.emplace_back(std::unique_ptr<FuncDeclStmt>(func_decl));
+                program_body->func_decl.emplace_back(std::unique_ptr<FuncDeclNode>(func_decl));
             }
             delete $3;
         }
@@ -655,7 +655,7 @@ const_declarations : /*empty*/
     | CONST const_declaration ';' 
     {
         current_rule = CurrentRule::ConstDeclarations;
-        ConstDeclStmt * const_decls = create_node<ConstDeclStmt>();
+        ConstDeclNode * const_decls = create_node<ConstDeclNode>();
         
         // 将声明列表中的键值对转移到常量声明对象中
         for(auto kv_pair : *$2) {
@@ -688,8 +688,8 @@ const_declarations : /*empty*/
 const_declaration : IDENTIFIER '=' const_value
     {
         current_rule = CurrentRule::ConstDeclaration;
-        auto const_decls = create_node<std::vector<std::pair<std::string, ValueStmt *>*>>();
-        auto kv_pair = create_node<std::pair<std::string, ValueStmt *>>($1, $3);
+        auto const_decls = create_node<std::vector<std::pair<std::string, ValueNode *>*>>();
+        auto kv_pair = create_node<std::pair<std::string, ValueNode *>>($1, $3);
         const_decls->emplace_back(kv_pair);
         free($1);
         $$ = const_decls;
@@ -697,7 +697,7 @@ const_declaration : IDENTIFIER '=' const_value
     | const_declaration ';' IDENTIFIER '=' const_value
     {
         current_rule = CurrentRule::ConstDeclaration;
-        $1->emplace_back(create_node<std::pair<std::string, ValueStmt *>>($3, $5));
+        $1->emplace_back(create_node<std::pair<std::string, ValueNode *>>($3, $5));
         free($3);
         $$ = $1;
     }
@@ -734,7 +734,7 @@ const_value: INTEGER
     }
     | '-' REAL
     {
-        ValueStmt* value = ValueNodeFactory::create_real($2);
+        ValueNode* value = ValueNodeFactory::create_real($2);
         // 处理负号：将实数值设为负数
         value->number->real_val *= -1;
         free($2);
@@ -776,8 +776,8 @@ var_declarations : /*empty*/
 var_declaration : idlist ':' type
     {
         current_rule = CurrentRule::VarDeclaration;
-        auto var_decls = create_node<std::vector<VarDeclStmt *>>();
-        auto var_decl = create_node<VarDeclStmt>();
+        auto var_decls = create_node<std::vector<VarDeclNode *>>();
+        auto var_decl = create_node<VarDeclNode>();
         
         // 将标识符列表中的所有标识符复制到变量声明中
         var_decl->id.insert(var_decl->id.end(), $1->begin(), $1->end());
@@ -796,7 +796,7 @@ var_declaration : idlist ':' type
     | var_declaration ';' idlist ':' type
     {
         current_rule = CurrentRule::VarDeclaration;
-        auto var_decl = create_node<VarDeclStmt>();
+        auto var_decl = create_node<VarDeclNode>();
         
         // 将标识符列表中的所有标识符复制到变量声明中
         var_decl->id.insert(var_decl->id.end(), $3->begin(), $3->end());
@@ -824,7 +824,7 @@ var_declaration : idlist ':' type
 type : basic_type
     {
         current_rule = CurrentRule::Type;
-        auto type_stmt = create_node<VarDeclStmt>();
+        auto type_stmt = create_node<VarDeclNode>();
         type_stmt->data_type = DataType::BasicType;
         type_stmt->basic_type = $1;
         $$ = type_stmt;
@@ -833,13 +833,13 @@ type : basic_type
     | ARRAY '[' period_list ']' OF basic_type
     {
         current_rule = CurrentRule::Type;
-        auto type_stmt = create_node<VarDeclStmt>();
+        auto type_stmt = create_node<VarDeclNode>();
         type_stmt->data_type = DataType::ArrayType;
         type_stmt->basic_type = $6;
         
         // 转移数组范围信息
         for(auto period : *$3) {
-            type_stmt->array_range.emplace_back(std::unique_ptr<PeriodStmt>(period));
+            type_stmt->array_range.emplace_back(std::unique_ptr<PeriodNode>(period));
         }
         
         delete $3;
@@ -873,8 +873,8 @@ basic_type: INTEGER_KW
 // 2.5 周期列表（数组索引范围）
 period_list: INTEGER DOUBLE_DOT INTEGER
     {
-        auto period_list = create_node<std::vector<PeriodStmt *>>();
-        auto period = create_node<PeriodStmt>();
+        auto period_list = create_node<std::vector<PeriodNode *>>();
+        auto period = create_node<PeriodNode>();
         period->begin = $1;
         period->end = $3;
         period_list->emplace_back(period);
@@ -883,7 +883,7 @@ period_list: INTEGER DOUBLE_DOT INTEGER
     }
     | period_list ',' INTEGER DOUBLE_DOT INTEGER
     {
-        auto period = create_node<PeriodStmt>();
+        auto period = create_node<PeriodNode>();
         period->begin = $3;
         period->end = $5;
         $1->emplace_back(period);
@@ -901,7 +901,7 @@ subprogram_declarations : /*empty*/
     {
         current_rule = CurrentRule::SubprogramDeclarations;
         if($1 == nullptr) {
-            auto func_decl_list = create_node<std::vector<FuncDeclStmt *>>();
+            auto func_decl_list = create_node<std::vector<FuncDeclNode *>>();
             func_decl_list->emplace_back($2);    
             $$ = func_decl_list;
         } else {
@@ -916,9 +916,9 @@ subprogram_declarations : /*empty*/
 subprogram : subprogram_head ';' subprogram_body
     {
         current_rule = CurrentRule::Subprogram;
-        auto subprogram = create_node<FuncDeclStmt>();
-        subprogram->header = std::unique_ptr<FuncHeadDeclStmt>($1);
-        subprogram->body = std::unique_ptr<FuncBodyDeclStmt>($3);
+        auto subprogram = create_node<FuncDeclNode>();
+        subprogram->header = std::unique_ptr<FuncHeadDeclNode>($1);
+        subprogram->body = std::unique_ptr<FuncBodyDeclNode>($3);
         $$ = subprogram;
         LOG_RULE("subprogram -> subprogram_head ';' subprogram_body");
     }
@@ -928,14 +928,14 @@ subprogram : subprogram_head ';' subprogram_body
 subprogram_head: PROCEDURE IDENTIFIER formal_parameter
     {
         current_rule = CurrentRule::SubprogramHead;
-        auto sub_head = create_node<FuncHeadDeclStmt>();
+        auto sub_head = create_node<FuncHeadDeclNode>();
         sub_head->func_name = std::string($2);
         sub_head->ret_type = BasicType::VOID;
         
         // 处理形式参数
         if($3 != nullptr) {
             for(auto formal_parameter : *$3) {
-                sub_head->args.emplace_back(std::unique_ptr<VarDeclStmt>(formal_parameter));
+                sub_head->args.emplace_back(std::unique_ptr<VarDeclNode>(formal_parameter));
             }
             delete $3;
         }
@@ -947,14 +947,14 @@ subprogram_head: PROCEDURE IDENTIFIER formal_parameter
     | FUNCTION IDENTIFIER formal_parameter ':' basic_type
     {
         current_rule = CurrentRule::SubprogramHead;
-        auto sub_head = create_node<FuncHeadDeclStmt>();
+        auto sub_head = create_node<FuncHeadDeclNode>();
         sub_head->func_name = std::string($2);
         sub_head->ret_type = $5;
         
         // 处理形式参数
         if($3 != nullptr) {
             for(auto formal_parameter : *$3) {
-                sub_head->args.emplace_back(std::unique_ptr<VarDeclStmt>(formal_parameter));
+                sub_head->args.emplace_back(std::unique_ptr<VarDeclNode>(formal_parameter));
             }
             delete $3;
         }
@@ -997,7 +997,7 @@ parameter_list :/* empty */
     }
     | parameter
     {
-        auto param_list = create_node<std::vector<VarDeclStmt *>>();
+        auto param_list = create_node<std::vector<VarDeclNode *>>();
         param_list->emplace_back($1);
         $$ = param_list;
         LOG_RULE("parameter_list -> parameter");
@@ -1035,7 +1035,7 @@ var_parameter: VAR value_parameter
 // 3.3 值参数
 value_parameter: idlist ':' basic_type
     {
-        auto var_decl = create_node<VarDeclStmt>();
+        auto var_decl = create_node<VarDeclNode>();
         var_decl->id.insert(var_decl->id.end(), $1->begin(), $1->end());
         var_decl->data_type = DataType::BasicType;
         var_decl->basic_type = $3;
@@ -1049,17 +1049,17 @@ value_parameter: idlist ':' basic_type
 subprogram_body : const_declarations var_declarations compound_statement
     {
         current_rule = CurrentRule::SubprogramBody;
-        auto func_body = create_node<FuncBodyDeclStmt>();
+        auto func_body = create_node<FuncBodyDeclNode>();
         
         // 处理常量声明
         if($1 != nullptr) {
-            func_body->const_decl = std::unique_ptr<ConstDeclStmt>($1);
+            func_body->const_decl = std::unique_ptr<ConstDeclNode>($1);
         }
         
         // 处理变量声明
         if($2 != nullptr) {
             for(auto var_decl : *$2) {
-                func_body->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(var_decl));
+                func_body->var_decl.emplace_back(std::unique_ptr<VarDeclNode>(var_decl));
             }
             delete $2;
         }
@@ -1151,9 +1151,9 @@ statement : /*empty*/
     | variable ASSIGNOP expression
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto assign_stmt = create_node<AssignStmt>();
-        assign_stmt->lval = std::unique_ptr<LValStmt>($1);
-        assign_stmt->expr = std::unique_ptr<ExprStmt>($3);
+        auto assign_stmt = create_node<AssignmentNode>();
+        assign_stmt->lval = std::unique_ptr<LValueNode>($1);
+        assign_stmt->expr = std::unique_ptr<ExprNode>($3);
         stmt_list->emplace_back(assign_stmt);
         $$ = stmt_list;
         LOG_RULE("statement -> variable ASSIGNOP expression");
@@ -1173,8 +1173,8 @@ statement : /*empty*/
     | WHILE expression DO statement
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto while_stmt = create_node<WhileStmt>();
-        while_stmt->expr = std::unique_ptr<ExprStmt>($2);
+        auto while_stmt = create_node<WhileNode>();
+        while_stmt->expr = std::unique_ptr<ExprNode>($2);
         
         // 处理循环体语句
         if($4 != nullptr) {
@@ -1191,8 +1191,8 @@ statement : /*empty*/
     | IF expression THEN statement %prec THEN
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto if_stmt = create_node<IfStmt>();
-        if_stmt->expr = std::unique_ptr<ExprStmt>($2);
+        auto if_stmt = create_node<IfNode>();
+        if_stmt->expr = std::unique_ptr<ExprNode>($2);
         
         // 处理if条件为真时的语句
         if($4 != nullptr) {
@@ -1209,8 +1209,8 @@ statement : /*empty*/
     | IF expression THEN statement ELSE statement
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto if_stmt = create_node<IfStmt>();
-        if_stmt->expr = std::unique_ptr<ExprStmt>($2);
+        auto if_stmt = create_node<IfNode>();
+        if_stmt->expr = std::unique_ptr<ExprNode>($2);
         
         // 处理if条件为真时的语句
         if($4 != nullptr) {
@@ -1235,10 +1235,10 @@ statement : /*empty*/
     | FOR IDENTIFIER ASSIGNOP expression TO expression DO statement
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto for_stmt = create_node<ForStmt>();
+        auto for_stmt = create_node<ForNode>();
         for_stmt->id = std::string($2);
-        for_stmt->begin = std::unique_ptr<ExprStmt>($4);
-        for_stmt->end = std::unique_ptr<ExprStmt>($6);
+        for_stmt->begin = std::unique_ptr<ExprNode>($4);
+        for_stmt->end = std::unique_ptr<ExprNode>($6);
         
         // 处理循环体语句
         if($8 != nullptr) {
@@ -1256,11 +1256,11 @@ statement : /*empty*/
     | READ '(' variable_list ')'
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto read_stmt = create_node<ReadFuncStmt>();
+        auto read_stmt = create_node<ReadFuncNode>();
         
         // 处理变量列表
         for(auto lval : *$3) {
-            read_stmt->lval.emplace_back(std::unique_ptr<LValStmt>(lval));
+            read_stmt->lval.emplace_back(std::unique_ptr<LValueNode>(lval));
         }
         
         delete $3;
@@ -1271,12 +1271,12 @@ statement : /*empty*/
     | WRITE '(' expression_list ')'
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto write_stmt = create_node<WriteFuncStmt>();
+        auto write_stmt = create_node<WriteFuncNode>();
         
         // 处理表达式列表
         if($3 != nullptr) {
             for(auto expr : *$3) {
-                write_stmt->expr.emplace_back(std::unique_ptr<ExprStmt>(expr));
+                write_stmt->expr.emplace_back(std::unique_ptr<ExprNode>(expr));
             }
         }
         
@@ -1288,7 +1288,7 @@ statement : /*empty*/
     | BREAK
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto break_stmt = create_node<BreakStmt>();
+        auto break_stmt = create_node<BreakNode>();
         stmt_list->emplace_back(break_stmt);
         $$ = stmt_list;
         LOG_RULE("statement -> BREAK");
@@ -1296,7 +1296,7 @@ statement : /*empty*/
     | CONTINUE
     {
         auto stmt_list = create_node<std::vector<BaseStmt *>>();
-        auto continue_stmt = create_node<ContinueStmt>();
+        auto continue_stmt = create_node<ContinueNode>();
         stmt_list->emplace_back(continue_stmt);
         $$ = stmt_list;
         LOG_RULE("statement -> CONTINUE");
@@ -1307,7 +1307,7 @@ statement : /*empty*/
 variable_list : variable
     {
         current_rule = CurrentRule::VariableList;
-        auto lval_list = create_node<std::vector<LValStmt *>>();
+        auto lval_list = create_node<std::vector<LValueNode *>>();
         lval_list->emplace_back($1);
         $$ = lval_list;
         LOG_RULE("variable_list -> variable");
@@ -1318,7 +1318,7 @@ variable_list : variable
         if($3 != nullptr) {
             $1->emplace_back($3);
         } else {
-            auto lval_list = create_node<std::vector<LValStmt *>>();
+            auto lval_list = create_node<std::vector<LValueNode *>>();
             lval_list->emplace_back($3);
             $1 = lval_list;
         }
@@ -1337,13 +1337,13 @@ variable_list : variable
 variable : IDENTIFIER id_varpart
     {
         current_rule = CurrentRule::Variable;
-        auto lval = create_node<LValStmt>();
+        auto lval = create_node<LValueNode>();
         lval->id = std::string($1);
         
         // 处理变量的数组下标部分
         if($2 != nullptr) {
             for(auto expr : *$2) {
-                lval->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));
+                lval->array_index.emplace_back(std::unique_ptr<ExprNode>(expr));
             }
             delete $2;
         }
@@ -1390,7 +1390,7 @@ id_varpart : /*empty*/
 array_index_expression: expression ']'
     {
         current_rule = CurrentRule::ArrayIndexExpression;
-        auto expr_list = create_node<std::vector<ExprStmt *>>();
+        auto expr_list = create_node<std::vector<ExprNode *>>();
         expr_list->emplace_back($1);
         $$ = expr_list;
         LOG_RULE("array_index_expression -> expression_list");
@@ -1408,7 +1408,7 @@ array_index_expression: expression ']'
 procedure_call : IDENTIFIER
     {
         current_rule = CurrentRule::ProcedureCall;
-        auto proc_call = create_node<FuncCallStmt>();
+        auto proc_call = create_node<FuncCallNode>();
         proc_call->id = std::string($1);
         free($1);
         $$ = proc_call;
@@ -1417,13 +1417,13 @@ procedure_call : IDENTIFIER
     | IDENTIFIER '(' expression_list ')'
     {
         current_rule = CurrentRule::ProcedureCall;
-        auto proc_call = create_node<FuncCallStmt>();
+        auto proc_call = create_node<FuncCallNode>();
         proc_call->id = std::string($1);
         
         // 处理参数表达式列表
         if($3 != nullptr) {
             for(auto expr : *$3) {
-                proc_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));
+                proc_call->args.emplace_back(std::unique_ptr<ExprNode>(expr));
             }
             delete $3;
         }
@@ -1443,7 +1443,7 @@ expression_list : /*empty*/
     | expression
     {
         current_rule = CurrentRule::ExpressionList;
-        auto expr_list = create_node<std::vector<ExprStmt *>>();
+        auto expr_list = create_node<std::vector<ExprNode *>>();
         expr_list->emplace_back($1);
         $$ = expr_list;
         LOG_RULE("expression_list -> expression");
@@ -1468,9 +1468,9 @@ expression : simple_expression
     {
         current_rule = CurrentRule::Expression;
         auto expr = $1;
-        RelExprStmt::Term term;
+        RelExprNode::Term term;
         term.type = get_rel_expr_type($2);
-        term.add_expr = std::unique_ptr<AddExprStmt>($3);
+        term.add_expr = std::unique_ptr<AddExprNode>($3);
         expr->rel_expr->terms.emplace_back(std::move(term));
         $$ = expr;
         LOG_RULE("expression -> simple_expression relop simple_expression");
@@ -1487,9 +1487,9 @@ simple_expression : term
     {
         current_rule = CurrentRule::SimpleExpression;
         auto add_expr = $1;
-        AddExprStmt::Term term;
+        AddExprNode::Term term;
         term.type = get_add_expr_type($2);
-        term.mul_expr = std::unique_ptr<MulExprStmt>($3);
+        term.mul_expr = std::unique_ptr<MulExprNode>($3);
         add_expr->terms.emplace_back(std::move(term));
         $$ = add_expr;
         LOG_RULE("simple_expression -> simple_expression %lld term\n");
@@ -1507,9 +1507,9 @@ term : factor
     {
         current_rule = CurrentRule::Term;
         auto mul_expr = $1;
-        MulExprStmt::Term term;
+        MulExprNode::Term term;
         term.type = get_mul_expr_type($2);
-        term.unary_expr = std::unique_ptr<UnaryExprStmt>($3);
+        term.unary_expr = std::unique_ptr<UnaryExprNode>($3);
         mul_expr->terms.emplace_back(std::move(term));
         $$ = mul_expr;
         LOG_RULE("term -> term mulop factor");
@@ -1520,10 +1520,10 @@ term : factor
 factor : INTEGER
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Value);
+        unary_expr->primary_expr->value = std::make_unique<ValueNode>();
+        unary_expr->primary_expr->value->type = ValueNode::ValueType::Number;
+        unary_expr->primary_expr->value->number = std::make_unique<NumberNode>();
         fill_number_stmt(unary_expr->primary_expr->value->number, $1);
         $$ = unary_expr;
         LOG_RULE("factor -> INTEGER");
@@ -1531,10 +1531,10 @@ factor : INTEGER
     | REAL
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Value);
+        unary_expr->primary_expr->value = std::make_unique<ValueNode>();
+        unary_expr->primary_expr->value->type = ValueNode::ValueType::Number;
+        unary_expr->primary_expr->value->number = std::make_unique<NumberNode>();
         double val = atof($1);
         fill_number_stmt(unary_expr->primary_expr->value->number, val);
         unary_expr->primary_expr->value->number->literal = std::string($1);
@@ -1545,10 +1545,10 @@ factor : INTEGER
     | BOOLEAN
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Value);
+        unary_expr->primary_expr->value = std::make_unique<ValueNode>();
+        unary_expr->primary_expr->value->type = ValueNode::ValueType::Number;
+        unary_expr->primary_expr->value->number = std::make_unique<NumberNode>();
         long long int val = $1 ? 1 : 0;
         fill_number_stmt(unary_expr->primary_expr->value->number, val);
         $$ = unary_expr;
@@ -1557,10 +1557,10 @@ factor : INTEGER
     | CHAR
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type = ValueStmt::ValueType::Number;
-        unary_expr->primary_expr->value->number = std::make_unique<NumberStmt>();
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Value);
+        unary_expr->primary_expr->value = std::make_unique<ValueNode>();
+        unary_expr->primary_expr->value->type = ValueNode::ValueType::Number;
+        unary_expr->primary_expr->value->number = std::make_unique<NumberNode>();
         fill_number_stmt(unary_expr->primary_expr->value->number, $1);
         $$ = unary_expr;
         LOG_RULE("factor -> CHAR");
@@ -1568,34 +1568,34 @@ factor : INTEGER
     | variable
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type = ValueStmt::ValueType::LVal;
-        unary_expr->primary_expr->value->lval = std::unique_ptr<LValStmt>($1);
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Value);
+        unary_expr->primary_expr->value = std::make_unique<ValueNode>();
+        unary_expr->primary_expr->value->type = ValueNode::ValueType::LVal;
+        unary_expr->primary_expr->value->lval = std::unique_ptr<LValueNode>($1);
         $$ = unary_expr;
         LOG_RULE("factor -> variable");
     }
     | '(' expression ')'
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Parentheses);
-        unary_expr->primary_expr->expr = std::unique_ptr<ExprStmt>($2);
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Parentheses);
+        unary_expr->primary_expr->expr = std::unique_ptr<ExprNode>($2);
         $$ = unary_expr;
         LOG_RULE("factor -> '(' expression ')'");
     }
     | IDENTIFIER '(' expression_list ')'
     {
         current_rule = CurrentRule::Factor;
-        auto unary_expr = create_unary_expr(PrimaryExprStmt::PrimaryExprType::Value);
-        unary_expr->primary_expr->value = std::make_unique<ValueStmt>();
-        unary_expr->primary_expr->value->type = ValueStmt::ValueType::FuncCall;
-        unary_expr->primary_expr->value->func_call = std::make_unique<FuncCallStmt>();
+        auto unary_expr = create_unary_expr(PrimaryExprNode::PrimaryExprType::Value);
+        unary_expr->primary_expr->value = std::make_unique<ValueNode>();
+        unary_expr->primary_expr->value->type = ValueNode::ValueType::FuncCall;
+        unary_expr->primary_expr->value->func_call = std::make_unique<FuncCallNode>();
         unary_expr->primary_expr->value->func_call->id = std::string($1);
         
         // 处理函数参数
         if($3 != nullptr) {
             for(auto expr : *$3) {
-                unary_expr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));
+                unary_expr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprNode>(expr));
             }
             delete $3;
         }
@@ -1608,7 +1608,7 @@ factor : INTEGER
     {
         current_rule = CurrentRule::Factor;
         auto unary_expr = $2;
-        unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::Not);
+        unary_expr->types.emplace_back(UnaryExprNode::UnaryExprType::Not);
         $$ = unary_expr;
         LOG_RULE("factor -> NOT factor");
     }
@@ -1622,7 +1622,7 @@ factor : INTEGER
     {
         current_rule = CurrentRule::Factor;
         auto unary_expr = $2;
-        unary_expr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus);
+        unary_expr->types.emplace_back(UnaryExprNode::UnaryExprType::Minus);
         $$ = unary_expr;
         LOG_RULE("factor -> '-' factor");
     };
@@ -1646,7 +1646,7 @@ error_recovery : error ';'
 extern void scan_string(const char *str, yyscan_t scanner);
 
 // 相关所需的函数，可能包含一些错误处理函数
-int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg)
+int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg)
 {
     (void)program;
     (void)scanner;
@@ -1656,7 +1656,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
     return 0;
 }
 
-static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramStmt ** program, void * scanner)
+static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramNode ** program, void * scanner)
 {
     hadError = true;
     int res = 0;
@@ -1702,7 +1702,7 @@ static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str,
     return res;
 }
 
-int code_parse(const char * code_str, ProgramStmt ** program) {
+int code_parse(const char * code_str, ProgramNode ** program) {
     yyscan_t scanner;
     yylex_init(&scanner);
     scan_string(code_str, scanner);

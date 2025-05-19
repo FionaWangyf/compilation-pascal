@@ -11,23 +11,23 @@
 class StmtVisitor;
 
 // AST节点类型前向声明
-class FuncCallStmt;
-class LValStmt;
-class StrStmt;
-class NumberStmt;
-class ValueStmt;
-class PrimaryExprStmt;
-class UnaryExprStmt;
-class MulExprStmt;
-class AddExprStmt;
-class RelExprStmt;
-class FuncHeadDeclStmt;
-class FuncBodyDeclStmt;
+class FuncCallNode;
+class LValueNode;
+class StringNode;
+class NumberNode;
+class ValueNode;
+class PrimaryExprNode;
+class UnaryExprNode;
+class MulExprNode;
+class AddExprNode;
+class RelExprNode;
+class FuncHeadDeclNode;
+class FuncBodyDeclNode;
 
 /**
  * @brief 抽象语法树(AST)的基类节点
  */
-class BaseStmt {
+class BaseNode {
 public:
     /**
      * @brief 用于接受visitor模式的访问
@@ -36,12 +36,12 @@ public:
     virtual void accept(StmtVisitor& visitor) = 0;
     
     // 使用默认构造和虚析构
-    BaseStmt() = default;
-    virtual ~BaseStmt() = default;
+    BaseNode() = default;
+    virtual ~BaseNode() = default;
     
     // 禁用复制
-    BaseStmt(const BaseStmt&) = delete;
-    BaseStmt& operator=(const BaseStmt&) = delete;
+    BaseNode(const BaseNode&) = delete;
+    BaseNode& operator=(const BaseNode&) = delete;
 };
 
 /********************************** 表达式节点 ***********************************/
@@ -57,9 +57,9 @@ public:
 /**
  * @brief 表达式语句(如: a + b * c)
  */
-class ExprStmt : public BaseStmt {
+class ExprNode : public BaseNode {
 public:
-    std::unique_ptr<RelExprStmt> rel_expr;
+    std::unique_ptr<RelExprNode> rel_expr;
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -67,7 +67,7 @@ public:
 /**
  * @brief 关系表达式(如: a < b < c)
  */
-class RelExprStmt : public BaseStmt {
+class RelExprNode : public BaseNode {
 public:
     // 关系操作符类型
     enum class RelExprType {
@@ -84,7 +84,7 @@ public:
     // 关系表达式项
     struct Term {
         RelExprType type;                     // 操作类型
-        std::unique_ptr<AddExprStmt> add_expr; // 加法表达式
+        std::unique_ptr<AddExprNode> add_expr; // 加法表达式
     };
     
     std::vector<Term> terms;  // 关系表达式列表
@@ -95,7 +95,7 @@ public:
 /**
  * @brief 加法表达式(如: a + b - c)
  */
-class AddExprStmt : public BaseStmt {
+class AddExprNode : public BaseNode {
 public:
     // 加法操作符类型
     enum class AddExprType {
@@ -108,7 +108,7 @@ public:
     // 加法表达式项
     struct Term {
         AddExprType type;
-        std::unique_ptr<MulExprStmt> mul_expr;
+        std::unique_ptr<MulExprNode> mul_expr;
     };
     
     std::vector<Term> terms;  // 加法表达式列表
@@ -119,7 +119,7 @@ public:
 /**
  * @brief 乘法表达式(如: a * b / c)
  */
-class MulExprStmt : public BaseStmt {
+class MulExprNode : public BaseNode {
 public:
     // 乘法操作符类型
     enum class MulExprType {
@@ -134,7 +134,7 @@ public:
     // 乘法表达式项
     struct Term {
         MulExprType type;
-        std::unique_ptr<UnaryExprStmt> unary_expr;
+        std::unique_ptr<UnaryExprNode> unary_expr;
     };
     
     std::vector<Term> terms;  // 乘法表达式列表
@@ -145,7 +145,7 @@ public:
 /**
  * @brief 一元表达式(如: -a)
  */
-class UnaryExprStmt : public BaseStmt {
+class UnaryExprNode : public BaseNode {
 public:
     // 一元操作符类型
     enum class UnaryExprType {
@@ -155,7 +155,7 @@ public:
     };
     
     std::vector<UnaryExprType> types;  // 一元操作符链
-    std::unique_ptr<PrimaryExprStmt> primary_expr;  // 基本表达式
+    std::unique_ptr<PrimaryExprNode> primary_expr;  // 基本表达式
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -163,7 +163,7 @@ public:
 /**
  * @brief 基本表达式(表达式的最小完整单元)
  */
-class PrimaryExprStmt : public BaseStmt {
+class PrimaryExprNode : public BaseNode {
 public:
     // 基本表达式类型
     enum class PrimaryExprType {
@@ -173,8 +173,8 @@ public:
     };
     
     PrimaryExprType type = PrimaryExprType::NULL_TYPE;
-    std::unique_ptr<ValueStmt> value;  // 值表达式
-    std::unique_ptr<ExprStmt> expr;    // 括号内表达式
+    std::unique_ptr<ValueNode> value;  // 值表达式
+    std::unique_ptr<ExprNode> expr;    // 括号内表达式
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -182,7 +182,7 @@ public:
 /**
  * @brief 值表达式
  */
-class ValueStmt : public BaseStmt {
+class ValueNode : public BaseNode {
 public:
     // 值类型
     enum class ValueType {
@@ -194,10 +194,10 @@ public:
     };
     
     ValueType type = ValueType::NULL_TYPE;
-    std::unique_ptr<NumberStmt> number;      // 数值
-    std::unique_ptr<StrStmt> str;            // 字符串
-    std::unique_ptr<LValStmt> lval;          // 左值
-    std::unique_ptr<FuncCallStmt> func_call; // 函数调用
+    std::unique_ptr<NumberNode> number;      // 数值
+    std::unique_ptr<StringNode> str;            // 字符串
+    std::unique_ptr<LValueNode> lval;          // 左值
+    std::unique_ptr<FuncCallNode> func_call; // 函数调用
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -205,7 +205,7 @@ public:
 /**
  * @brief 数字表达式(如: 42)
  */
-class NumberStmt : public BaseStmt {
+class NumberNode : public BaseNode {
 public:
     bool is_real = false;     // 是否为实数(浮点型)
     bool is_signed = true;    // 是否为有符号数
@@ -228,7 +228,7 @@ public:
 /**
  * @brief 字符串表达式(如: 'hello world')
  */
-class StrStmt : public BaseStmt {
+class StringNode : public BaseNode {
 public:
     std::string val;
     
@@ -238,10 +238,10 @@ public:
 /**
  * @brief 左值表达式(如: 变量名x, 数组名arr[i+1])
  */
-class LValStmt : public BaseStmt {
+class LValueNode : public BaseNode {
 public:
     std::string id;  // 标识符名称
-    std::vector<std::unique_ptr<ExprStmt>> array_index;  // 多维数组下标
+    std::vector<std::unique_ptr<ExprNode>> array_index;  // 多维数组下标
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -249,10 +249,10 @@ public:
 /**
  * @brief 函数调用表达式(如: func(a, b+c))
  */
-class FuncCallStmt : public BaseStmt {
+class FuncCallNode : public BaseNode {
 public:
     std::string id;  // 函数名
-    std::vector<std::unique_ptr<ExprStmt>> args;  // 函数参数列表
+    std::vector<std::unique_ptr<ExprNode>> args;  // 函数参数列表
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -282,7 +282,7 @@ enum class DataType {
 /**
  * @brief 范围表达式(用于数组声明)
  */
-class PeriodStmt : public BaseStmt {
+class PeriodNode : public BaseNode {
 public:
     int begin;
     int end;
@@ -293,9 +293,9 @@ public:
 /**
  * @brief 常量声明语句(对应Pascal中的const部分)
  */
-class ConstDeclStmt : public BaseStmt {
+class ConstDeclNode : public BaseNode {
 public:
-    using KvPair = std::pair<std::string, std::unique_ptr<ValueStmt>>;  // 键值对(标识符-值)
+    using KvPair = std::pair<std::string, std::unique_ptr<ValueNode>>;  // 键值对(标识符-值)
     std::vector<KvPair> pairs;
     
     void accept(StmtVisitor& visitor) override;
@@ -304,14 +304,14 @@ public:
 /**
  * @brief 变量声明语句(对应Pascal中的变量声明部分)
  */
-class VarDeclStmt : public BaseStmt {
+class VarDeclNode : public BaseNode {
 public:
     std::vector<std::string> id;  // 变量名数组(支持一条语句声明多个同类型变量)
     DataType data_type = DataType::NULL_TYPE;  // 顶层类型(基本类型或数组类型)
     BasicType basic_type = BasicType::VOID;    // 具体的基本类型(INT, REAL等)
     int type_size = 0;                         // 类型占用的内存大小
     bool is_var = false;                       // 是否按引用传递(Pascal中的var关键字)
-    std::vector<std::unique_ptr<PeriodStmt>> array_range;  // 数组各维度的范围
+    std::vector<std::unique_ptr<PeriodNode>> array_range;  // 数组各维度的范围
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -319,10 +319,10 @@ public:
 /**
  * @brief 完整函数声明
  */
-class FuncDeclStmt : public BaseStmt {
+class FuncDeclNode : public BaseNode {
 public:
-    std::unique_ptr<FuncHeadDeclStmt> header;  // 函数头部
-    std::unique_ptr<FuncBodyDeclStmt> body;    // 函数体
+    std::unique_ptr<FuncHeadDeclNode> header;  // 函数头部
+    std::unique_ptr<FuncBodyDeclNode> body;    // 函数体
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -330,11 +330,11 @@ public:
 /**
  * @brief 函数头部声明(对应Pascal中的function/procedure声明部分)
  */
-class FuncHeadDeclStmt : public BaseStmt {
+class FuncHeadDeclNode : public BaseNode {
 public:
     std::string func_name;  // 函数名
     BasicType ret_type = BasicType::VOID;  // 返回值类型(过程为void)
-    std::vector<std::unique_ptr<VarDeclStmt>> args;  // 函数参数
+    std::vector<std::unique_ptr<VarDeclNode>> args;  // 函数参数
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -342,11 +342,11 @@ public:
 /**
  * @brief 函数体声明(对应Pascal中的function/procedure实现部分)
  */
-class FuncBodyDeclStmt : public BaseStmt {
+class FuncBodyDeclNode : public BaseNode {
 public:
-    std::unique_ptr<ConstDeclStmt> const_decl;  // 常量声明块
-    std::vector<std::unique_ptr<VarDeclStmt>> var_decl;  // 局部变量声明块
-    std::vector<std::unique_ptr<BaseStmt>> comp_stmt;    // 复合语句块(代码段)
+    std::unique_ptr<ConstDeclNode> const_decl;  // 常量声明块
+    std::vector<std::unique_ptr<VarDeclNode>> var_decl;  // 局部变量声明块
+    std::vector<std::unique_ptr<BaseNode>> comp_stmt;    // 复合语句块(代码段)
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -356,11 +356,11 @@ public:
 /**
  * @brief 赋值语句(如: a := expr)
  */
-class AssignStmt : public BaseStmt {
+class AssignmentNode : public BaseNode {
 public:
     bool is_lval_func = false;  // 标记左值是否为函数名
-    std::unique_ptr<LValStmt> lval;  // 左值
-    std::unique_ptr<ExprStmt> expr;  // 右值表达式
+    std::unique_ptr<LValueNode> lval;  // 左值
+    std::unique_ptr<ExprNode> expr;  // 右值表达式
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -368,11 +368,11 @@ public:
 /**
  * @brief 分支语句(if-then-else)
  */
-class IfStmt : public BaseStmt {
+class IfNode : public BaseNode {
 public:
-    std::unique_ptr<ExprStmt> expr;  // 条件表达式
-    std::vector<std::unique_ptr<BaseStmt>> true_stmt;   // if语句块
-    std::vector<std::unique_ptr<BaseStmt>> false_stmt;  // else语句块
+    std::unique_ptr<ExprNode> expr;  // 条件表达式
+    std::vector<std::unique_ptr<BaseNode>> true_stmt;   // if语句块
+    std::vector<std::unique_ptr<BaseNode>> false_stmt;  // else语句块
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -380,12 +380,12 @@ public:
 /**
  * @brief for循环语句
  */
-class ForStmt : public BaseStmt {
+class ForNode : public BaseNode {
 public:
     std::string id;  // 循环变量名称(只能自增)
-    std::unique_ptr<ExprStmt> begin;  // 起始值表达式
-    std::unique_ptr<ExprStmt> end;    // 结束值表达式
-    std::vector<std::unique_ptr<BaseStmt>> stmt;  // 循环体语句
+    std::unique_ptr<ExprNode> begin;  // 起始值表达式
+    std::unique_ptr<ExprNode> end;    // 结束值表达式
+    std::vector<std::unique_ptr<BaseNode>> stmt;  // 循环体语句
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -393,10 +393,10 @@ public:
 /**
  * @brief while循环语句
  */
-class WhileStmt : public BaseStmt {
+class WhileNode : public BaseNode {
 public:
-    std::unique_ptr<ExprStmt> expr;  // 循环条件表达式
-    std::vector<std::unique_ptr<BaseStmt>> stmt;  // 循环体语句
+    std::unique_ptr<ExprNode> expr;  // 循环条件表达式
+    std::vector<std::unique_ptr<BaseNode>> stmt;  // 循环体语句
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -404,9 +404,9 @@ public:
 /**
  * @brief 输入函数(read/readln)
  */
-class ReadFuncStmt : public BaseStmt {
+class ReadFuncNode : public BaseNode {
 public:
-    std::vector<std::unique_ptr<LValStmt>> lval;  // 接收输入的变量列表
+    std::vector<std::unique_ptr<LValueNode>> lval;  // 接收输入的变量列表
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -414,9 +414,9 @@ public:
 /**
  * @brief 输出函数(write/writeln)
  */
-class WriteFuncStmt : public BaseStmt {
+class WriteFuncNode : public BaseNode {
 public:
-    std::vector<std::unique_ptr<ExprStmt>> expr;  // 输出的表达式列表
+    std::vector<std::unique_ptr<ExprNode>> expr;  // 输出的表达式列表
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -424,7 +424,7 @@ public:
 /**
  * @brief break语句
  */
-class BreakStmt : public BaseStmt {
+class BreakNode : public BaseNode {
 public:
     void accept(StmtVisitor& visitor) override;
 };
@@ -432,7 +432,7 @@ public:
 /**
  * @brief continue语句
  */
-class ContinueStmt : public BaseStmt {
+class ContinueNode : public BaseNode {
 public:
     void accept(StmtVisitor& visitor) override;
 };
@@ -442,7 +442,7 @@ public:
 /**
  * @brief 程序头部声明(对应Pascal中的program声明部分)
  */
-class ProgramHeadStmt : public BaseStmt {
+class ProgramHeadNode : public BaseNode {
 public:
     std::vector<std::string> id_list;  // 程序名和可能的外部文件参数
     
@@ -452,12 +452,12 @@ public:
 /**
  * @brief 程序体声明(对应Pascal中的program实现部分)
  */
-class ProgramBodyStmt : public BaseStmt {
+class ProgramBodyNode : public BaseNode {
 public:
-    std::unique_ptr<ConstDeclStmt> const_decl;  // 常量声明部分
-    std::vector<std::unique_ptr<VarDeclStmt>> var_decl;  // 变量声明部分
-    std::vector<std::unique_ptr<FuncDeclStmt>> func_decl;  // 函数/过程声明部分
-    std::vector<std::unique_ptr<BaseStmt>> comp_stmt;  // 主程序语句部分(begin...end)
+    std::unique_ptr<ConstDeclNode> const_decl;  // 常量声明部分
+    std::vector<std::unique_ptr<VarDeclNode>> var_decl;  // 变量声明部分
+    std::vector<std::unique_ptr<FuncDeclNode>> func_decl;  // 函数/过程声明部分
+    std::vector<std::unique_ptr<BaseNode>> comp_stmt;  // 主程序语句部分(begin...end)
     
     void accept(StmtVisitor& visitor) override;
 };
@@ -465,10 +465,10 @@ public:
 /**
  * @brief 整个程序
  */
-class ProgramStmt : public BaseStmt {
+class ProgramNode : public BaseNode {
 public:
-    std::unique_ptr<ProgramHeadStmt> head;  // 程序头部
-    std::unique_ptr<ProgramBodyStmt> body;  // 程序体
+    std::unique_ptr<ProgramHeadNode> head;  // 程序头部
+    std::unique_ptr<ProgramBodyNode> body;  // 程序体
     
     void accept(StmtVisitor& visitor) override;
 };

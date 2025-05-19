@@ -11,7 +11,7 @@
 #include "common/log/log.hpp"
 #include "ASTPrettyPrinter.hpp"
 
-extern int code_parse(const char *code_str, ProgramStmt **program);
+extern int code_parse(const char *code_str, ProgramNode **program);
 
 void single_point_test(const std::string folderPath,
                        std::vector<std::string> files) {
@@ -28,7 +28,7 @@ void single_point_test(const std::string folderPath,
   ss << ifs.rdbuf();
   std::string content = ss.str();
   LOG_INFO("File: %s", fileName.c_str());
-  ProgramStmt *program = nullptr;
+  ProgramNode *program = nullptr;
   code_parse(content.c_str(), &program);
 
   if (program == nullptr) {
@@ -53,7 +53,7 @@ void batch_test(int beginIndex, const std::string folderPath,
     std::stringstream ss;
     ss << ifs.rdbuf();
     std::string content = ss.str();
-    ProgramStmt *program = nullptr;
+    ProgramNode *program = nullptr;
     code_parse(content.c_str(), &program);
     if (program == nullptr) {
       LOG_FATAL("ERROR : Parsing failed.");

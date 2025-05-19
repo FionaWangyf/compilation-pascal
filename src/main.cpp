@@ -15,7 +15,7 @@
 #include "code_generator/code_generator.hpp"
 #include "parser/yacc_pascal.hpp"
 
-int code_parse(const char *code, ProgramStmt **program_stmt);
+int code_parse(const char *code, ProgramNode **program_stmt);
 
 void init_env()
 {
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     
     // 第一步：词法分析 and 语法分析
     LOG_DEBUG("Start parsing code...");
-    ProgramStmt* program_stmt;
+    ProgramNode* program_stmt;
     int ret = code_parse(code.c_str(), &program_stmt);
     if (ret != 0)
     {
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     LOG_DEBUG("Semantic analysis done.");
     // std::cout << "Inferred Types:" << std::endl;
     // for (const auto& pair : semanticAnalyzer.getInferredType()) {
-    //     const BaseStmt* stmt = pair.first;
+    //     const BaseNode* stmt = pair.first;
     //     const std::string& type = pair.second;
     //     std::cout << "  Statement: " << typeid(*stmt).name() << ", Type: " << type << std::endl;
     // }

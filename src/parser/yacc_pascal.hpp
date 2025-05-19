@@ -116,57 +116,57 @@ union YYSTYPE
 #line 367 "yacc_pascal.y"
 
     /* 程序结构相关类型 */
-    ProgramStmt *                                   program_struct;   /* 整个程序的AST节点 */
-    ProgramHeadStmt *                               program_head;     /* 程序头部AST节点 */
-    ProgramBodyStmt *                               program_body;     /* 程序主体AST节点 */
+    ProgramNode *                                   program_struct;   /* 整个程序的AST节点 */
+    ProgramHeadNode *                               program_head;     /* 程序头部AST节点 */
+    ProgramBodyNode *                               program_body;     /* 程序主体AST节点 */
     std::vector<std::string> *                      id_list;          /* 标识符列表，用于程序参数、变量声明等 */
     
     /* 常量声明相关类型 */
-    ConstDeclStmt *                                 const_decls;      /* 常量声明AST节点 */
-    std::pair<std::string, ValueStmt *> *           kv_pair;          /* 常量名称-值对 */
-    std::vector<std::pair<std::string, ValueStmt *>*> * kv_pair_list; /* 常量名称-值对列表 */
-    ValueStmt *                                     value;            /* 值AST节点，表示常量值 */
+    ConstDeclNode *                                 const_decls;      /* 常量声明AST节点 */
+    std::pair<std::string, ValueNode *> *           kv_pair;          /* 常量名称-值对 */
+    std::vector<std::pair<std::string, ValueNode *>*> * kv_pair_list; /* 常量名称-值对列表 */
+    ValueNode *                                     value;            /* 值AST节点，表示常量值 */
     
     /* 变量声明相关类型 */
-    std::vector<VarDeclStmt *> *                    var_decls;        /* 变量声明列表 */
-    VarDeclStmt *                                   var_decl;         /* 单个变量声明AST节点 */
+    std::vector<VarDeclNode *> *                    var_decls;        /* 变量声明列表 */
+    VarDeclNode *                                   var_decl;         /* 单个变量声明AST节点 */
     DataType                                        var_type;         /* 变量数据类型枚举 */
     BasicType                                       basic_type;       /* 基本类型枚举（int, real等） */
     
     /* 数组范围相关类型 */
-    std::vector<PeriodStmt *> *                     period_list;      /* 数组索引范围列表 */
-    PeriodStmt *                                    period;           /* 单个数组索引范围 */
+    std::vector<PeriodNode *> *                     period_list;      /* 数组索引范围列表 */
+    PeriodNode *                                    period;           /* 单个数组索引范围 */
     
     /* 函数/过程声明相关类型 */
-    std::vector<FuncDeclStmt *> *                   func_decl_list;   /* 函数声明列表 */
-    FuncDeclStmt *                                  func_decl;        /* 单个函数声明AST节点 */
-    FuncHeadDeclStmt *                              func_head;        /* 函数头部AST节点 */
-    FuncBodyDeclStmt *                              func_body;        /* 函数主体AST节点 */
+    std::vector<FuncDeclNode *> *                   func_decl_list;   /* 函数声明列表 */
+    FuncDeclNode *                                  func_decl;        /* 单个函数声明AST节点 */
+    FuncHeadDeclNode *                              func_head;        /* 函数头部AST节点 */
+    FuncBodyDeclNode *                              func_body;        /* 函数主体AST节点 */
     
     /* 语句相关类型 */
-    std::vector<BaseStmt *> *                       stmt_list;        /* 语句列表 */
-    AssignStmt *                                    assign_stmt;      /* 赋值语句AST节点 */
-    IfStmt *                                        if_stmt;          /* 条件语句AST节点 */
-    ForStmt *                                       for_stmt;         /* For循环语句AST节点 */
-    ReadFuncStmt *                                  read_stmt;        /* 读取语句AST节点 */
-    WriteFuncStmt *                                 write_stmt;       /* 写入语句AST节点 */
-    FuncCallStmt *                                  func_call_stmt;   /* 函数调用语句AST节点 */
-    std::vector<LValStmt *> *                       lval_list;        /* 左值表达式列表（用于变量引用） */
-    LValStmt *                                      lval;             /* 单个左值表达式AST节点 */
-    BaseStmt *                                      stmt;             /* 基本语句AST节点 */
+    std::vector<BaseNode *> *                       stmt_list;        /* 语句列表 */
+    AssignmentNode *                                    assign_stmt;      /* 赋值语句AST节点 */
+    IfNode *                                        if_stmt;          /* 条件语句AST节点 */
+    ForNode *                                       for_stmt;         /* For循环语句AST节点 */
+    ReadFuncNode *                                  read_stmt;        /* 读取语句AST节点 */
+    WriteFuncNode *                                 write_stmt;       /* 写入语句AST节点 */
+    FuncCallNode *                                  func_call_stmt;   /* 函数调用语句AST节点 */
+    std::vector<LValueNode *> *                       lval_list;        /* 左值表达式列表（用于变量引用） */
+    LValueNode *                                      lval;             /* 单个左值表达式AST节点 */
+    BaseNode *                                      stmt;             /* 基本语句AST节点 */
 
     /* 表达式相关类型 */
-    std::vector<ExprStmt *> *                       expr_list;        /* 表达式列表 */
-    ExprStmt *                                      expr;             /* 完整表达式AST节点 */
-    RelExprStmt *                                   rel_expr;         /* 关系表达式AST节点 */
-    AddExprStmt *                                   add_expr;         /* 加法表达式AST节点 */
-    MulExprStmt *                                   mul_expr;         /* 乘法表达式AST节点 */
-    UnaryExprStmt *                                 unary_expr;       /* 一元表达式AST节点 */
-    PrimaryExprStmt *                               primary_expr;     /* 基本表达式AST节点 */
+    std::vector<ExprNode *> *                       expr_list;        /* 表达式列表 */
+    ExprNode *                                      expr;             /* 完整表达式AST节点 */
+    RelExprNode *                                   rel_expr;         /* 关系表达式AST节点 */
+    AddExprNode *                                   add_expr;         /* 加法表达式AST节点 */
+    MulExprNode *                                   mul_expr;         /* 乘法表达式AST节点 */
+    UnaryExprNode *                                 unary_expr;       /* 一元表达式AST节点 */
+    PrimaryExprNode *                               primary_expr;     /* 基本表达式AST节点 */
 
     /* 控制流相关类型 */
-    BreakStmt *                                     break_stmt;       /* Break语句AST节点 */
-    ContinueStmt *                                  continue_stmt;    /* Continue语句AST节点 */
+    BreakNode *                                     break_stmt;       /* Break语句AST节点 */
+    ContinueNode *                                  continue_stmt;    /* Continue语句AST节点 */
 
     /* 基本数据类型 */
     char *                                          string;           /* 字符串，用于标识符和字符串字面量 */
@@ -201,7 +201,7 @@ struct YYLTYPE
 
 
 
-int yyparse (const char * code_str, ProgramStmt ** program, void * scanner);
+int yyparse (const char * code_str, ProgramNode ** program, void * scanner);
 
 
 #endif /* !YY_YY_YACC_PASCAL_HPP_INCLUDED  */

@@ -93,28 +93,28 @@ namespace {
     #define GRAMMAR_ERROR(rule)    LOG_DEBUG("ERROR: " rule)
     
     // 运算符类型映射表
-    const std::map<long long, RelExprStmt::RelExprType> relOperatorMap = {
-        {0, RelExprStmt::RelExprType::Equal},
-        {1, RelExprStmt::RelExprType::NotEqual},
-        {2, RelExprStmt::RelExprType::Less},
-        {3, RelExprStmt::RelExprType::LessEqual},
-        {4, RelExprStmt::RelExprType::Greater},
-        {5, RelExprStmt::RelExprType::GreaterEqual},
-        {6, RelExprStmt::RelExprType::In}
+    const std::map<long long, RelExprNode::RelExprType> relOperatorMap = {
+        {0, RelExprNode::RelExprType::Equal},
+        {1, RelExprNode::RelExprType::NotEqual},
+        {2, RelExprNode::RelExprType::Less},
+        {3, RelExprNode::RelExprType::LessEqual},
+        {4, RelExprNode::RelExprType::Greater},
+        {5, RelExprNode::RelExprType::GreaterEqual},
+        {6, RelExprNode::RelExprType::In}
     };
 
-    const std::map<long long, AddExprStmt::AddExprType> addOperatorMap = {
-        {0, AddExprStmt::AddExprType::Plus},
-        {1, AddExprStmt::AddExprType::Minus},
-        {2, AddExprStmt::AddExprType::Or}
+    const std::map<long long, AddExprNode::AddExprType> addOperatorMap = {
+        {0, AddExprNode::AddExprType::Plus},
+        {1, AddExprNode::AddExprType::Minus},
+        {2, AddExprNode::AddExprType::Or}
     };
 
-    const std::map<long long, MulExprStmt::MulExprType> mulOperatorMap = {
-        {0, MulExprStmt::MulExprType::Mul},
-        {1, MulExprStmt::MulExprType::Div},
-        {2, MulExprStmt::MulExprType::Mod},
-        {3, MulExprStmt::MulExprType::And},
-        {4, MulExprStmt::MulExprType::AndThen}
+    const std::map<long long, MulExprNode::MulExprType> mulOperatorMap = {
+        {0, MulExprNode::MulExprType::Mul},
+        {1, MulExprNode::MulExprType::Div},
+        {2, MulExprNode::MulExprType::Mod},
+        {3, MulExprNode::MulExprType::And},
+        {4, MulExprNode::MulExprType::AndThen}
     };
 
     // 从映射表中获取运算符枚举类型
@@ -129,21 +129,21 @@ namespace {
 
     // 特化版本
     //关系运算符 (=, <>, <, <=, >, >=, in)
-    RelExprStmt::RelExprType getRelationOperator(long long op) {
-        return getOperatorKind<RelExprStmt::RelExprType>(op, relOperatorMap);
+    RelExprNode::RelExprType getRelationOperator(long long op) {
+        return getOperatorKind<RelExprNode::RelExprType>(op, relOperatorMap);
     }
     //加法级运算符 (+, -, or)
-    AddExprStmt::AddExprType getArithmeticOperator(long long op) {
-        return getOperatorKind<AddExprStmt::AddExprType>(op, addOperatorMap);
+    AddExprNode::AddExprType getArithmeticOperator(long long op) {
+        return getOperatorKind<AddExprNode::AddExprType>(op, addOperatorMap);
     }
     //乘法级运算符 (*, /, div, mod, and, andthen)
-    MulExprStmt::MulExprType getTermOperator(long long op) {
-        return getOperatorKind<MulExprStmt::MulExprType>(op, mulOperatorMap);
+    MulExprNode::MulExprType getTermOperator(long long op) {
+        return getOperatorKind<MulExprNode::MulExprType>(op, mulOperatorMap);
     }
 
     // 填充数值节点函数
     template<typename T>
-    void setupNumberNode(std::unique_ptr<NumberStmt>& numNode, T val) {
+    void setupNumberNode(std::unique_ptr<NumberNode>& numNode, T val) {
         numNode->is_signed = true;
         numNode->is_real = std::is_same<T, double>::value;////在编译时检测类型，并相应设置 is_real 和 is_char 标志
         numNode->is_char = std::is_same<T, char>::value;
@@ -183,37 +183,37 @@ namespace {
     // 值节点工厂类：用于创建不同类型的值节点对象
     class ValueFactory {
     public:
-        //创建整数值节点，返回包含整数值的ValueStmt指针
-        static ValueStmt* makeInteger(long long val) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        //创建整数值节点，返回包含整数值的ValueNode指针
+        static ValueNode* makeInteger(long long val) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             setupNumberNode(value->number, val);
             return value;
         }
-        //创建实数值节点，返回包含实数值的ValueStmt指针
-        static ValueStmt* makeReal(const char* str) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        //创建实数值节点，返回包含实数值的ValueNode指针
+        static ValueNode* makeReal(const char* str) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             double val = atof(str);//将字符串转换为双精度浮点数
             setupNumberNode(value->number, val);
             value->number->literal = std::string(str);
             return value;
         }
-        //创建字符值节点，返回包含字符值的ValueStmt指针
-        static ValueStmt* makeChar(char val) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Number;
-            value->number = std::make_unique<NumberStmt>();
+        //创建字符值节点，返回包含字符值的ValueNode指针
+        static ValueNode* makeChar(char val) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Number;
+            value->number = std::make_unique<NumberNode>();
             setupNumberNode(value->number, val);
             return value;
         }
-        //创建字符串值节点，返回包含字符串值的ValueStmt指针
-        static ValueStmt* makeString(const char* str) {
-            ValueStmt* value = new ValueStmt();
-            value->type = ValueStmt::ValueType::Str;
-            value->str = std::make_unique<StrStmt>();
+        //创建字符串值节点，返回包含字符串值的ValueNode指针
+        static ValueNode* makeString(const char* str) {
+            ValueNode* value = new ValueNode();
+            value->type = ValueNode::ValueType::Str;
+            value->str = std::make_unique<StringNode>();
             value->str->val = std::string(str).substr(1, std::string(str).length() - 2);//从输入字符串中提取内容，去掉首尾的引号
             return value;
         }
@@ -224,39 +224,39 @@ namespace {
     class ExprFactory {
     public:
         //将简单表达式转换为完整表达式节点
-        static ExprStmt* createFromSimpleExpr(AddExprStmt* simpleExpr) {
-            ExprStmt* expr = new ExprStmt();
-            expr->rel_expr = std::make_unique<RelExprStmt>();
-            RelExprStmt::Term term;
-            term.type = RelExprStmt::RelExprType::NULL_TYPE;
-            term.add_expr = std::unique_ptr<AddExprStmt>(simpleExpr);
+        static ExprNode* createFromSimpleExpr(AddExprNode* simpleExpr) {
+            ExprNode* expr = new ExprNode();
+            expr->rel_expr = std::make_unique<RelExprNode>();
+            RelExprNode::Term term;
+            term.type = RelExprNode::RelExprType::NULL_TYPE;
+            term.add_expr = std::unique_ptr<AddExprNode>(simpleExpr);
             expr->rel_expr->terms.emplace_back(std::move(term));
             return expr;
         }
         //将项(term)转换为简单表达式节点
-        static AddExprStmt* createFromTerm(MulExprStmt* term) {
-            AddExprStmt* addExpr = new AddExprStmt();
-            AddExprStmt::Term termStruct;
-            termStruct.type = AddExprStmt::AddExprType::NULL_TYPE;
-            termStruct.mul_expr = std::unique_ptr<MulExprStmt>(term);
+        static AddExprNode* createFromTerm(MulExprNode* term) {
+            AddExprNode* addExpr = new AddExprNode();
+            AddExprNode::Term termStruct;
+            termStruct.type = AddExprNode::AddExprType::NULL_TYPE;
+            termStruct.mul_expr = std::unique_ptr<MulExprNode>(term);
             addExpr->terms.emplace_back(std::move(termStruct));
             return addExpr;
         }
         //将因子(factor)转换为项节点
-        static MulExprStmt* createFromFactor(UnaryExprStmt* factor) {
-            MulExprStmt* mulExpr = new MulExprStmt();
-            MulExprStmt::Term term;
-            term.type = MulExprStmt::MulExprType::NULL_TYPE;
-            term.unary_expr = std::unique_ptr<UnaryExprStmt>(factor);
+        static MulExprNode* createFromFactor(UnaryExprNode* factor) {
+            MulExprNode* mulExpr = new MulExprNode();
+            MulExprNode::Term term;
+            term.type = MulExprNode::MulExprType::NULL_TYPE;
+            term.unary_expr = std::unique_ptr<UnaryExprNode>(factor);
             mulExpr->terms.emplace_back(std::move(term));
             return mulExpr;
         }
     };
 
     // 创建一元表达式的函数
-    UnaryExprStmt* makeUnaryExpr(PrimaryExprStmt::PrimaryExprType type) {
-        UnaryExprStmt* unary = new UnaryExprStmt();
-        unary->primary_expr = std::make_unique<PrimaryExprStmt>();
+    UnaryExprNode* makeUnaryExpr(PrimaryExprNode::PrimaryExprType type) {
+        UnaryExprNode* unary = new UnaryExprNode();
+        unary->primary_expr = std::make_unique<PrimaryExprNode>();
         unary->primary_expr->type = type;
         return unary;
     }
@@ -362,7 +362,7 @@ void resetSyntaxError() {
     syntaxErrorFlag = false; // 重置错误标志，为下一次解析准备
 }
 //当语法分析器检测到语法错误时，Bison会自动调用此函数报告错误。
-int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg);
+int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg);
 
 
 #line 369 "yacc_pascal.cpp"
@@ -1319,7 +1319,7 @@ do {                                                                      \
 
 static void
 yy_symbol_value_print (FILE *yyo,
-                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, const char * code_str, ProgramStmt ** program, void * scanner)
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, const char * code_str, ProgramNode ** program, void * scanner)
 {
   FILE *yyoutput = yyo;
   YY_USE (yyoutput);
@@ -1341,7 +1341,7 @@ yy_symbol_value_print (FILE *yyo,
 
 static void
 yy_symbol_print (FILE *yyo,
-                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, const char * code_str, ProgramStmt ** program, void * scanner)
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, const char * code_str, ProgramNode ** program, void * scanner)
 {
   YYFPRINTF (yyo, "%s %s (",
              yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
@@ -1382,7 +1382,7 @@ do {                                                            \
 
 static void
 yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp,
-                 int yyrule, const char * code_str, ProgramStmt ** program, void * scanner)
+                 int yyrule, const char * code_str, ProgramNode ** program, void * scanner)
 {
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -1508,7 +1508,7 @@ yypcontext_location (const yypcontext_t *yyctx)
 
 /* User defined function to report a syntax error.  */
 static int
-yyreport_syntax_error (const yypcontext_t *yyctx, const char * code_str, ProgramStmt ** program, void * scanner);
+yyreport_syntax_error (const yypcontext_t *yyctx, const char * code_str, ProgramNode ** program, void * scanner);
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
@@ -1516,7 +1516,7 @@ yyreport_syntax_error (const yypcontext_t *yyctx, const char * code_str, Program
 
 static void
 yydestruct (const char *yymsg,
-            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, const char * code_str, ProgramStmt ** program, void * scanner)
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, const char * code_str, ProgramNode ** program, void * scanner)
 {
   YY_USE (yyvaluep);
   YY_USE (yylocationp);
@@ -1903,7 +1903,7 @@ yydestruct (const char *yymsg,
 `----------*/
 
 int
-yyparse (const char * code_str, ProgramStmt ** program, void * scanner)
+yyparse (const char * code_str, ProgramNode ** program, void * scanner)
 {
 /* Lookahead token kind.  */
 int yychar;
@@ -2197,9 +2197,9 @@ yyreduce:
 #line 541 "yacc_pascal.y"
                                            {
         currentParserContext = ParserContext::ProgramStruct;//设置当前解析上下文为程序结构
-        ProgramStmt* programStruct = allocateNode<ProgramStmt>();//创建程序结构AST节点
-        programStruct->head = std::unique_ptr<ProgramHeadStmt>((yyvsp[-3].program_head));//设置程序头部，使用智能指针管理内存
-        programStruct->body = std::unique_ptr<ProgramBodyStmt>((yyvsp[-1].program_body));//设置程序主体，使用智能指针管理内存 
+        ProgramNode* programStruct = allocateNode<ProgramNode>();//创建程序结构AST节点
+        programStruct->head = std::unique_ptr<ProgramHeadNode>((yyvsp[-3].program_head));//设置程序头部，使用智能指针管理内存
+        programStruct->body = std::unique_ptr<ProgramBodyNode>((yyvsp[-1].program_body));//设置程序主体，使用智能指针管理内存 
         
         GRAMMAR_TRACE("programstruct -> program_head ';' program_body '.'");
         *program = programStruct;//将构建的AST根节点存储到输出参数中
@@ -2211,7 +2211,7 @@ yyreduce:
   case 3: /* programstruct: error ';' program_body '.'  */
 #line 552 "yacc_pascal.y"
                                     {
-        *program = allocateNode<ProgramStmt>();//创建空的程序结构作为恢复
+        *program = allocateNode<ProgramNode>();//创建空的程序结构作为恢复
         delete (yyvsp[-1].program_body);//释放已解析的程序主体
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' program_body '.'");
@@ -2222,7 +2222,7 @@ yyreduce:
   case 4: /* programstruct: program_head ';' error  */
 #line 559 "yacc_pascal.y"
                                 {
-        *program = allocateNode<ProgramStmt>();
+        *program = allocateNode<ProgramNode>();
         delete (yyvsp[-2].program_head);
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> program_head ';' error");
@@ -2233,7 +2233,7 @@ yyreduce:
   case 5: /* programstruct: error ';' error  */
 #line 566 "yacc_pascal.y"
                          {
-        *program = allocateNode<ProgramStmt>();
+        *program = allocateNode<ProgramNode>();
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' error");
     }
@@ -2244,7 +2244,7 @@ yyreduce:
 #line 577 "yacc_pascal.y"
                                          {  // 匹配 "program 标识符 ( 标识符列表 )"
         currentParserContext = ParserContext::ProgramHead;  // 设置当前解析上下文为程序头
-        (yyval.program_head) = allocateNode<ProgramHeadStmt>();  // 创建新的程序头AST节点
+        (yyval.program_head) = allocateNode<ProgramHeadNode>();  // 创建新的程序头AST节点
         (yyval.program_head)->id_list.push_back(std::string((yyvsp[-3].string)));  // 先添加程序名
         (yyval.program_head)->id_list.insert((yyval.program_head)->id_list.end(), (yyvsp[-1].id_list)->begin(), (yyvsp[-1].id_list)->end());  // 再添加参数
         //$$->id_list = *$4; 将标识符列表（参数）复制到程序头节点
@@ -2260,7 +2260,7 @@ yyreduce:
 #line 590 "yacc_pascal.y"
                           {  // 匹配 "program 标识符"
         currentParserContext = ParserContext::ProgramHead;  // 设置当前解析上下文为程序头
-        (yyval.program_head) = allocateNode<ProgramHeadStmt>();  // 创建新的程序头AST节点
+        (yyval.program_head) = allocateNode<ProgramHeadNode>();  // 创建新的程序头AST节点
         (yyval.program_head)->id_list.emplace_back(std::string((yyvsp[0].string)));  // 将程序名称作为参数添加到id_list中
         
         GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER");  // 记录语法跟踪日志
@@ -2286,12 +2286,12 @@ yyreduce:
         currentParserContext = ParserContext::ProgramBody;
         
         // 创建程序体AST节点
-        ProgramBodyStmt* programBody = allocateNode<ProgramBodyStmt>();
+        ProgramBodyNode* programBody = allocateNode<ProgramBodyNode>();
         
         // 处理常量声明部分
         if((yyvsp[-3].const_decls) != nullptr) {  // 如果有常量声明
             // 将常量声明节点转移到程序体节点中，使用智能指针管理内存
-            programBody->const_decl = std::unique_ptr<ConstDeclStmt>((yyvsp[-3].const_decls));
+            programBody->const_decl = std::unique_ptr<ConstDeclNode>((yyvsp[-3].const_decls));
         }
         
         // 处理变量声明部分
@@ -2299,7 +2299,7 @@ yyreduce:
             // 遍历变量声明列表，将每个声明转移到程序体节点中
             for(auto varDecl : *(yyvsp[-2].var_decls)) {
                 // 使用智能指针封装每个变量声明，并添加到程序体的变量声明列表中
-                programBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));
+                programBody->var_decl.emplace_back(std::unique_ptr<VarDeclNode>(varDecl));
             }
             // 释放变量声明列表容器（内部元素已被转移到程序体节点）
             delete (yyvsp[-2].var_decls);
@@ -2310,7 +2310,7 @@ yyreduce:
             // 遍历子程序声明列表，将每个声明转移到程序体节点中
             for(auto funcDecl : *(yyvsp[-1].func_decl_list)) {
                 // 使用智能指针封装每个函数声明，并添加到程序体的函数声明列表中
-                programBody->func_decl.emplace_back(std::unique_ptr<FuncDeclStmt>(funcDecl));
+                programBody->func_decl.emplace_back(std::unique_ptr<FuncDeclNode>(funcDecl));
             }
             // 释放子程序声明列表容器
             delete (yyvsp[-1].func_decl_list);
@@ -2321,7 +2321,7 @@ yyreduce:
             // 遍历语句列表，将每个语句转移到程序体节点中
             for(auto stmt : *(yyvsp[0].stmt_list)) {
                 // 使用智能指针封装每个语句，并添加到程序体的语句列表中
-                programBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));
+                programBody->comp_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));
             }
             // 释放语句列表容器
             delete (yyvsp[0].stmt_list);
@@ -2426,7 +2426,7 @@ yyreduce:
 #line 745 "yacc_pascal.y"
                                    {  // 匹配 "const 常量定义列表;" 形式
         currentParserContext = ParserContext::ConstDeclarations;  // 设置当前解析上下文为常量声明
-        ConstDeclStmt* constDecls = allocateNode<ConstDeclStmt>();  // 创建常量声明AST节点
+        ConstDeclNode* constDecls = allocateNode<ConstDeclNode>();  // 创建常量声明AST节点
         
         // 将声明列表中的键值对转移到常量声明对象中
         for(auto kvPair : *(yyvsp[-1].kv_pair_list)) {  // 遍历解析得到的常量定义键值对列表
@@ -2464,8 +2464,8 @@ yyreduce:
 #line 780 "yacc_pascal.y"
                                   {  // 匹配 "标识符 = 常量值" 形式，如 "PI = 3.14159"
         currentParserContext = ParserContext::ConstDeclaration;  // 设置当前解析上下文为常量声明
-        auto constDecls = allocateNode<std::vector<std::pair<std::string, ValueStmt *>*>>();  // 创建存储键值对指针的向量
-        auto kvPair = allocateNode<std::pair<std::string, ValueStmt *>>((yyvsp[-2].string), (yyvsp[0].value));  // 创建键值对，存储常量名和值
+        auto constDecls = allocateNode<std::vector<std::pair<std::string, ValueNode *>*>>();  // 创建存储键值对指针的向量
+        auto kvPair = allocateNode<std::pair<std::string, ValueNode *>>((yyvsp[-2].string), (yyvsp[0].value));  // 创建键值对，存储常量名和值
         
         constDecls->emplace_back(kvPair);  // 将键值对指针添加到向量中
         free((yyvsp[-2].string));  // 释放标识符字符串（已复制到键值对中）
@@ -2478,7 +2478,7 @@ yyreduce:
 #line 791 "yacc_pascal.y"
                                                         {  // 匹配 "已有声明; 标识符 = 常量值" 形式
         currentParserContext = ParserContext::ConstDeclaration;  // 设置当前解析上下文
-        (yyvsp[-4].kv_pair_list)->emplace_back(allocateNode<std::pair<std::string, ValueStmt *>>((yyvsp[-2].string), (yyvsp[0].value)));  // 创建新键值对并添加到现有列表
+        (yyvsp[-4].kv_pair_list)->emplace_back(allocateNode<std::pair<std::string, ValueNode *>>((yyvsp[-2].string), (yyvsp[0].value)));  // 创建新键值对并添加到现有列表
         
         free((yyvsp[-2].string));  // 释放标识符字符串
         (yyval.kv_pair_list) = (yyvsp[-4].kv_pair_list);  // 返回更新后的常量声明列表
@@ -2544,7 +2544,7 @@ yyreduce:
   case 24: /* const_value: '-' REAL  */
 #line 841 "yacc_pascal.y"
                 {  // 匹配带负号的实数，如 "-3.14159"
-        ValueStmt* value = ValueFactory::makeReal((yyvsp[0].real));  // 先创建实数值对象
+        ValueNode* value = ValueFactory::makeReal((yyvsp[0].real));  // 先创建实数值对象
         // 处理负号：将实数值设为负数
         value->number->real_val *= -1;  // 将实数值取负（直接修改对象中的值）
         
@@ -2605,8 +2605,8 @@ yyreduce:
 #line 892 "yacc_pascal.y"
                        {  // 匹配 "标识符列表 : 类型" 形式，如 "x, y : integer"
         currentParserContext = ParserContext::VarDeclaration;  // 设置当前解析上下文为变量声明
-        auto varDecls = allocateNode<std::vector<VarDeclStmt *>>();  // 创建变量声明列表容器
-        auto varDecl = allocateNode<VarDeclStmt>();  // 创建单个变量声明对象
+        auto varDecls = allocateNode<std::vector<VarDeclNode *>>();  // 创建变量声明列表容器
+        auto varDecl = allocateNode<VarDeclNode>();  // 创建单个变量声明对象
         
         // 将标识符列表中的所有标识符复制到变量声明中
         varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());  // 添加所有标识符到变量声明对象
@@ -2630,7 +2630,7 @@ yyreduce:
 #line 914 "yacc_pascal.y"
                                            {  // 匹配 "已有声明; 标识符列表 : 类型" 形式
         currentParserContext = ParserContext::VarDeclaration;  // 设置当前解析上下文
-        auto varDecl = allocateNode<VarDeclStmt>();  // 创建新的变量声明对象
+        auto varDecl = allocateNode<VarDeclNode>();  // 创建新的变量声明对象
         
         // 将标识符列表中的所有标识符复制到变量声明中
         varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());  // 添加所有标识符到变量声明对象
@@ -2667,7 +2667,7 @@ yyreduce:
 #line 950 "yacc_pascal.y"
                   {  // 匹配基本类型，如 "integer"、"real"、"boolean"、"char"
         currentParserContext = ParserContext::Type;  // 设置当前解析上下文为类型
-        auto typeStmt = allocateNode<VarDeclStmt>();  // 创建变量声明对象用于存储类型信息
+        auto typeStmt = allocateNode<VarDeclNode>();  // 创建变量声明对象用于存储类型信息
         typeStmt->data_type = DataType::BasicType;  // 设置数据类型为基本类型
         typeStmt->basic_type = (yyvsp[0].basic_type);  // 设置具体的基本类型（integer, real等）
         
@@ -2681,13 +2681,13 @@ yyreduce:
 #line 961 "yacc_pascal.y"
                                                {  // 匹配 "array [范围列表] of 基本类型"
         currentParserContext = ParserContext::Type;  // 设置当前解析上下文为类型
-        auto typeStmt = allocateNode<VarDeclStmt>();  // 创建变量声明对象用于存储类型信息
+        auto typeStmt = allocateNode<VarDeclNode>();  // 创建变量声明对象用于存储类型信息
         typeStmt->data_type = DataType::ArrayType;  // 设置数据类型为数组类型
         typeStmt->basic_type = (yyvsp[0].basic_type);  // 设置数组元素的基本类型
         
         // 转移数组范围信息
         for(auto period : *(yyvsp[-3].period_list)) {  // 遍历范围列表
-            typeStmt->array_range.emplace_back(std::unique_ptr<PeriodStmt>(period));  // 将每个范围添加到数组范围容器
+            typeStmt->array_range.emplace_back(std::unique_ptr<PeriodNode>(period));  // 将每个范围添加到数组范围容器
         }
         
         delete (yyvsp[-3].period_list);  // 释放原始范围列表容器
@@ -2736,8 +2736,8 @@ yyreduce:
   case 39: /* period_list: INTEGER DOUBLE_DOT INTEGER  */
 #line 1010 "yacc_pascal.y"
                                   {  // 匹配 "整数 .. 整数" 形式，如 "1..10"
-        auto periodList = allocateNode<std::vector<PeriodStmt *>>();  // 创建范围列表容器
-        auto period = allocateNode<PeriodStmt>();  // 创建单个范围对象
+        auto periodList = allocateNode<std::vector<PeriodNode *>>();  // 创建范围列表容器
+        auto period = allocateNode<PeriodNode>();  // 创建单个范围对象
         
         period->begin = (yyvsp[-2].number);  // 设置范围起始值
         period->end = (yyvsp[0].number);    // 设置范围结束值
@@ -2752,7 +2752,7 @@ yyreduce:
   case 40: /* period_list: period_list ',' INTEGER DOUBLE_DOT INTEGER  */
 #line 1023 "yacc_pascal.y"
                                                   {  // 匹配 "已有范围列表, 整数 .. 整数" 形式
-        auto period = allocateNode<PeriodStmt>();  // 创建新的范围对象
+        auto period = allocateNode<PeriodNode>();  // 创建新的范围对象
         period->begin = (yyvsp[-2].number);  // 设置范围起始值
         period->end = (yyvsp[0].number);    // 设置范围结束值
         
@@ -2779,7 +2779,7 @@ yyreduce:
         currentParserContext = ParserContext::SubprogramDeclarations;  // 设置当前解析上下文
         
         if ((yyvsp[-2].func_decl_list) == nullptr) {  // 如果这是第一个子程序声明
-            auto funcDeclList = allocateNode<std::vector<FuncDeclStmt *>>();  // 创建新的函数声明列表
+            auto funcDeclList = allocateNode<std::vector<FuncDeclNode *>>();  // 创建新的函数声明列表
             funcDeclList->emplace_back((yyvsp[-1].func_decl));  // 添加新的子程序声明    
             (yyval.func_decl_list) = funcDeclList;  // 返回新创建的列表
         } else {  // 如果已经有子程序声明
@@ -2796,10 +2796,10 @@ yyreduce:
 #line 1065 "yacc_pascal.y"
                                            {  // 匹配 "子程序头部; 子程序主体" 形式
         currentParserContext = ParserContext::Subprogram;  // 设置当前解析上下文为子程序
-        auto subprogram = allocateNode<FuncDeclStmt>();  // 创建函数声明AST节点
+        auto subprogram = allocateNode<FuncDeclNode>();  // 创建函数声明AST节点
         
-        subprogram->header = std::unique_ptr<FuncHeadDeclStmt>((yyvsp[-2].func_head));  // 设置子程序头部，使用智能指针管理内存
-        subprogram->body = std::unique_ptr<FuncBodyDeclStmt>((yyvsp[0].func_body));  // 设置子程序主体，使用智能指针管理内存
+        subprogram->header = std::unique_ptr<FuncHeadDeclNode>((yyvsp[-2].func_head));  // 设置子程序头部，使用智能指针管理内存
+        subprogram->body = std::unique_ptr<FuncBodyDeclNode>((yyvsp[0].func_body));  // 设置子程序主体，使用智能指针管理内存
         
         (yyval.func_decl) = subprogram;  // 返回创建的子程序声明节点
         GRAMMAR_TRACE("subprogram -> subprogram_head ';' subprogram_body");  // 记录语法跟踪日志
@@ -2811,7 +2811,7 @@ yyreduce:
 #line 1081 "yacc_pascal.y"
                                              {  // 匹配 "procedure 名称 (参数列表)" 形式
         currentParserContext = ParserContext::SubprogramHead;  // 设置当前解析上下文为子程序头部
-        auto subHead = allocateNode<FuncHeadDeclStmt>();  // 创建函数头部声明节点
+        auto subHead = allocateNode<FuncHeadDeclNode>();  // 创建函数头部声明节点
         
         subHead->func_name = std::string((yyvsp[-1].string));  // 设置函数名称
         subHead->ret_type = BasicType::VOID;  // 设置返回类型为VOID（表示过程）
@@ -2819,7 +2819,7 @@ yyreduce:
         // 处理形式参数
         if ((yyvsp[0].var_decls) != nullptr) {  // 如果有参数列表
             for (auto formalParameter : *(yyvsp[0].var_decls)) {  // 遍历参数列表
-                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));  // 将参数添加到函数头部
+                subHead->args.emplace_back(std::unique_ptr<VarDeclNode>(formalParameter));  // 将参数添加到函数头部
             }
             delete (yyvsp[0].var_decls);  // 释放原始参数列表容器
         }
@@ -2835,7 +2835,7 @@ yyreduce:
 #line 1102 "yacc_pascal.y"
                                                            {  // 匹配 "function 名称 (参数列表) : 类型" 形式
         currentParserContext = ParserContext::SubprogramHead;  // 设置当前解析上下文为子程序头部
-        auto subHead = allocateNode<FuncHeadDeclStmt>();  // 创建函数头部声明节点
+        auto subHead = allocateNode<FuncHeadDeclNode>();  // 创建函数头部声明节点
         
         subHead->func_name = std::string((yyvsp[-3].string));  // 设置函数名称
         subHead->ret_type = (yyvsp[0].basic_type);  // 设置返回类型（由basic_type规则提供）
@@ -2843,7 +2843,7 @@ yyreduce:
         // 处理形式参数
         if ((yyvsp[-2].var_decls) != nullptr) {  // 如果有参数列表
             for (auto formalParameter : *(yyvsp[-2].var_decls)) {  // 遍历参数列表
-                subHead->args.emplace_back(std::unique_ptr<VarDeclStmt>(formalParameter));  // 将参数添加到函数头部
+                subHead->args.emplace_back(std::unique_ptr<VarDeclNode>(formalParameter));  // 将参数添加到函数头部
             }
             delete (yyvsp[-2].var_decls);  // 释放原始参数列表容器
         }
@@ -2906,7 +2906,7 @@ yyreduce:
   case 51: /* parameter_list: parameter  */
 #line 1164 "yacc_pascal.y"
                  {  // 匹配单个参数，如 "x: integer" 或 "var a: real"
-        auto paramList = allocateNode<std::vector<VarDeclStmt *>>();  // 创建参数列表容器
+        auto paramList = allocateNode<std::vector<VarDeclNode *>>();  // 创建参数列表容器
         paramList->emplace_back((yyvsp[0].var_decl));  // 将参数添加到列表中
         
         (yyval.var_decls) = paramList;  // 返回参数列表
@@ -2960,7 +2960,7 @@ yyreduce:
   case 56: /* value_parameter: idlist ':' basic_type  */
 #line 1209 "yacc_pascal.y"
                              {  // 匹配"标识符列表:类型"形式的参数定义
-        auto varDecl = allocateNode<VarDeclStmt>();  // 创建新的变量声明节点
+        auto varDecl = allocateNode<VarDeclNode>();  // 创建新的变量声明节点
         
         varDecl->id.insert(varDecl->id.end(), (yyvsp[-2].id_list)->begin(), (yyvsp[-2].id_list)->end());  // 将标识符列表中的所有标识符添加到变量声明中
         varDecl->data_type = DataType::BasicType;  // 设置数据类型为基本类型
@@ -2979,17 +2979,17 @@ yyreduce:
 #line 1227 "yacc_pascal.y"
                                                              {  // 匹配常量声明、变量声明和复合语句组成的子程序体
        currentParserContext = ParserContext::SubprogramBody;  // 设置当前解析上下文为子程序体
-       auto funcBody = allocateNode<FuncBodyDeclStmt>();  // 创建函数体声明节点
+       auto funcBody = allocateNode<FuncBodyDeclNode>();  // 创建函数体声明节点
        
        // 处理常量声明
        if ((yyvsp[-2].const_decls) != nullptr) {  // 如果存在常量声明部分
-           funcBody->const_decl = std::unique_ptr<ConstDeclStmt>((yyvsp[-2].const_decls));  // 将常量声明添加到函数体，使用智能指针管理内存
+           funcBody->const_decl = std::unique_ptr<ConstDeclNode>((yyvsp[-2].const_decls));  // 将常量声明添加到函数体，使用智能指针管理内存
        }
        
        // 处理变量声明
        if ((yyvsp[-1].var_decls) != nullptr) {  // 如果存在变量声明部分
            for (auto varDecl : *(yyvsp[-1].var_decls)) {  // 遍历所有变量声明
-               funcBody->var_decl.emplace_back(std::unique_ptr<VarDeclStmt>(varDecl));  // 将每个变量声明添加到函数体
+               funcBody->var_decl.emplace_back(std::unique_ptr<VarDeclNode>(varDecl));  // 将每个变量声明添加到函数体
            }
            delete (yyvsp[-1].var_decls);  // 释放变量声明列表容器（内容已转移到函数体节点中）
        }
@@ -2997,7 +2997,7 @@ yyreduce:
        // 处理复合语句
        if ((yyvsp[0].stmt_list) != nullptr) {  // 如果存在复合语句部分
            for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历所有语句
-               funcBody->comp_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到函数体
+               funcBody->comp_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到函数体
            }
            delete (yyvsp[0].stmt_list);  // 释放语句列表容器（内容已转移到函数体节点中）
        }
@@ -3103,13 +3103,13 @@ yyreduce:
   case 64: /* statement: variable ASSIGNOP expression  */
 #line 1342 "yacc_pascal.y"
                                    {  // 匹配"变量 := 表达式"形式，如"x := y + 1"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto assignStmt = allocateNode<AssignStmt>();  // 创建赋值语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto assignmentNode = allocateNode<AssignmentNode>();  // 创建赋值语句节点
        
-       assignStmt->lval = std::unique_ptr<LValStmt>((yyvsp[-2].lval));  // 设置左值（赋值目标）
-       assignStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[0].expr));  // 设置右值表达式
+       assignmentNode->lval = std::unique_ptr<LValueNode>((yyvsp[-2].lval));  // 设置左值（赋值目标）
+       assignmentNode->expr = std::unique_ptr<ExprNode>((yyvsp[0].expr));  // 设置右值表达式
        
-       stmtList->emplace_back(assignStmt);  // 将赋值语句添加到语句列表
+       stmtList->emplace_back(assignmentNode);  // 将赋值语句添加到语句列表
        (yyval.stmt_list) = stmtList;  // 返回包含赋值语句的列表
        
        GRAMMAR_TRACE("statement -> variable ASSIGNOP expression");  // 记录语法解析跟踪信息
@@ -3120,7 +3120,7 @@ yyreduce:
   case 65: /* statement: procedure_call  */
 #line 1356 "yacc_pascal.y"
                      {  // 匹配过程调用，如"WriteLn(x)"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
        stmtList->emplace_back((yyvsp[0].func_call_stmt));  // 将过程调用添加到语句列表
        
        (yyval.stmt_list) = stmtList;  // 返回包含过程调用的列表
@@ -3141,20 +3141,20 @@ yyreduce:
   case 67: /* statement: WHILE expression DO statement  */
 #line 1371 "yacc_pascal.y"
                                     {  // 匹配"while 条件表达式 do 循环体"形式
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto whileStmt = allocateNode<WhileStmt>();  // 创建while语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto whileNode = allocateNode<WhileNode>();  // 创建while语句节点
        
-       whileStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));  // 设置循环条件表达式
+       whileNode->expr = std::unique_ptr<ExprNode>((yyvsp[-2].expr));  // 设置循环条件表达式
        
        // 处理循环体语句
        if ((yyvsp[0].stmt_list) != nullptr) {  // 如果循环体不为空
            for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历循环体中的所有语句
-               whileStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到while语句的循环体
+               whileNode->stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到while语句的循环体
            }
            delete (yyvsp[0].stmt_list);  // 释放语句列表容器（内容已转移）
        }
        
-       stmtList->emplace_back(whileStmt);  // 将while语句添加到语句列表
+       stmtList->emplace_back(whileNode);  // 将while语句添加到语句列表
        (yyval.stmt_list) = stmtList;  // 返回包含while语句的列表
        
        GRAMMAR_TRACE("statement -> WHILE expression DO statement");  // 记录语法解析跟踪信息
@@ -3165,26 +3165,26 @@ yyreduce:
   case 68: /* statement: IF expression THEN statement else_part  */
 #line 1392 "yacc_pascal.y"
                                              {
-        auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-        auto ifStmt = allocateNode<IfStmt>();  // 创建if语句节点
+        auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+        auto ifNode = allocateNode<IfNode>();  // 创建if语句节点
         
-        ifStmt->expr = std::unique_ptr<ExprStmt>((yyvsp[-3].expr));  // 设置条件表达式
+        ifNode->expr = std::unique_ptr<ExprNode>((yyvsp[-3].expr));  // 设置条件表达式
         
         // 处理if条件为真时的语句
         if ((yyvsp[-1].stmt_list) != nullptr) {  // 如果then分支不为空
             for (auto stmt : *(yyvsp[-1].stmt_list)) {  // 遍历then分支中的所有语句
-                ifStmt->true_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的true分支
+                ifNode->true_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到if语句的true分支
             }
         }
         
         // 处理if条件为假时的语句（else部分）
         if ((yyvsp[0].stmt_list) != nullptr) {  // 如果else分支不为空
             for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历else分支中的所有语句
-                ifStmt->false_stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到if语句的false分支
+                ifNode->false_stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到if语句的false分支
             }
         }
         
-        stmtList->emplace_back(ifStmt);  // 将if语句添加到语句列表
+        stmtList->emplace_back(ifNode);  // 将if语句添加到语句列表
         delete (yyvsp[-1].stmt_list);  // 释放then分支语句列表容器（内容已转移）
         delete (yyvsp[0].stmt_list);  // 释放else分支语句列表容器（内容已转移）
         
@@ -3197,21 +3197,21 @@ yyreduce:
   case 69: /* statement: FOR IDENTIFIER ASSIGNOP expression TO expression DO statement  */
 #line 1421 "yacc_pascal.y"
                                                                     {  // 匹配"for 变量:=初值 to 终值 do 循环体"形式
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto forStmt = allocateNode<ForStmt>();  // 创建for语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto forNode = allocateNode<ForNode>();  // 创建for语句节点
        
-       forStmt->id = std::string((yyvsp[-6].string));  // 设置循环变量名
-       forStmt->begin = std::unique_ptr<ExprStmt>((yyvsp[-4].expr));  // 设置循环初始值表达式
-       forStmt->end = std::unique_ptr<ExprStmt>((yyvsp[-2].expr));  // 设置循环终止值表达式
+       forNode->id = std::string((yyvsp[-6].string));  // 设置循环变量名
+       forNode->begin = std::unique_ptr<ExprNode>((yyvsp[-4].expr));  // 设置循环初始值表达式
+       forNode->end = std::unique_ptr<ExprNode>((yyvsp[-2].expr));  // 设置循环终止值表达式
        
        // 处理循环体语句
        if ((yyvsp[0].stmt_list) != nullptr) {  // 如果循环体不为空
            for (auto stmt : *(yyvsp[0].stmt_list)) {  // 遍历循环体中的所有语句
-               forStmt->stmt.emplace_back(std::unique_ptr<BaseStmt>(stmt));  // 将每个语句添加到for语句的循环体
+               forNode->stmt.emplace_back(std::unique_ptr<BaseNode>(stmt));  // 将每个语句添加到for语句的循环体
            }
        }
        
-       stmtList->emplace_back(forStmt);  // 将for语句添加到语句列表
+       stmtList->emplace_back(forNode);  // 将for语句添加到语句列表
        free((yyvsp[-6].string));  // 释放循环变量名字符串
        delete (yyvsp[0].stmt_list);  // 释放循环体语句列表容器（内容已转移）
        
@@ -3224,12 +3224,12 @@ yyreduce:
   case 70: /* statement: READ '(' variable_list ')'  */
 #line 1445 "yacc_pascal.y"
                                  {  // 匹配"read(变量列表)"形式，如"read(x, y, z)"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto readStmt = allocateNode<ReadFuncStmt>();  // 创建读取语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto readStmt = allocateNode<ReadFuncNode>();  // 创建读取语句节点
        
        // 处理变量列表
        for (auto lval : *(yyvsp[-1].lval_list)) {  // 遍历变量列表中的所有变量
-           readStmt->lval.emplace_back(std::unique_ptr<LValStmt>(lval));  // 将每个变量添加到读取语句的变量列表
+           readStmt->lval.emplace_back(std::unique_ptr<LValueNode>(lval));  // 将每个变量添加到读取语句的变量列表
        }
        
        delete (yyvsp[-1].lval_list);  // 释放变量列表容器（内容已转移）
@@ -3244,13 +3244,13 @@ yyreduce:
   case 71: /* statement: WRITE '(' expression_list ')'  */
 #line 1462 "yacc_pascal.y"
                                     {  // 匹配"write(表达式列表)"形式，如"write(x+y, 'hello')"
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto writeStmt = allocateNode<WriteFuncStmt>();  // 创建写入语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto writeStmt = allocateNode<WriteFuncNode>();  // 创建写入语句节点
        
        // 处理表达式列表
        if ((yyvsp[-1].expr_list) != nullptr) {  // 如果表达式列表不为空
            for (auto expr : *(yyvsp[-1].expr_list)) {  // 遍历表达式列表中的所有表达式
-               writeStmt->expr.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个表达式添加到写入语句的表达式列表
+               writeStmt->expr.emplace_back(std::unique_ptr<ExprNode>(expr));  // 将每个表达式添加到写入语句的表达式列表
            }
        }
        
@@ -3266,10 +3266,10 @@ yyreduce:
   case 72: /* statement: BREAK  */
 #line 1481 "yacc_pascal.y"
             {  // 匹配break关键字
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto breakStmt = allocateNode<BreakStmt>();  // 创建break语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto breakNode = allocateNode<BreakNode>();  // 创建break语句节点
        
-       stmtList->emplace_back(breakStmt);  // 将break语句添加到语句列表
+       stmtList->emplace_back(breakNode);  // 将break语句添加到语句列表
        (yyval.stmt_list) = stmtList;  // 返回包含break语句的列表
        
        GRAMMAR_TRACE("statement -> BREAK");  // 记录语法解析跟踪信息
@@ -3280,10 +3280,10 @@ yyreduce:
   case 73: /* statement: CONTINUE  */
 #line 1492 "yacc_pascal.y"
                {  // 匹配continue关键字
-       auto stmtList = allocateNode<std::vector<BaseStmt *>>();  // 创建语句列表容器
-       auto continueStmt = allocateNode<ContinueStmt>();  // 创建continue语句节点
+       auto stmtList = allocateNode<std::vector<BaseNode *>>();  // 创建语句列表容器
+       auto continueNode = allocateNode<ContinueNode>();  // 创建continue语句节点
        
-       stmtList->emplace_back(continueStmt);  // 将continue语句添加到语句列表
+       stmtList->emplace_back(continueNode);  // 将continue语句添加到语句列表
        (yyval.stmt_list) = stmtList;  // 返回包含continue语句的列表
        
        GRAMMAR_TRACE("statement -> CONTINUE");  // 记录语法解析跟踪信息
@@ -3295,7 +3295,7 @@ yyreduce:
 #line 1507 "yacc_pascal.y"
                {  // 匹配单个变量引用，如"x"或"arr[i]"
        currentParserContext = ParserContext::VariableList;  // 设置当前解析上下文为变量列表
-       auto lvalList = allocateNode<std::vector<LValStmt *>>();  // 创建左值列表容器，变量列表中的元素必须是可赋值的目标（左值）
+       auto lvalList = allocateNode<std::vector<LValueNode *>>();  // 创建左值列表容器，变量列表中的元素必须是可赋值的目标（左值）
        
        lvalList->emplace_back((yyvsp[0].lval));  // 将变量添加到左值列表中
        (yyval.lval_list) = lvalList;  // 返回包含单个变量的左值列表
@@ -3335,14 +3335,14 @@ yyreduce:
 #line 1541 "yacc_pascal.y"
                             {  // 匹配"标识符 可选的数组下标"形式，如"x"或"array[i, j+1]"
        currentParserContext = ParserContext::Variable;  // 设置当前解析上下文为变量
-       auto lval = allocateNode<LValStmt>();  // 创建左值语句节点
+       auto lval = allocateNode<LValueNode>();  // 创建左值语句节点
        
        lval->id = std::string((yyvsp[-1].string));  // 设置变量的标识符名称
        
        // 处理变量的数组下标部分
        if ((yyvsp[0].expr_list) != nullptr) {  // 如果有数组下标部分
            for (auto expr : *(yyvsp[0].expr_list)) {  // 遍历所有下标表达式
-               lval->array_index.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个下标表达式添加到左值的数组索引列表
+               lval->array_index.emplace_back(std::unique_ptr<ExprNode>(expr));  // 将每个下标表达式添加到左值的数组索引列表
            }
            delete (yyvsp[0].expr_list);  // 释放下标表达式列表容器（内容已转移）
        }
@@ -3384,7 +3384,7 @@ yyreduce:
 #line 1592 "yacc_pascal.y"
                  {  // 匹配单个标识符，如"WriteLn"或"Initialize"
        currentParserContext = ParserContext::ProcedureCall;  // 设置当前解析上下文为过程调用
-       auto procCall = allocateNode<FuncCallStmt>();  // 创建函数调用语句节点
+       auto procCall = allocateNode<FuncCallNode>();  // 创建函数调用语句节点
        
        procCall->id = std::string((yyvsp[0].string));  // 设置过程名称
        free((yyvsp[0].string));  // 释放词法分析器分配的标识符字符串（已复制到节点中）
@@ -3399,14 +3399,14 @@ yyreduce:
 #line 1604 "yacc_pascal.y"
                                          {  // 匹配"标识符(参数列表)"形式，如"WriteLn(x, y+1)"
        currentParserContext = ParserContext::ProcedureCall;  // 设置当前解析上下文为过程调用
-       auto procCall = allocateNode<FuncCallStmt>();  // 创建函数调用语句节点
+       auto procCall = allocateNode<FuncCallNode>();  // 创建函数调用语句节点
        
        procCall->id = std::string((yyvsp[-3].string));  // 设置过程名称
        
        // 处理参数表达式列表
        if ((yyvsp[-1].expr_list) != nullptr) {  // 如果参数列表不为空
            for (auto expr : *(yyvsp[-1].expr_list)) {  // 遍历所有参数表达式
-               procCall->args.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 将每个参数表达式添加到函数调用的参数列表
+               procCall->args.emplace_back(std::unique_ptr<ExprNode>(expr));  // 将每个参数表达式添加到函数调用的参数列表
            }
            delete (yyvsp[-1].expr_list);  // 释放表达式列表容器（内容已转移到函数调用节点）
        }
@@ -3450,7 +3450,7 @@ yyreduce:
 #line 1651 "yacc_pascal.y"
                  {  // 匹配单个表达式，如"(x)"或"[i]"
        currentParserContext = ParserContext::ExpressionList;  // 设置当前解析上下文为表达式列表
-       auto exprList = allocateNode<std::vector<ExprStmt *>>();  // 创建表达式列表容器
+       auto exprList = allocateNode<std::vector<ExprNode *>>();  // 创建表达式列表容器
        
        exprList->emplace_back((yyvsp[0].expr));  // 将表达式添加到列表中
        (yyval.expr_list) = exprList;  // 返回包含单个表达式的列表
@@ -3490,10 +3490,10 @@ yyreduce:
                                          {  // 匹配"表达式 关系运算符 简单表达式"形式，如"a > b"或"x = y+1"
        currentParserContext = ParserContext::Expression;  // 设置当前解析上下文为表达式
        auto expr = (yyvsp[-2].expr);  // 获取左侧已解析的表达式
-       RelExprStmt::Term term;  // 创建新的关系表达式项结构
+       RelExprNode::Term term;  // 创建新的关系表达式项结构
        
        term.type = getRelationOperator((yyvsp[-1].number));  // 设置关系运算符类型（通过将语法分析器的token转换为枚举值）
-       term.add_expr = std::unique_ptr<AddExprStmt>((yyvsp[0].add_expr));  // 设置右侧的简单表达式，使用智能指针管理内存
+       term.add_expr = std::unique_ptr<AddExprNode>((yyvsp[0].add_expr));  // 设置右侧的简单表达式，使用智能指针管理内存
        expr->rel_expr->terms.emplace_back(std::move(term));  // 将新的关系表达式项添加到表达式节点中
                                                              // 使用std::move转移所有权
        
@@ -3521,10 +3521,10 @@ yyreduce:
                                    {  // 匹配"简单表达式 加法运算符 项"形式，如"a+b"或"x-y*z"
        currentParserContext = ParserContext::SimpleExpression;  // 设置当前解析上下文为简单表达式
        auto addExpr = (yyvsp[-2].add_expr);  // 获取左侧已解析的简单表达式
-       AddExprStmt::Term term;  // 创建新的加法表达式项
+       AddExprNode::Term term;  // 创建新的加法表达式项
        
        term.type = getArithmeticOperator((yyvsp[-1].number));  // 设置加法运算符类型（如Plus、Minus、Or）
-       term.mul_expr = std::unique_ptr<MulExprStmt>((yyvsp[0].mul_expr));  // 将右侧的项转换为智能指针并存储
+       term.mul_expr = std::unique_ptr<MulExprNode>((yyvsp[0].mul_expr));  // 将右侧的项转换为智能指针并存储
        addExpr->terms.emplace_back(std::move(term));  // 将新的加法表达式项添加到简单表达式节点
                                                       // 使用std::move转移所有权
        
@@ -3552,10 +3552,10 @@ yyreduce:
                         {  // 匹配"项 乘法运算符 因子"形式，如"a*b"或"x/y"
        currentParserContext = ParserContext::Term;  // 设置当前解析上下文为项
        auto mulExpr = (yyvsp[-2].mul_expr);  // 获取左侧已解析的项
-       MulExprStmt::Term term;  // 创建新的乘法表达式项结构
+       MulExprNode::Term term;  // 创建新的乘法表达式项结构
        
        term.type = getTermOperator((yyvsp[-1].number));  // 设置乘法运算符类型（如Mul、Div、Mod、And、AndThen）
-       term.unary_expr = std::unique_ptr<UnaryExprStmt>((yyvsp[0].unary_expr));  // 将右侧的因子转换为智能指针并存储
+       term.unary_expr = std::unique_ptr<UnaryExprNode>((yyvsp[0].unary_expr));  // 将右侧的因子转换为智能指针并存储
        mulExpr->terms.emplace_back(std::move(term));  // 将新的乘法表达式项添加到项节点
                                                       // 使用std::move转移所有权
        
@@ -3569,11 +3569,11 @@ yyreduce:
 #line 1766 "yacc_pascal.y"
               {  // 匹配整数字面量，如"42"或"1024"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        setupNumberNode(unaryExpr->primary_expr->value->number, (yyvsp[0].number));  // 设置数字节点的值和类型信息
        
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
@@ -3586,11 +3586,11 @@ yyreduce:
 #line 1780 "yacc_pascal.y"
            {  // 匹配实数字面量，如"3.14"或"2.71828"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        
        double val = atof((yyvsp[0].real));  // 将字符串转换为双精度浮点数
        setupNumberNode(unaryExpr->primary_expr->value->number, val);  // 设置数字节点的值和类型信息
@@ -3608,11 +3608,11 @@ yyreduce:
 #line 1799 "yacc_pascal.y"
               {  // 匹配布尔字面量，如"true"或"false"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        
        long long int val = (yyvsp[0].boolean) ? 1 : 0;  // 将布尔值转换为整数（true=1, false=0）
        setupNumberNode(unaryExpr->primary_expr->value->number, val);  // 设置数字节点的值和类型信息
@@ -3627,11 +3627,11 @@ yyreduce:
 #line 1815 "yacc_pascal.y"
            {  // 匹配字符字面量，如"'A'"或"'z'"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::Number;  // 设置值类型为数字
-       unaryExpr->primary_expr->value->number = std::make_unique<NumberStmt>();  // 创建数字节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::Number;  // 设置值类型为数字
+       unaryExpr->primary_expr->value->number = std::make_unique<NumberNode>();  // 创建数字节点
        
        setupNumberNode(unaryExpr->primary_expr->value->number, (yyvsp[0].charactor));  // 设置数字节点的值和类型信息
        
@@ -3645,11 +3645,11 @@ yyreduce:
 #line 1830 "yacc_pascal.y"
                {  // 匹配变量引用，如"x"或"array[i]"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::LVal;  // 设置值类型为左值
-       unaryExpr->primary_expr->value->lval = std::unique_ptr<LValStmt>((yyvsp[0].lval));  // 设置左值节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::LVal;  // 设置值类型为左值
+       unaryExpr->primary_expr->value->lval = std::unique_ptr<LValueNode>((yyvsp[0].lval));  // 设置左值节点
        
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> variable");  // 记录语法解析跟踪信息
@@ -3661,9 +3661,9 @@ yyreduce:
 #line 1843 "yacc_pascal.y"
                          {  // 匹配括号表达式，如"(a+b)"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Parentheses);  // 创建一元表达式节点，类型为括号表达式
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Parentheses);  // 创建一元表达式节点，类型为括号表达式
        
-       unaryExpr->primary_expr->expr = std::unique_ptr<ExprStmt>((yyvsp[-1].expr));  // 设置括号内的表达式
+       unaryExpr->primary_expr->expr = std::unique_ptr<ExprNode>((yyvsp[-1].expr));  // 设置括号内的表达式
        
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> '(' expression ')'");  // 记录语法解析跟踪信息
@@ -3675,17 +3675,17 @@ yyreduce:
 #line 1854 "yacc_pascal.y"
                                          {  // 匹配函数调用，如"Sqrt(x)"或"Max(a, b)"
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
-       auto unaryExpr = makeUnaryExpr(PrimaryExprStmt::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
+       auto unaryExpr = makeUnaryExpr(PrimaryExprNode::PrimaryExprType::Value);  // 创建一元表达式节点，类型为值
        
-       unaryExpr->primary_expr->value = std::make_unique<ValueStmt>();  // 创建值语句节点
-       unaryExpr->primary_expr->value->type = ValueStmt::ValueType::FuncCall;  // 设置值类型为函数调用
-       unaryExpr->primary_expr->value->func_call = std::make_unique<FuncCallStmt>();  // 创建函数调用节点
+       unaryExpr->primary_expr->value = std::make_unique<ValueNode>();  // 创建值语句节点
+       unaryExpr->primary_expr->value->type = ValueNode::ValueType::FuncCall;  // 设置值类型为函数调用
+       unaryExpr->primary_expr->value->func_call = std::make_unique<FuncCallNode>();  // 创建函数调用节点
        unaryExpr->primary_expr->value->func_call->id = std::string((yyvsp[-3].string));  // 设置函数名
        
        // 处理函数参数
        if ((yyvsp[-1].expr_list) != nullptr) {  // 如果有参数列表
            for (auto expr : *(yyvsp[-1].expr_list)) {  // 遍历所有参数表达式
-               unaryExpr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprStmt>(expr));  // 添加参数
+               unaryExpr->primary_expr->value->func_call->args.emplace_back(std::unique_ptr<ExprNode>(expr));  // 添加参数
            }
            delete (yyvsp[-1].expr_list);  // 释放参数列表容器
        }
@@ -3704,7 +3704,7 @@ yyreduce:
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
        auto unaryExpr = (yyvsp[0].unary_expr);  // 获取操作数（已解析的因子）
        
-       unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Not);  // 添加逻辑非运算符类型
+       unaryExpr->types.emplace_back(UnaryExprNode::UnaryExprType::Not);  // 添加逻辑非运算符类型
        
        (yyval.unary_expr) = unaryExpr;  // 返回更新后的一元表达式节点
        GRAMMAR_TRACE("factor -> NOT factor");  // 记录语法解析跟踪信息
@@ -3729,7 +3729,7 @@ yyreduce:
        currentParserContext = ParserContext::Factor;  // 设置当前解析上下文为因子
        auto unaryExpr = (yyvsp[0].unary_expr);  // 获取操作数（已解析的因子）
        
-       unaryExpr->types.emplace_back(UnaryExprStmt::UnaryExprType::Minus);  // 添加负号运算符类型
+       unaryExpr->types.emplace_back(UnaryExprNode::UnaryExprType::Minus);  // 添加负号运算符类型
        
        (yyval.unary_expr) = unaryExpr;  // 返回更新后的一元表达式节点
        GRAMMAR_TRACE("factor -> '-' factor");  // 记录语法解析跟踪信息
@@ -4054,7 +4054,7 @@ yyreturnlab:
 extern void scan_string(const char *str, yyscan_t scanner);
 
 // 基本错误处理函数 - 由Bison在遇到语法错误时自动调用
-int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan_t scanner, const char *msg)
+int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg)
 {
    (void)program;  // 未使用的参数，使用void转换避免编译警告
    (void)scanner;  // 未使用的参数，使用void转换避免编译警告
@@ -4066,7 +4066,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramStmt ** program, yyscan
 }
 
 // 详细语法错误报告函数 - 为用户提供更直观的错误信息
-static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramStmt ** program, void * scanner)
+static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramNode ** program, void * scanner)
 {
    syntaxErrorFlag = true;  // 设置全局错误标志
    int res = 0;  // 初始化返回值
@@ -4121,7 +4121,7 @@ static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str,
 }
 
 // 主解析函数 - 语法分析的入口点，初始化词法分析器并执行解析
-int code_parse(const char * code_str, ProgramStmt ** program) {
+int code_parse(const char * code_str, ProgramNode ** program) {
    yyscan_t scanner;  // 词法分析器状态
    yylex_init(&scanner);  // 初始化词法分析器
    scan_string(code_str, scanner);  // 加载源代码字符串到词法分析器

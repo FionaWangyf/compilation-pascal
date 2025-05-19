@@ -37,9 +37,9 @@ private:
     void initTypeMapping();
     
     // 分析表达式类型的辅助函数
-    semantic::SymbolEntry* determineExpressionType(ExprStmt* expr);
-    bool hasFloatingPointOperation(ExprStmt* expr);
-    bool isSimpleExpression(ExprStmt* expr);
+    semantic::SymbolEntry* determineExpressionType(ExprNode* expr);
+    bool hasFloatingPointOperation(ExprNode* expr);
+    bool isSimpleExpression(ExprNode* expr);
     
     // 分析变量使用的辅助函数
     bool isVariableUsedInScope(const std::string& varName);
@@ -53,54 +53,54 @@ private:
 
     int exprDepth = 0;              // >0 表示当前在“表达式”上下文
 
-    void emitExpr(ExprStmt *e);
+    void emitExpr(ExprNode *e);
     
     bool isLastStmtInFuncBody = false;
 
-    void emitExprWithType(ExprStmt* expr, const std::string& expectType);
+    void emitExprWithType(ExprNode* expr, const std::string& expectType);
     std::string currentExprType; // 用于跟踪当前表达式类型
 public:
     CodeGenerator(const semantic::SemanticAnalyzer& s, semantic::SymbolTable& st);
     ~CodeGenerator();
     
     // 生成C代码
-    std::string generate(ProgramStmt* root);
+    std::string generate(ProgramNode* root);
     
     // 输出C代码到文件
     void output(std::ofstream& out);
     
     // 语句访问函数
-    void visit(ExprStmt &stmt) override;
-    void visit(RelExprStmt &stmt) override;
-    void visit(AddExprStmt &stmt) override;
-    void visit(MulExprStmt &stmt) override;
-    void visit(UnaryExprStmt &stmt) override;
-    void visit(PrimaryExprStmt &stmt) override;
-    void visit(ValueStmt &stmt) override;
-    void visit(NumberStmt &stmt) override;
-    void visit(StrStmt &stmt) override;
-    void visit(LValStmt &stmt) override;
-    void visit(FuncCallStmt &stmt) override;
-    void visit(PeriodStmt &stmt) override;
-    void visit(ConstDeclStmt &stmt) override;
-    void visit(VarDeclStmt &stmt) override;
-    void visit(FuncHeadDeclStmt &stmt) override;
-    void visit(FuncBodyDeclStmt &stmt) override;
-    void visit(FuncDeclStmt &stmt) override;
-    void visit(AssignStmt &stmt) override;
-    void visit(IfStmt &stmt) override;
-    void visit(ForStmt &stmt) override;
-    void visit(WhileStmt &stmt) override;
-    void visit(ReadFuncStmt &stmt) override;
-    void visit(WriteFuncStmt &stmt) override;
-    void visit(BreakStmt &stmt) override;
-    void visit(ContinueStmt &stmt) override;
-    void visit(ProgramHeadStmt &stmt) override;
-    void visit(ProgramBodyStmt &stmt) override;
-    void visit(ProgramStmt &stmt) override;
+    void visit(ExprNode &stmt) override;
+    void visit(RelExprNode &stmt) override;
+    void visit(AddExprNode &stmt) override;
+    void visit(MulExprNode &stmt) override;
+    void visit(UnaryExprNode &stmt) override;
+    void visit(PrimaryExprNode &stmt) override;
+    void visit(ValueNode &stmt) override;
+    void visit(NumberNode &stmt) override;
+    void visit(StringNode &stmt) override;
+    void visit(LValueNode &stmt) override;
+    void visit(FuncCallNode &stmt) override;
+    void visit(PeriodNode &stmt) override;
+    void visit(ConstDeclNode &stmt) override;
+    void visit(VarDeclNode &stmt) override;
+    void visit(FuncHeadDeclNode &stmt) override;
+    void visit(FuncBodyDeclNode &stmt) override;
+    void visit(FuncDeclNode &stmt) override;
+    void visit(AssignmentNode &stmt) override;
+    void visit(IfNode &stmt) override;
+    void visit(ForNode &stmt) override;
+    void visit(WhileNode &stmt) override;
+    void visit(ReadFuncNode &stmt) override;
+    void visit(WriteFuncNode &stmt) override;
+    void visit(BreakNode &stmt) override;
+    void visit(ContinueNode &stmt) override;
+    void visit(ProgramHeadNode &stmt) override;
+    void visit(ProgramBodyNode &stmt) override;
+    void visit(ProgramNode &stmt) override;
     
     // 处理return语句
-    void handleReturn(ExprStmt& expr);
+    void handleReturn(ExprNode& expr);
 };
 
 } // namespace codegen

@@ -1,34 +1,34 @@
 #pragma once
 
-class ExprStmt;
-class RelExprStmt;
-class AddExprStmt;
-class MulExprStmt;
-class UnaryExprStmt;
-class PrimaryExprStmt;
-class ValueStmt;
-class NumberStmt;
-class StrStmt;
-class LValStmt;
+class ExprNode;
+class RelExprNode;
+class AddExprNode;
+class MulExprNode;
+class UnaryExprNode;
+class PrimaryExprNode;
+class ValueNode;
+class NumberNode;
+class StringNode;
+class LValueNode;
 
-class FuncCallStmt;
-class PeriodStmt;
-class ConstDeclStmt;
-class VarDeclStmt;
-class FuncHeadDeclStmt;
-class FuncBodyDeclStmt;
-class FuncDeclStmt;
-class AssignStmt;
-class IfStmt;
-class ForStmt;
-class WhileStmt;
-class ReadFuncStmt;
-class WriteFuncStmt;
-class BreakStmt;
-class ContinueStmt;
-class ProgramHeadStmt;
-class ProgramBodyStmt;
-class ProgramStmt;
+class FuncCallNode;
+class PeriodNode;
+class ConstDeclNode;
+class VarDeclNode;
+class FuncHeadDeclNode;
+class FuncBodyDeclNode;
+class FuncDeclNode;
+class AssignmentNode;
+class IfNode;
+class ForNode;
+class WhileNode;
+class ReadFuncNode;
+class WriteFuncNode;
+class BreakNode;
+class ContinueNode;
+class ProgramHeadNode;
+class ProgramBodyNode;
+class ProgramNode;
 
 /**
  * @brief AST节点访问器基类
@@ -41,38 +41,38 @@ public:
     virtual ~StmtVisitor() = default;
 
     // 表达式相关节点访问方法
-    virtual void visit(ExprStmt &stmt) = 0;
-    virtual void visit(RelExprStmt &stmt) = 0;
-    virtual void visit(AddExprStmt &stmt) = 0;
-    virtual void visit(MulExprStmt &stmt) = 0;
-    virtual void visit(UnaryExprStmt &stmt) = 0;
-    virtual void visit(PrimaryExprStmt &stmt) = 0;
-    virtual void visit(ValueStmt &stmt) = 0;
-    virtual void visit(NumberStmt &stmt) = 0;
-    virtual void visit(StrStmt &stmt) = 0;
-    virtual void visit(LValStmt &stmt) = 0;
-    virtual void visit(FuncCallStmt &stmt) = 0;
+    virtual void visit(ExprNode &stmt) = 0;
+    virtual void visit(RelExprNode &stmt) = 0;
+    virtual void visit(AddExprNode &stmt) = 0;
+    virtual void visit(MulExprNode &stmt) = 0;
+    virtual void visit(UnaryExprNode &stmt) = 0;
+    virtual void visit(PrimaryExprNode &stmt) = 0;
+    virtual void visit(ValueNode &stmt) = 0;
+    virtual void visit(NumberNode &stmt) = 0;
+    virtual void visit(StringNode &stmt) = 0;
+    virtual void visit(LValueNode &stmt) = 0;
+    virtual void visit(FuncCallNode &stmt) = 0;
 
     // 声明相关节点访问方法
-    virtual void visit(PeriodStmt &stmt) = 0;
-    virtual void visit(ConstDeclStmt &stmt) = 0;
-    virtual void visit(VarDeclStmt &stmt) = 0;
-    virtual void visit(FuncHeadDeclStmt &stmt) = 0;
-    virtual void visit(FuncBodyDeclStmt &stmt) = 0;
-    virtual void visit(FuncDeclStmt &stmt) = 0;
+    virtual void visit(PeriodNode &stmt) = 0;
+    virtual void visit(ConstDeclNode &stmt) = 0;
+    virtual void visit(VarDeclNode &stmt) = 0;
+    virtual void visit(FuncHeadDeclNode &stmt) = 0;
+    virtual void visit(FuncBodyDeclNode &stmt) = 0;
+    virtual void visit(FuncDeclNode &stmt) = 0;
 
     // 语句相关节点访问方法
-    virtual void visit(AssignStmt &stmt) = 0;
-    virtual void visit(IfStmt &stmt) = 0;
-    virtual void visit(ForStmt &stmt) = 0;
-    virtual void visit(WhileStmt &stmt) = 0;
-    virtual void visit(ReadFuncStmt &stmt) = 0;
-    virtual void visit(WriteFuncStmt &stmt) = 0;
-    virtual void visit(BreakStmt &stmt) = 0;
-    virtual void visit(ContinueStmt &stmt) = 0;
+    virtual void visit(AssignmentNode &stmt) = 0;
+    virtual void visit(IfNode &stmt) = 0;
+    virtual void visit(ForNode &stmt) = 0;
+    virtual void visit(WhileNode &stmt) = 0;
+    virtual void visit(ReadFuncNode &stmt) = 0;
+    virtual void visit(WriteFuncNode &stmt) = 0;
+    virtual void visit(BreakNode &stmt) = 0;
+    virtual void visit(ContinueNode &stmt) = 0;
 
     // 程序结构相关节点访问方法
-    virtual void visit(ProgramHeadStmt &stmt) = 0;
-    virtual void visit(ProgramBodyStmt &stmt) = 0;
-    virtual void visit(ProgramStmt &stmt) = 0;
+    virtual void visit(ProgramHeadNode &stmt) = 0;
+    virtual void visit(ProgramBodyNode &stmt) = 0;
+    virtual void visit(ProgramNode &stmt) = 0;
 };

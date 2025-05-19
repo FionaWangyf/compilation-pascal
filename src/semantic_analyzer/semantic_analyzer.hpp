@@ -63,7 +63,7 @@ public:
 
 // 语义分析器
 class SemanticAnalyzer : public StmtVisitor {
-    std::unordered_map<const BaseStmt*, std::string> inferredType;
+    std::unordered_map<const BaseNode*, std::string> inferredType;
 private:
     SymbolTable symbolTable;
     std::vector<std::string> errors;
@@ -76,40 +76,40 @@ private:
     std::string getBinaryExprType(const std::string& leftType, const std::string& rightType, const std::string& op);
     std::string getUnaryExprType(const std::string& exprType, const std::string& op);
     
-    void setType(const BaseStmt* n, const std::string& t) { inferredType[n] = t; }
+    void setType(const BaseNode* n, const std::string& t) { inferredType[n] = t; }
 public:
     SemanticAnalyzer();
     ~SemanticAnalyzer();
     
     // 语句访问函数
-    void visit(ExprStmt &stmt) override;
-    void visit(RelExprStmt &stmt) override;
-    void visit(AddExprStmt &stmt) override;
-    void visit(MulExprStmt &stmt) override;
-    void visit(UnaryExprStmt &stmt) override;
-    void visit(PrimaryExprStmt &stmt) override;
-    void visit(ValueStmt &stmt) override;
-    void visit(NumberStmt &stmt) override;
-    void visit(StrStmt &stmt) override;
-    void visit(LValStmt &stmt) override;
-    void visit(FuncCallStmt &stmt) override;
-    void visit(PeriodStmt &stmt) override;
-    void visit(ConstDeclStmt &stmt) override;
-    void visit(VarDeclStmt &stmt) override;
-    void visit(FuncHeadDeclStmt &stmt) override;
-    void visit(FuncBodyDeclStmt &stmt) override;
-    void visit(FuncDeclStmt &stmt) override;
-    void visit(AssignStmt &stmt) override;
-    void visit(IfStmt &stmt) override;
-    void visit(ForStmt &stmt) override;
-    void visit(WhileStmt &stmt) override;
-    void visit(ReadFuncStmt &stmt) override;
-    void visit(WriteFuncStmt &stmt) override;
-    void visit(BreakStmt &stmt) override;
-    void visit(ContinueStmt &stmt) override;
-    void visit(ProgramHeadStmt &stmt) override;
-    void visit(ProgramBodyStmt &stmt) override;
-    void visit(ProgramStmt &stmt) override;
+    void visit(ExprNode &stmt) override;
+    void visit(RelExprNode &stmt) override;
+    void visit(AddExprNode &stmt) override;
+    void visit(MulExprNode &stmt) override;
+    void visit(UnaryExprNode &stmt) override;
+    void visit(PrimaryExprNode &stmt) override;
+    void visit(ValueNode &stmt) override;
+    void visit(NumberNode &stmt) override;
+    void visit(StringNode &stmt) override;
+    void visit(LValueNode &stmt) override;
+    void visit(FuncCallNode &stmt) override;
+    void visit(PeriodNode &stmt) override;
+    void visit(ConstDeclNode &stmt) override;
+    void visit(VarDeclNode &stmt) override;
+    void visit(FuncHeadDeclNode &stmt) override;
+    void visit(FuncBodyDeclNode &stmt) override;
+    void visit(FuncDeclNode &stmt) override;
+    void visit(AssignmentNode &stmt) override;
+    void visit(IfNode &stmt) override;
+    void visit(ForNode &stmt) override;
+    void visit(WhileNode &stmt) override;
+    void visit(ReadFuncNode &stmt) override;
+    void visit(WriteFuncNode &stmt) override;
+    void visit(BreakNode &stmt) override;
+    void visit(ContinueNode &stmt) override;
+    void visit(ProgramHeadNode &stmt) override;
+    void visit(ProgramBodyNode &stmt) override;
+    void visit(ProgramNode &stmt) override;
     
     // 错误处理
     void addError(const std::string& message);
@@ -119,13 +119,13 @@ public:
     // 获取符号表
     SymbolTable& getSymbolTable();
 
-    const std::string& getType(const BaseStmt* n) const {
+    const std::string& getType(const BaseNode* n) const {
         static const std::string unknown = "unknown";
         auto it = inferredType.find(n);
         return it == inferredType.end() ? unknown : it->second;
     }
 
-    const std::unordered_map<const BaseStmt*, std::string>& getInferredType() const {
+    const std::unordered_map<const BaseNode*, std::string>& getInferredType() const {
         return inferredType;
     }
 };

@@ -17,7 +17,7 @@
 #include "common/setting/settings.hpp"
 #include "parser/yacc_pascal.hpp"
 
-void code_parse(const char *code, ProgramStmt **program_stmt);
+void code_parse(const char *code, ProgramNode **program_stmt);
 
 void init_env()
 {
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         ifs.close();
         // 第一步：词法分析 and 语法分析
         LOG_DEBUG("Start parsing code..., File: %s", fileName.c_str());
-        ProgramStmt *program = nullptr;
+        ProgramNode *program = nullptr;
         code_parse(content.c_str(), &program);
         if (program == nullptr) {
             LOG_FATAL("ERROR : Parsing failed.");

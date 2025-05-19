@@ -2,13 +2,13 @@
 /*
 * no : 1.1
 * rule  :  programstruct -> program_head ‘;’ program_body '.'
-* node :  ProgramStmt * program_struct
-* son  :  ProgramHeadStmt * program_head ProgramBodyStmt * program_body
+* node :  ProgramNode * program_struct
+* son  :  ProgramHeadNode * program_head ProgramBodyNode * program_body
 * error : 程序定义出错 请检查是否符合规范
 */
 programstruct : program_head  ';'  program_body '.'
     {
-        $$ = new ProgramStmt();
+        $$ = new ProgramNode();
         $$->head = $1;
         $$->body = $3;
     }
@@ -20,18 +20,18 @@ programstruct : program_head  ';'  program_body '.'
 /*
 * no : 1.2
 * rule  :  program_head -> "program" IDENTIFIER '(' idlist ')' | "program" IDENTIFIER
-* node :  ProgramHeadStmt * program_head
+* node :  ProgramHeadNode * program_head
 * son  :  char * std::vector<std::string>
 * error : 程序头定义出错 请检查是否符合规范
 */
 program_head : PROGRAM IDENTIFIER '(' idlist ')'
     {
-        $$ = new ProgramHeadStmt();
+        $$ = new ProgramHeadNode();
         // TODO
     }
     | PROGRAM IDENTIFIER
     {
-        $$ = new ProgramHeadStmt();
+        $$ = new ProgramHeadNode();
         $$->id_list.push_back($2);
         delete $2;
     }
@@ -42,13 +42,13 @@ program_head : PROGRAM IDENTIFIER '(' idlist ')'
 /*
 * no : 1.3
 * rule  :  program_body -> const_declarations var_declarations subprogram_declarations compound_statement
-* node :  ProgramBodyStmt * program_body
-* son  :  ConstDeclStmt * const_decl std::vector<VarDeclStmt *> var_decl  std::vector<FuncDeclStmt *>  func_decl  std::vector<BaseStmt *>  comp_stmt
+* node :  ProgramBodyNode * program_body
+* son  :  ConstDeclNode * const_decl std::vector<VarDeclNode *> var_decl  std::vector<FuncDeclNode *>  func_decl  std::vector<BaseStmt *>  comp_stmt
 * error : 程序体定义出错 请检查是否符合规范
 */
 program_body : const_declarations var_declarations subprogram_declarations compound_statement
     {
-        $$ = new ProgramBodyStmt();
+        $$ = new ProgramBodyNode();
         $$->const_decl = $1;
         $$->var_decl = *$2;
         $$->func_decl = *$3;
@@ -93,8 +93,8 @@ idlist : IDENTIFIER
 /*
 * no : 1.5
 * rule  :  const_declarations -> empty | "const" const_declaration ';' const_declarations
-* node :  ConstDeclStmt * const_decls
-* son  :  std::vector<std::pair<std::string, NumberStmt> *> *
+* node :  ConstDeclNode * const_decls
+* son  :  std::vector<std::pair<std::string, NumberNode> *> *
 * error : 常量定义出错 请检查是否符合规范
 */
 const_declarations : /*empty*/
@@ -103,8 +103,8 @@ const_declarations : /*empty*/
     }
     | CONST const_declaration ';'
     {
-        $$ = new ConstDeclStmt();
-        std::vector<std::pair<std::string, NumberStmt> *> kv_pair_list = *$2;
+        $$ = new ConstDeclNode();
+        std::vector<std::pair<std::string, NumberNode> *> kv_pair_list = *$2;
         for (auto kv_pair : kv_pair_list) {
             $$->pairs.push_back(*kv_pair);
             delete kv_pair;
@@ -122,19 +122,19 @@ const_declarations : /*empty*/
 /*
 * no : 1.6
 * rule  :  const_declaration -> IDENTIFIER = const_value | const_declaration ; IDENTIFIER = const_value
-* node :  std::vector<std::pair<std::string, NumberStmt> *> * 
-* son  :  char *   NumberStmt *
+* node :  std::vector<std::pair<std::string, NumberNode> *> * 
+* son  :  char *   NumberNode *
 */
 const_declaration : IDENTIFIER '=' const_value
     {
-        $$ = new std::vector<std::pair<std::string, NumberStmt> *>();
-        $$->push_back(new std::pair<std::string, NumberStmt>($1, *$3));
+        $$ = new std::vector<std::pair<std::string, NumberNode> *>();
+        $$->push_back(new std::pair<std::string, NumberNode>($1, *$3));
         delete $1;
         delete $3;
     }
     | const_declaration ';' IDENTIFIER '=' const_value
     {
-        $1->push_back(new std::pair<std::string, NumberStmt>($3, *$5));
+        $1->push_back(new std::pair<std::string, NumberNode>($3, *$5));
         delete $3;
         delete $5;
         $$ = $1; // 不需要删除
@@ -145,55 +145,55 @@ const_declaration : IDENTIFIER '=' const_value
 /*
 * no : 1.7
 * rule  :  const_value -> INTEGER | REAL | CHAR | '-' INTEGER | '-' REAL | '+' INTEGER | '+' REAL | ' CHAR '
-* node :  NumberStmt * num_value
+* node :  NumberNode * num_value
 * son  :  long long | double | char
 * error : 常量 请检查是否为合法常量 
 */
 const_value: INTEGER
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_signed = true;
         num_value->int_val = $1;
         $$ = num_value;
     }|
     '+' INTEGER
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_signed = true;
         num_value->int_val = $2;
         $$ = num_value;
     }
     | '-' INTEGER
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_signed = true;
         num_value->int_val = -$2;
         $$ = num_value;
     }
     | REAL
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_real = true;
         num_value->real_val = $1;
         $$ = num_value;
     }
     | '+' REAL
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_real = true;
         num_value->real_val = $2;
         $$ = num_value;
     }
     | '-' REAL
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_real = true;
         num_value->real_val = -$2;
         $$ = num_value;
     }
     | '\'' CHAR  '\''
     {
-        NumberStmt * num_value = new NumberStmt();
+        NumberNode * num_value = new NumberNode();
         num_value->is_char = true;
         num_value->char_val = $2;
         $$ = num_value;
@@ -252,9 +252,9 @@ var_declaration:
         if ($6) {
             $$ = $6;
         } else {
-            $$ = new std::vector<VarDeclStmt *>();
+            $$ = new std::vector<VarDeclNode *>();
         }
-        VarDeclStmt * var_decl = new VarDeclStmt();
+        VarDeclNode * var_decl = new VarDeclNode();
         if ($2) {
             var_decl->id_list = *$2;
             delete $2;
@@ -270,9 +270,9 @@ var_declaration:
         if ($11) {
             $$ = $11;
         } else {
-            $$ = new std::vector<VarDeclStmt *>();
+            $$ = new std::vector<VarDeclNode *>();
         }
-        VarDeclStmt * var_decl = new VarDeclStmt();
+        VarDeclNode * var_decl = new VarDeclNode();
         if ($2) {
             var_decl->id_list = *$2;
             delete $2;
@@ -283,7 +283,7 @@ var_declaration:
         if ($6) {
             std::reverse($6->begin(), $6->end());
             for (auto period : *$6) {
-                var_decl->period_list.emplace_back(std::unique_ptr<PeriodStmt>(period));
+                var_decl->period_list.emplace_back(std::unique_ptr<PeriodNode>(period));
             }
             delete $6;
         }
@@ -330,7 +330,7 @@ period_item:
         if ($2) {
             $$ = $2;
         } else {
-            $$ = new std::vector<PeriodStmt *>();
+            $$ = new std::vector<PeriodNode *>();
         }
         $$->emplace_back($1);
     };
@@ -345,7 +345,7 @@ period_list:
         if ($3) {
             $$ = $3;
         } else {
-            $$ = new std::vector<PeriodStmt *>();
+            $$ = new std::vector<PeriodNode *>();
         }
         $$->emplace_back($2);
     };
@@ -353,15 +353,15 @@ period_list:
 period:
     NUMBER DOT DOT NUMBER
     {
-        $$ = new PeriodStmt();
+        $$ = new PeriodNode();
         $$->start = $1;
         $$->end = $4;
     };
 
 * no : 2.8-2.9
 * rule  : subprogram_head -> PROCEDURE IDENTIFIER | PROCEDURE IDENTIFIER '(' parameter_list')' | FUNCTION IDENTIFIER ':' basic_type | FUNCTION IDENTIFIER '(' parameter_list')' ':' basic_type
-* node :  FuncHeadDeclStmt *
-* son  :  VarDeclStmt*
+* node :  FuncHeadDeclNode *
+* son  :  VarDeclNode*
 * error :
 *
 * TODO:unique_ptr
@@ -375,14 +375,14 @@ subprogram_head : PROCEDURE IDENTIFIER
 /*
 * no : 2.2
 * rule  : var_declaration -> idlist ':' type | var_declaration ';' idlist ':' type
-* node :  std::vector<VarDeclStmt *> *
+* node :  std::vector<VarDeclNode *> *
 * son :
 * TODO: data_type中period list； unique_ptr
 */
 var_declaration: idlist ':' type
         {
-            $$ = new std::vector<VarDeclStmt *>();
-            VarDeclStmt * var_decl = new VarDeclStmt();
+            $$ = new std::vector<VarDeclNode *>();
+            VarDeclNode * var_decl = new VarDeclNode();
             var_decl->id = idlist;
             var_decl->
         }

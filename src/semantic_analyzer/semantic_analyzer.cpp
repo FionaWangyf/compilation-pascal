@@ -205,28 +205,28 @@ SymbolTable& SemanticAnalyzer::getSymbolTable() {
 }
 
 // Visitor方法实现
-void SemanticAnalyzer::visit(PrimaryExprStmt &stmt) {
-    if (stmt.type == PrimaryExprStmt::PrimaryExprType::Value) {
+void SemanticAnalyzer::visit(PrimaryExprNode &stmt) {
+    if (stmt.type == PrimaryExprNode::PrimaryExprType::Value) {
         stmt.value->accept(*this);
         setType(&stmt, getType(stmt.value.get()));
-    } else if (stmt.type == PrimaryExprStmt::PrimaryExprType::Parentheses) {
+    } else if (stmt.type == PrimaryExprNode::PrimaryExprType::Parentheses) {
         stmt.expr->accept(*this);
         setType(&stmt, getType(stmt.expr.get()));
     }
 }
 
-void SemanticAnalyzer::visit(ValueStmt &stmt) {
+void SemanticAnalyzer::visit(ValueNode &stmt) {
     switch (stmt.type) {
-        case ValueStmt::ValueType::Number:
+        case ValueNode::ValueType::Number:
             stmt.number->accept(*this);
             break;
-        case ValueStmt::ValueType::Str:
+        case ValueNode::ValueType::Str:
             stmt.str->accept(*this);
             break;
-        case ValueStmt::ValueType::LVal:
+        case ValueNode::ValueType::LVal:
             stmt.lval->accept(*this);
             break;
-        case ValueStmt::ValueType::FuncCall:
+        case ValueNode::ValueType::FuncCall:
             stmt.func_call->accept(*this);
             break;
         default: break;
@@ -243,14 +243,14 @@ void SemanticAnalyzer::visit(ValueStmt &stmt) {
 
 
 
-void SemanticAnalyzer::visit(PeriodStmt &stmt) {
+void SemanticAnalyzer::visit(PeriodNode &stmt) {
     // 不需要额外的语义检查
 }
 
-void SemanticAnalyzer::visit(ConstDeclStmt &stmt) {
+void SemanticAnalyzer::visit(ConstDeclNode &stmt) {
     for (auto& pair : stmt.pairs) {
         const std::string& name = pair.first;
-        ValueStmt* value = pair.second.get();
+        ValueNode* value = pair.second.get();
         
         // 检查常量名是否已在当前作用域中定义
         if (symbolTable.lookupSymbolInCurrentScope(name)) {
@@ -263,8 +263,8 @@ void SemanticAnalyzer::visit(ConstDeclStmt &stmt) {
         
         // 确定常量类型并插入符号表
         std::string dataType;
-        if (value->type == ValueStmt::ValueType::Number) {
-            NumberStmt* num = value->number.get();
+        if (value->type == ValueNode::ValueType::Number) {
+            NumberNode* num = value->number.get();
             if (num->is_real) {
                 dataType = "float";
             } else if (num->is_char) {
@@ -272,7 +272,7 @@ void SemanticAnalyzer::visit(ConstDeclStmt &stmt) {
             } else {
                 dataType = "int";
             }
-        } else if (value->type == ValueStmt::ValueType::Str) {
+        } else if (value->type == ValueNode::ValueType::Str) {
             dataType = "string";
         }
         
@@ -285,7 +285,7 @@ void SemanticAnalyzer::visit(ConstDeclStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(VarDeclStmt &stmt) {
+void SemanticAnalyzer::visit(VarDeclNode &stmt) {
     // 处理变量声明
     std::string dataType = basicTypeToString(stmt.basic_type);
     
@@ -313,7 +313,7 @@ void SemanticAnalyzer::visit(VarDeclStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(FuncHeadDeclStmt &stmt) {
+void SemanticAnalyzer::visit(FuncHeadDeclNode &stmt) {
     // 处理函数头声明
     std::string returnType = basicTypeToString(stmt.ret_type);
     currentFunction = stmt.func_name;
@@ -348,7 +348,7 @@ void SemanticAnalyzer::visit(FuncHeadDeclStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(FuncBodyDeclStmt &stmt) {
+void SemanticAnalyzer::visit(FuncBodyDeclNode &stmt) {
     // 处理函数体
     
     // 处理常量声明
@@ -372,7 +372,7 @@ void SemanticAnalyzer::visit(FuncBodyDeclStmt &stmt) {
     currentReturnType = "";
 }
 
-void SemanticAnalyzer::visit(FuncDeclStmt &stmt) {
+void SemanticAnalyzer::visit(FuncDeclNode &stmt) {
     // 处理函数声明（头部+体）
     if (stmt.header) {
         stmt.header->accept(*this);
@@ -383,7 +383,7 @@ void SemanticAnalyzer::visit(FuncDeclStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(AssignStmt &stmt) {
+void SemanticAnalyzer::visit(AssignmentNode &stmt) {
     // 处理赋值语句
     
     // 处理左值
@@ -403,7 +403,7 @@ void SemanticAnalyzer::visit(AssignStmt &stmt) {
     // 这里可以添加更详细的类型检查
 }
 
-void SemanticAnalyzer::visit(IfStmt &stmt) {
+void SemanticAnalyzer::visit(IfNode &stmt) {
     // 处理条件表达式
     stmt.expr->accept(*this);
     
@@ -418,7 +418,7 @@ void SemanticAnalyzer::visit(IfStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(ForStmt &stmt) {
+void SemanticAnalyzer::visit(ForNode &stmt) {
     // 处理for循环
     
     // 检查循环变量
@@ -450,7 +450,7 @@ void SemanticAnalyzer::visit(ForStmt &stmt) {
     inLoop = oldInLoop;
 }
 
-void SemanticAnalyzer::visit(WhileStmt &stmt) {
+void SemanticAnalyzer::visit(WhileNode &stmt) {
     // 处理while循环
     
     // 处理条件表达式
@@ -469,22 +469,22 @@ void SemanticAnalyzer::visit(WhileStmt &stmt) {
     inLoop = oldInLoop;
 }
 
-void SemanticAnalyzer::visit(ReadFuncStmt &stmt) {
+void SemanticAnalyzer::visit(ReadFuncNode &stmt) {
     // 处理read函数调用
     
     // 检查所有参数是否是可写的左值
-    for (const auto& lvalStmt : stmt.lval) {
-        lvalStmt->accept(*this);
+    for (const auto& lValueNode : stmt.lval) {
+        lValueNode->accept(*this);
         
         // 检查左值是否可赋值（非常量）
-        SymbolEntry* entry = symbolTable.lookupSymbol(lvalStmt->id);
+        SymbolEntry* entry = symbolTable.lookupSymbol(lValueNode->id);
         if (entry && entry->type == SymbolType::CONSTANT) {
-            addError("Cannot read into constant: " + lvalStmt->id);
+            addError("Cannot read into constant: " + lValueNode->id);
         }
     }
 }
 
-void SemanticAnalyzer::visit(WriteFuncStmt &stmt) {
+void SemanticAnalyzer::visit(WriteFuncNode &stmt) {
     // 处理write函数调用
     
     // 处理所有表达式参数
@@ -493,26 +493,26 @@ void SemanticAnalyzer::visit(WriteFuncStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(BreakStmt &stmt) {
+void SemanticAnalyzer::visit(BreakNode &stmt) {
     // 处理break语句
     if (!inLoop) {
         addError("Break statement outside of loop");
     }
 }
 
-void SemanticAnalyzer::visit(ContinueStmt &stmt) {
+void SemanticAnalyzer::visit(ContinueNode &stmt) {
     // 处理continue语句
     if (!inLoop) {
         addError("Continue statement outside of loop");
     }
 }
 
-void SemanticAnalyzer::visit(ProgramHeadStmt &stmt) {
+void SemanticAnalyzer::visit(ProgramHeadNode &stmt) {
     // 处理程序头
     // 不需要额外的语义检查
 }
 
-void SemanticAnalyzer::visit(ProgramBodyStmt &stmt) {
+void SemanticAnalyzer::visit(ProgramBodyNode &stmt) {
     // 处理程序体
     
     // 处理常量声明
@@ -536,7 +536,7 @@ void SemanticAnalyzer::visit(ProgramBodyStmt &stmt) {
     }
 }
 
-void SemanticAnalyzer::visit(ProgramStmt &stmt) {
+void SemanticAnalyzer::visit(ProgramNode &stmt) {
     // 处理程序声明（头部+体）
     if (stmt.head) {
         stmt.head->accept(*this);
@@ -549,16 +549,16 @@ void SemanticAnalyzer::visit(ProgramStmt &stmt) {
 
 
 
-void SemanticAnalyzer::visit(NumberStmt &stmt) {
+void SemanticAnalyzer::visit(NumberNode &stmt) {
     std::string t = stmt.is_real ? "float" : (stmt.is_char ? "char" : "int");
     setType(&stmt, t);
 }
 
-void SemanticAnalyzer::visit(StrStmt &stmt) {
+void SemanticAnalyzer::visit(StringNode &stmt) {
     setType(&stmt, "string");
 }
 
-void SemanticAnalyzer::visit(LValStmt &stmt) {
+void SemanticAnalyzer::visit(LValueNode &stmt) {
     // 原有声明检查不变
     SymbolEntry* entry = symbolTable.lookupSymbol(stmt.id);
     if (!entry) {
@@ -588,7 +588,7 @@ void SemanticAnalyzer::visit(LValStmt &stmt) {
         }
     }
 }
-void SemanticAnalyzer::visit(FuncCallStmt &stmt) {
+void SemanticAnalyzer::visit(FuncCallNode &stmt) {
     SymbolEntry* entry = symbolTable.lookupSymbol(stmt.id);
     if (!entry || entry->type != SymbolType::FUNCTION) {
         addError("Undefined function: " + stmt.id);
@@ -612,18 +612,18 @@ void SemanticAnalyzer::visit(FuncCallStmt &stmt) {
 }
 
 // 一元表达式
-void SemanticAnalyzer::visit(UnaryExprStmt &stmt) {
+void SemanticAnalyzer::visit(UnaryExprNode &stmt) {
     stmt.primary_expr->accept(*this);
     std::string cur = getType(stmt.primary_expr.get());
     for (auto op : stmt.types) {
-        std::string opStr = (op==UnaryExprStmt::UnaryExprType::Minus)?"-":"not";
+        std::string opStr = (op==UnaryExprNode::UnaryExprType::Minus)?"-":"not";
         cur = getUnaryExprType(cur, opStr);
     }
     setType(&stmt, cur);
 }
 
 // 乘法表达式
-void SemanticAnalyzer::visit(MulExprStmt &stmt)
+void SemanticAnalyzer::visit(MulExprNode &stmt)
 {
     /* 1. 递归推断所有因子类型 */
     for (auto &term : stmt.terms)
@@ -634,23 +634,23 @@ void SemanticAnalyzer::visit(MulExprStmt &stmt)
 
     for (size_t i = 1; i < stmt.terms.size(); ++i) {
         std::string rhs = getType(stmt.terms[i].unary_expr.get());
-        MulExprStmt::MulExprType op = stmt.terms[i].type;
+        MulExprNode::MulExprType op = stmt.terms[i].type;
 
         switch (op) {
-        case MulExprStmt::MulExprType::Mul:          // *   —— 与加法规则一致
-        case MulExprStmt::MulExprType::Mod:          // mod —— 结果必为 int
+        case MulExprNode::MulExprType::Mul:          // *   —— 与加法规则一致
+        case MulExprNode::MulExprType::Mod:          // mod —— 结果必为 int
             cur = (cur == "float" || rhs == "float") ? "float" : "int";
             break;
 
-        case MulExprStmt::MulExprType::Div:          // /   —— **关键修改**
+        case MulExprNode::MulExprType::Div:          // /   —— **关键修改**
             if (cur == "float" || rhs == "float")
                 cur = "float";          // 只要有 float → float
             else
                 cur = "int";            // 两边都是 int → int
             break;
 
-        case MulExprStmt::MulExprType::And:
-        case MulExprStmt::MulExprType::AndThen:
+        case MulExprNode::MulExprType::And:
+        case MulExprNode::MulExprType::AndThen:
             cur = "bool";
             break;
 
@@ -665,21 +665,21 @@ void SemanticAnalyzer::visit(MulExprStmt &stmt)
 
 
 // 加法表达式
-void SemanticAnalyzer::visit(AddExprStmt &stmt) {
+void SemanticAnalyzer::visit(AddExprNode &stmt) {
     for (auto& term : stmt.terms) term.mul_expr->accept(*this);
 
     std::string cur = getType(stmt.terms[0].mul_expr.get());
     for (size_t i=1;i<stmt.terms.size();++i) {
         std::string right = getType(stmt.terms[i].mul_expr.get());
-        std::string op = (stmt.terms[i].type==AddExprStmt::AddExprType::Plus)?"+":
-                         (stmt.terms[i].type==AddExprStmt::AddExprType::Minus)?"-":"or";
+        std::string op = (stmt.terms[i].type==AddExprNode::AddExprType::Plus)?"+":
+                         (stmt.terms[i].type==AddExprNode::AddExprType::Minus)?"-":"or";
         cur = getBinaryExprType(cur,right,op);
     }
     setType(&stmt, cur);
 }
 
 // 关系表达式
-void SemanticAnalyzer::visit(RelExprStmt &stmt) {
+void SemanticAnalyzer::visit(RelExprNode &stmt) {
     for (auto& term : stmt.terms) term.add_expr->accept(*this);
 
     std::string cur = getType(stmt.terms[0].add_expr.get());
@@ -687,12 +687,12 @@ void SemanticAnalyzer::visit(RelExprStmt &stmt) {
         std::string right = getType(stmt.terms[i].add_expr.get());
         std::string op;
         switch(stmt.terms[i].type){
-            case RelExprStmt::RelExprType::Equal:        op="==";break;
-            case RelExprStmt::RelExprType::NotEqual:     op="!=";break;
-            case RelExprStmt::RelExprType::Less:         op="<"; break;
-            case RelExprStmt::RelExprType::LessEqual:    op="<=";break;
-            case RelExprStmt::RelExprType::Greater:      op=">"; break;
-            case RelExprStmt::RelExprType::GreaterEqual: op=">=";break;
+            case RelExprNode::RelExprType::Equal:        op="==";break;
+            case RelExprNode::RelExprType::NotEqual:     op="!=";break;
+            case RelExprNode::RelExprType::Less:         op="<"; break;
+            case RelExprNode::RelExprType::LessEqual:    op="<=";break;
+            case RelExprNode::RelExprType::Greater:      op=">"; break;
+            case RelExprNode::RelExprType::GreaterEqual: op=">=";break;
             default: op="==";
         }
         cur = getBinaryExprType(cur,right,op);
@@ -701,7 +701,7 @@ void SemanticAnalyzer::visit(RelExprStmt &stmt) {
 }
 
 // 顶层表达式
-void SemanticAnalyzer::visit(ExprStmt &stmt) {
+void SemanticAnalyzer::visit(ExprNode &stmt) {
     if (stmt.rel_expr) {
         stmt.rel_expr->accept(*this);
         setType(&stmt, getType(stmt.rel_expr.get()));
