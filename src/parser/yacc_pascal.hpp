@@ -113,7 +113,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 367 "yacc_pascal.y"
+#line 398 "yacc_pascal.y"
 
     /* 程序结构相关类型 */
     ProgramNode *                                   program_struct;   /* 整个程序的AST节点 */

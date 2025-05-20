@@ -199,43 +199,74 @@ namespace {
     }
 
     // 获取错误位置函数，生成可视化的错误位置显示
-    void locateErrorPosition(const char* code_str, YYLTYPE *llocp, std::string &error_note, std::string &msg, bool have_expected) {
+    void locateErrorPosition(const char* code_str, YYLTYPE *llocp, 
+                        std::string &error_note, std::string &msg, 
+                        bool have_expected) {
         std::string code(code_str);
         std::istringstream stream(code);
         std::string line;
         int current_line = 1;
-        msg += "\t";
+        int error_line = llocp->first_line;
+        int context_lines = 2; // 显示错误行前后的行数
         
-        while (std::getline(stream, line)) {
-            if (current_line == llocp->first_line) {
-                // 打印到错误开始之前的部分
-                msg += line.substr(0, llocp->first_column);
-                // 错误部分使用红色高亮显示
-                error_note = line.substr(llocp->first_column, llocp->last_column - llocp->first_column + 1);
-                msg += "\033[31m";
-                msg += error_note;
-                msg += "\033[0m";
-                // 打印错误之后的部分
-                if (llocp->last_column < line.size()) {
-                    msg += line.substr(llocp->last_column + 1);
-                }
-                // 添加箭头
-                msg += "\n\t";
-                if (have_expected) {
-                    for (int i = 0; i < llocp->first_column; ++i) {
-                        msg += " ";
-                    }
-                    for (int i = llocp->first_column; i <= llocp->last_column; ++i) {
-                        msg += "\033[1;37m^\033[0m";
-                    }
-                } else {
-                    for (int i = 0; i < llocp->first_column; ++i) {
-                        msg += "\033[1;37m^\033[0m";
-                    }
-                }
-                break; // 已找到错误行，跳出循环
+        // 收集上下文行
+        std::vector<std::string> context;
+        while (std::getline(stream, line) && 
+            current_line <= error_line + context_lines) {
+            if (current_line >= error_line - context_lines) {
+                context.push_back(line);
             }
-            ++current_line;
+            current_line++;
+        }
+        
+        // 计算行号宽度（用于对齐）
+        int line_num_width = std::to_string(error_line + context_lines).length();
+        
+        // 显示上下文和错误行
+        current_line = error_line - context_lines;
+        for (size_t i = 0; i < context.size(); i++) {
+            int line_num = current_line + i;
+            if (line_num < 1) continue; // 跳过不存在的行
+            
+            std::string line_str = context[i];
+            std::string line_num_str = std::to_string(line_num);
+            // 补齐行号前缀空格，保持对齐
+            std::string padding(line_num_width - line_num_str.length(), ' ');
+            
+            if (line_num == error_line) {
+                // 错误行
+                msg += "\n\033[1;37m" + padding + line_num_str + " │ \033[0m";
+                
+                // 错误前部分
+                msg += line_str.substr(0, llocp->first_column);
+                
+                // 错误部分
+                error_note = line_str.substr(llocp->first_column, 
+                                llocp->last_column - llocp->first_column + 1);
+                msg += "\033[41;97m" + error_note + "\033[0m"; // 白字红底
+                
+                // 错误后部分
+                if (llocp->last_column < line_str.size()) {
+                    msg += line_str.substr(llocp->last_column + 1);
+                }
+                
+                // 添加错误指示线
+                msg += "\n\033[90m" + std::string(line_num_width, ' ') + " │ \033[0m";
+                for (int i = 0; i < llocp->first_column; ++i) {
+                    msg += " ";
+                }
+                std::string indicator(llocp->last_column - llocp->first_column + 1, '~');
+                msg += "\033[1;31m" + indicator + "\033[0m";
+                
+                // 添加可能的错误说明
+                if (have_expected) {
+                    msg += " \033[1;31m此处语法不正确\033[0m";
+                }
+            } else {
+                // 上下文行
+                msg += "\n\033[90m" + padding + line_num_str + " │ " 
+                    + line_str + "\033[0m";
+            }
         }
     }
 }
@@ -1963,58 +1994,72 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan
 }
 
 // 详细语法错误报告函数 - 为用户提供更直观的错误信息
-static int yyreport_syntax_error(const yypcontext_t *ctx, const char * code_str, ProgramNode ** program, void * scanner)
-{
-   syntaxErrorFlag = true;  // 设置全局错误标志
-   int res = 0;  // 初始化返回值
-   std::ostringstream buf;  // 创建字符串流用于构建错误消息
-   
-   // 构建错误位置信息（高亮显示文件名和行号）
-   buf << "\033[1;37m" << SETTINGS.input_file << ":" << yypcontext_location(ctx)->first_line 
-       << ":" << yypcontext_location(ctx)->first_column + 1 << ":\033[0m";
-   buf << " \033[1;31m" << "Syntax error:" << "\033[0m";  // 添加红色的"Syntax error:"标记
-   bool have_expected = false;  // 标记是否有期望的token信息
-   
-   // 报告此处期望的token（最多显示5个）
-   {
-       enum { TOKENMAX = 5 };  // 最多显示5个期望的token
-       yysymbol_kind_t expected[TOKENMAX];  // 存储期望的token类型
-       int n = yypcontext_expected_tokens(ctx, expected, TOKENMAX);  // 获取期望的token
-       
-       if (n < 0) {  // 如果获取失败
-           // 向yyparse传递错误
-           res = n;  // 设置返回值表示错误
-       } else {  // 成功获取期望的token
-           for (int i = 0; i < n; ++i)  // 遍历所有期望的token
-               buf << (i == 0 ? " expected" : " or") << " " << yysymbol_name(expected[i]);  // 格式化显示
-           
-           if (n > 0)  // 如果有期望的token
-               have_expected = true;  // 设置标志
-       }
-   }
-   
-   // 报告意外的token（实际遇到的token）
-   {
-       yysymbol_kind_t lookahead = yypcontext_token(ctx);  // 获取当前查看的token
-       if (lookahead != YYSYMBOL_YYEMPTY)  // 如果不是空token
-           buf << " before " << yysymbol_name(lookahead);  // 添加到错误信息中
-   }
-   
-   std::string error_note;  // 存储错误部分的文本
-   std::string msg;  // 存储完整的错误消息
-   
-   // 调用辅助函数定位错误在源代码中的位置，并生成可视化的错误显示
-   locateErrorPosition(code_str, yypcontext_location(ctx), error_note, msg, have_expected);
-   
-   // 如果有期望的token，添加"但发现了xxx"的信息
-   if (have_expected)
-       buf << " but found \"" << error_note << "\"";
-   
-   // 输出错误信息
-   std::cerr << buf.str() << std::endl;  // 输出基本错误信息
-   std::cerr << msg << std::endl;  // 输出错误位置的可视化显示
-   
-   return res;  // 返回结果
+static int yyreport_syntax_error(const yypcontext_t *ctx, 
+                                const char *code_str, 
+                                ProgramNode **program, void *scanner) {
+    syntaxErrorFlag = true;
+    int res = 0;
+    std::ostringstream buf;
+    
+    // 修改后的错误消息头部
+    buf << "\n\033[1;97;41m PASCAL 语法错误 \033[0m\n";
+    buf << "\033[1;36m文件:\033[0m " << SETTINGS.input_file << "\n";
+    buf << "\033[1;36m位置:\033[0m 第" 
+        << yypcontext_location(ctx)->first_line << "行 第" 
+        << yypcontext_location(ctx)->first_column + 1 << "列\n";
+    
+    // 报告期望的token
+    bool have_expected = false;
+    {
+        enum { TOKENMAX = 5 };
+        yysymbol_kind_t expected[TOKENMAX];
+        int n = yypcontext_expected_tokens(ctx, expected, TOKENMAX);
+        
+        if (n < 0) {
+            res = n;
+        } else {
+            buf << "\033[1;36m期望:\033[0m ";
+            for (int i = 0; i < n; ++i) {
+                buf << (i == 0 ? "" : " 或 ") 
+                    << "\033[1;33m" << yysymbol_name(expected[i]) << "\033[0m";
+            }
+            if (n > 0)
+                have_expected = true;
+        }
+    }
+    
+    // 报告实际token
+    {
+        yysymbol_kind_t lookahead = yypcontext_token(ctx);
+        if (lookahead != YYSYMBOL_YYEMPTY) {
+            buf << "\n\033[1;36m实际:\033[0m \033[1;31m" 
+                << yysymbol_name(lookahead) << "\033[0m";
+        }
+    }
+    
+    std::string error_note;
+    std::string msg = "\n";
+    
+    // 使用修改后的错误位置可视化
+    locateErrorPosition(code_str, yypcontext_location(ctx), 
+                       error_note, msg, have_expected);
+    
+    if (have_expected)
+        buf << "\n\033[1;36m提示:\033[0m 需要 \"" << error_note 
+            << "\" 但找到了其他内容";
+    
+    // 输出错误信息
+    std::cerr << buf.str() << std::endl;
+    std::cerr << msg << std::endl;
+    std::cerr << "\n\033[1;36m建议:\033[0m 检查代码语法或参考Pascal语言规范\n" 
+              << std::endl;
+    
+    return res;
+}
+
+// 获取语法错误标志的当前状态
+bool getSyntaxErrorFlag() {
+    return syntaxErrorFlag;
 }
 
 // 主解析函数 - 语法分析的入口点，初始化词法分析器并执行解析

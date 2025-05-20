@@ -15,6 +15,10 @@
 #include "code_generator/code_generator.hpp"
 #include "parser/yacc_pascal.hpp"
 
+extern bool getSyntaxErrorFlag(); // 声明访问语法错误标志的函数
+extern void resetSyntaxError();   // 声明重置语法错误标志的函数
+
+
 int code_parse(const char *code, ProgramNode **program_stmt);
 
 void init_env()

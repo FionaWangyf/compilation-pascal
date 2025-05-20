@@ -11,7 +11,10 @@
 #include "common/log/log.hpp"
 #include "ASTPrettyPrinter.hpp"
 
+// 声明外部函数
 extern int code_parse(const char *code_str, ProgramNode **program);
+extern bool getSyntaxErrorFlag(); // 获取语法错误标志
+extern void resetSyntaxError();   // 重置语法错误标志
 
 void single_point_test(const std::string folderPath,
                        std::vector<std::string> files) {
@@ -28,15 +31,20 @@ void single_point_test(const std::string folderPath,
   ss << ifs.rdbuf();
   std::string content = ss.str();
   LOG_INFO("File: %s", fileName.c_str());
+  
   ProgramNode *program = nullptr;
+  resetSyntaxError(); // 重置语法错误标志
   code_parse(content.c_str(), &program);
 
   if (program == nullptr) {
-    LOG_FATAL("ERROR : Parsing failed.");
+    LOG_FATAL("ERROR : Parsing failed completely.");
+  } else if (getSyntaxErrorFlag()) {
+    LOG_ERROR("Syntax errors detected in file %s, not generating AST visualization.", fileName.c_str());
+    delete program; // 清理不完整的AST
   } else {
     LOG_INFO("File %s Parsing succeeded.", fileName.c_str());
     
-    // 使用新的AST打印器打印AST结构
+    // 只有在没有语法错误时才打印AST
     ASTPrettyPrinter printer;
     std::string astOutput = printer.printProgram(program);
     std::cout << astOutput << std::endl;
@@ -53,20 +61,26 @@ void batch_test(int beginIndex, const std::string folderPath,
     std::stringstream ss;
     ss << ifs.rdbuf();
     std::string content = ss.str();
+    
     ProgramNode *program = nullptr;
+    resetSyntaxError(); // 重置语法错误标志
     code_parse(content.c_str(), &program);
+    
     if (program == nullptr) {
-      LOG_FATAL("ERROR : Parsing failed.");
-      break;
+      LOG_ERROR("ERROR : File %s: Parsing failed completely.", fileName.c_str());
+    } else if (getSyntaxErrorFlag()) {
+      LOG_ERROR("File %s: Syntax errors detected, not generating AST visualization.", fileName.c_str());
+      delete program; // 清理不完整的AST
     } else {
       LOG_INFO("File %s Parsing succeeded.", fileName.c_str());
       
-      // 使用新的AST打印器打印AST结构
+      // 只有在没有语法错误时才打印AST
       ASTPrettyPrinter printer;
       std::string astOutput = printer.printProgram(program);
       std::cout << astOutput << std::endl;
+      
+      delete program;
     }
-    delete program;
   }
 }
 
