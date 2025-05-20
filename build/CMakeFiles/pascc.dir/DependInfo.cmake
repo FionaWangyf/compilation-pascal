@@ -10,7 +10,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/src/src/common/setting/settings.cpp" "/src/build/CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"
   "/src/src/main.cpp" "/src/build/CMakeFiles/pascc.dir/src/main.cpp.o"
   "/src/src/parser/lexer.cpp" "/src/build/CMakeFiles/pascc.dir/src/parser/lexer.cpp.o"
-  "/src/src/parser/yacc_pascal.cpp" "/src/build/CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o"
+  "/src/src/parser/parser.cpp" "/src/build/CMakeFiles/pascc.dir/src/parser/parser.cpp.o"
   "/src/src/semantic_analyzer/semantic_analyzer.cpp" "/src/build/CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o"
   "/src/src/token/token.cpp" "/src/build/CMakeFiles/pascc.dir/src/token/token.cpp.o"
   )

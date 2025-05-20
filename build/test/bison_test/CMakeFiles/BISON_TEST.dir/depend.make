@@ -15,14 +15,14 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: ../src/ast/ast.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: ../src/common/log/log.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: ../src/parser/lexer.cpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: ../src/parser/yacc_pascal.hpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: ../src/parser/parser.hpp
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/ast/ast.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/common/log/log.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/common/setting/settings.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/lexer.hpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.cpp
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.hpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o: ../src/ast/ast.hpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o: ../src/common/log/log.hpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o: ../src/common/setting/settings.hpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o: ../src/parser/lexer.hpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o: ../src/parser/parser.cpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o: ../src/parser/parser.hpp
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../src/ast/ast.hpp
 test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o: ../src/common/log/log.hpp

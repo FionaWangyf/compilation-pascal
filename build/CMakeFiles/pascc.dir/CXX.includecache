@@ -221,8 +221,8 @@ semantic_analyzer/semantic_analyzer.hpp
 /src/src/semantic_analyzer/semantic_analyzer.hpp
 code_generator/code_generator.hpp
 /src/src/code_generator/code_generator.hpp
-parser/yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser/parser.hpp
+/src/src/parser/parser.hpp
 
 /src/src/parser/lexer.cpp
 stdio.h
@@ -243,8 +243,8 @@ ast/ast.hpp
 /src/src/parser/ast/ast.hpp
 common/log/log.hpp
 /src/src/parser/common/log/log.hpp
-yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser.hpp
+/src/src/parser/parser.hpp
 unistd.h
 -
 
@@ -262,7 +262,7 @@ inttypes.h
 unistd.h
 -
 
-/src/src/parser/yacc_pascal.cpp
+/src/src/parser/parser.cpp
 memory
 -
 sstream
@@ -285,12 +285,12 @@ common/setting/settings.hpp
 /src/src/parser/common/setting/settings.hpp
 ast/ast.hpp
 /src/src/parser/ast/ast.hpp
-yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser.hpp
+/src/src/parser/parser.hpp
 lexer.hpp
 /src/src/parser/lexer.hpp
-yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser.hpp
+/src/src/parser/parser.hpp
 limits.h
 -
 stdint.h
@@ -312,7 +312,7 @@ stdlib.h
 stdio.h
 -
 
-/src/src/parser/yacc_pascal.hpp
+/src/src/parser/parser.hpp
 
 /src/src/semantic_analyzer/semantic_analyzer.cpp
 semantic_analyzer/semantic_analyzer.hpp

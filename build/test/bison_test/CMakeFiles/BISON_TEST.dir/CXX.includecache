@@ -105,8 +105,8 @@ ast/ast.hpp
 /src/src/parser/ast/ast.hpp
 common/log/log.hpp
 /src/src/parser/common/log/log.hpp
-yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser.hpp
+/src/src/parser/parser.hpp
 unistd.h
 -
 
@@ -124,7 +124,7 @@ inttypes.h
 unistd.h
 -
 
-/src/src/parser/yacc_pascal.cpp
+/src/src/parser/parser.cpp
 memory
 -
 sstream
@@ -147,12 +147,12 @@ common/setting/settings.hpp
 /src/src/parser/common/setting/settings.hpp
 ast/ast.hpp
 /src/src/parser/ast/ast.hpp
-yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser.hpp
+/src/src/parser/parser.hpp
 lexer.hpp
 /src/src/parser/lexer.hpp
-yacc_pascal.hpp
-/src/src/parser/yacc_pascal.hpp
+parser.hpp
+/src/src/parser/parser.hpp
 limits.h
 -
 stdint.h
@@ -174,7 +174,7 @@ stdlib.h
 stdio.h
 -
 
-/src/src/parser/yacc_pascal.hpp
+/src/src/parser/parser.hpp
 
 /src/test/bison_test/ASTPrettyPrinter.hpp
 ast/ast.hpp

@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/src/src/common/log/log.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o"
   "/src/src/common/setting/settings.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
   "/src/src/parser/lexer.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o"
-  "/src/src/parser/yacc_pascal.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o"
+  "/src/src/parser/parser.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o"
   "/src/test/bison_test/main.cpp" "/src/build/test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

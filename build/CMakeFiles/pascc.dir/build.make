@@ -135,18 +135,18 @@ CMakeFiles/pascc.dir/src/parser/lexer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/parser/lexer.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/lexer.cpp -o CMakeFiles/pascc.dir/src/parser/lexer.cpp.s
 
-CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: CMakeFiles/pascc.dir/flags.make
-CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o -c /src/src/parser/yacc_pascal.cpp
+CMakeFiles/pascc.dir/src/parser/parser.cpp.o: CMakeFiles/pascc.dir/flags.make
+CMakeFiles/pascc.dir/src/parser/parser.cpp.o: ../src/parser/parser.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/pascc.dir/src/parser/parser.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/pascc.dir/src/parser/parser.cpp.o -c /src/src/parser/parser.cpp
 
-CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/parser/yacc_pascal.cpp > CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i
+CMakeFiles/pascc.dir/src/parser/parser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/pascc.dir/src/parser/parser.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/parser/parser.cpp > CMakeFiles/pascc.dir/src/parser/parser.cpp.i
 
-CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/yacc_pascal.cpp -o CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s
+CMakeFiles/pascc.dir/src/parser/parser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/pascc.dir/src/parser/parser.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/parser.cpp -o CMakeFiles/pascc.dir/src/parser/parser.cpp.s
 
 CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o: CMakeFiles/pascc.dir/flags.make
 CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o: ../src/semantic_analyzer/semantic_analyzer.cpp
@@ -182,7 +182,7 @@ pascc_OBJECTS = \
 "CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o" \
 "CMakeFiles/pascc.dir/src/main.cpp.o" \
 "CMakeFiles/pascc.dir/src/parser/lexer.cpp.o" \
-"CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o" \
+"CMakeFiles/pascc.dir/src/parser/parser.cpp.o" \
 "CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o" \
 "CMakeFiles/pascc.dir/src/token/token.cpp.o"
 
@@ -195,7 +195,7 @@ pascc_EXTERNAL_OBJECTS =
 ../bin/pascc: CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/main.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/parser/lexer.cpp.o
-../bin/pascc: CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o
+../bin/pascc: CMakeFiles/pascc.dir/src/parser/parser.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/src/token/token.cpp.o
 ../bin/pascc: CMakeFiles/pascc.dir/build.make

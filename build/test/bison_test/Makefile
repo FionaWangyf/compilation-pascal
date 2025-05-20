@@ -244,32 +244,32 @@ __/__/src/parser/lexer.cpp.s:
 	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.s
 .PHONY : __/__/src/parser/lexer.cpp.s
 
-__/__/src/parser/yacc_pascal.o: __/__/src/parser/yacc_pascal.cpp.o
+__/__/src/parser/parser.o: __/__/src/parser/parser.cpp.o
 
-.PHONY : __/__/src/parser/yacc_pascal.o
+.PHONY : __/__/src/parser/parser.o
 
 # target to build an object file
-__/__/src/parser/yacc_pascal.cpp.o:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o
-.PHONY : __/__/src/parser/yacc_pascal.cpp.o
+__/__/src/parser/parser.cpp.o:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.o
+.PHONY : __/__/src/parser/parser.cpp.o
 
-__/__/src/parser/yacc_pascal.i: __/__/src/parser/yacc_pascal.cpp.i
+__/__/src/parser/parser.i: __/__/src/parser/parser.cpp.i
 
-.PHONY : __/__/src/parser/yacc_pascal.i
+.PHONY : __/__/src/parser/parser.i
 
 # target to preprocess a source file
-__/__/src/parser/yacc_pascal.cpp.i:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.i
-.PHONY : __/__/src/parser/yacc_pascal.cpp.i
+__/__/src/parser/parser.cpp.i:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.i
+.PHONY : __/__/src/parser/parser.cpp.i
 
-__/__/src/parser/yacc_pascal.s: __/__/src/parser/yacc_pascal.cpp.s
+__/__/src/parser/parser.s: __/__/src/parser/parser.cpp.s
 
-.PHONY : __/__/src/parser/yacc_pascal.s
+.PHONY : __/__/src/parser/parser.s
 
 # target to generate assembly for a file
-__/__/src/parser/yacc_pascal.cpp.s:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.s
-.PHONY : __/__/src/parser/yacc_pascal.cpp.s
+__/__/src/parser/parser.cpp.s:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/parser.cpp.s
+.PHONY : __/__/src/parser/parser.cpp.s
 
 main.o: main.cpp.o
 
@@ -320,9 +320,9 @@ help:
 	@echo "... __/__/src/parser/lexer.o"
 	@echo "... __/__/src/parser/lexer.i"
 	@echo "... __/__/src/parser/lexer.s"
-	@echo "... __/__/src/parser/yacc_pascal.o"
-	@echo "... __/__/src/parser/yacc_pascal.i"
-	@echo "... __/__/src/parser/yacc_pascal.s"
+	@echo "... __/__/src/parser/parser.o"
+	@echo "... __/__/src/parser/parser.i"
+	@echo "... __/__/src/parser/parser.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

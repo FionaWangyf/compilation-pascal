@@ -21,7 +21,7 @@ set(LOG_SOURCE_FILES
 
 set(YACC_OUTPUTS
     ../../src/parser/lexer.cpp
-    ../../src/parser/yacc_pascal.cpp
+    ../../src/parser/parser.cpp
 )
 
 # 添加AST打印器的头文件

@@ -7,7 +7,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/pascc.dir/src/common/setting/settings.cpp.o"
   "CMakeFiles/pascc.dir/src/main.cpp.o"
   "CMakeFiles/pascc.dir/src/parser/lexer.cpp.o"
-  "CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o"
+  "CMakeFiles/pascc.dir/src/parser/parser.cpp.o"
   "CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o"
   "CMakeFiles/pascc.dir/src/token/token.cpp.o"
 )

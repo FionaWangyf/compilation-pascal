@@ -25,20 +25,20 @@ CMakeFiles/pascc.dir/src/main.cpp.o
  /src/src/common/log/log.hpp
  /src/src/common/setting/settings.hpp
  /src/src/main.cpp
- /src/src/parser/yacc_pascal.hpp
+ /src/src/parser/parser.hpp
  /src/src/semantic_analyzer/semantic_analyzer.hpp
 CMakeFiles/pascc.dir/src/parser/lexer.cpp.o
  ../src/ast/ast.hpp
  ../src/common/log/log.hpp
  /src/src/parser/lexer.cpp
- /src/src/parser/yacc_pascal.hpp
-CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o
+ /src/src/parser/parser.hpp
+CMakeFiles/pascc.dir/src/parser/parser.cpp.o
  ../src/ast/ast.hpp
  ../src/common/log/log.hpp
  ../src/common/setting/settings.hpp
  /src/src/parser/lexer.hpp
- /src/src/parser/yacc_pascal.cpp
- /src/src/parser/yacc_pascal.hpp
+ /src/src/parser/parser.cpp
+ /src/src/parser/parser.hpp
 CMakeFiles/pascc.dir/src/semantic_analyzer/semantic_analyzer.cpp.o
  ../src/ast/ast.hpp
  ../src/ast/visitor.hpp

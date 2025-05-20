@@ -13,7 +13,7 @@
 #include "common/setting/settings.hpp"
 #include "semantic_analyzer/semantic_analyzer.hpp"
 #include "code_generator/code_generator.hpp"
-#include "parser/yacc_pascal.hpp"
+#include "parser/parser.hpp"
 
 
 

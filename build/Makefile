@@ -309,32 +309,32 @@ src/parser/lexer.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lexer.cpp.s
 .PHONY : src/parser/lexer.cpp.s
 
-src/parser/yacc_pascal.o: src/parser/yacc_pascal.cpp.o
+src/parser/parser.o: src/parser/parser.cpp.o
 
-.PHONY : src/parser/yacc_pascal.o
+.PHONY : src/parser/parser.o
 
 # target to build an object file
-src/parser/yacc_pascal.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.o
-.PHONY : src/parser/yacc_pascal.cpp.o
+src/parser/parser.cpp.o:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/parser.cpp.o
+.PHONY : src/parser/parser.cpp.o
 
-src/parser/yacc_pascal.i: src/parser/yacc_pascal.cpp.i
+src/parser/parser.i: src/parser/parser.cpp.i
 
-.PHONY : src/parser/yacc_pascal.i
+.PHONY : src/parser/parser.i
 
 # target to preprocess a source file
-src/parser/yacc_pascal.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.i
-.PHONY : src/parser/yacc_pascal.cpp.i
+src/parser/parser.cpp.i:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/parser.cpp.i
+.PHONY : src/parser/parser.cpp.i
 
-src/parser/yacc_pascal.s: src/parser/yacc_pascal.cpp.s
+src/parser/parser.s: src/parser/parser.cpp.s
 
-.PHONY : src/parser/yacc_pascal.s
+.PHONY : src/parser/parser.s
 
 # target to generate assembly for a file
-src/parser/yacc_pascal.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/yacc_pascal.cpp.s
-.PHONY : src/parser/yacc_pascal.cpp.s
+src/parser/parser.cpp.s:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/parser.cpp.s
+.PHONY : src/parser/parser.cpp.s
 
 src/semantic_analyzer/semantic_analyzer.o: src/semantic_analyzer/semantic_analyzer.cpp.o
 
@@ -419,9 +419,9 @@ help:
 	@echo "... src/parser/lexer.o"
 	@echo "... src/parser/lexer.i"
 	@echo "... src/parser/lexer.s"
-	@echo "... src/parser/yacc_pascal.o"
-	@echo "... src/parser/yacc_pascal.i"
-	@echo "... src/parser/yacc_pascal.s"
+	@echo "... src/parser/parser.o"
+	@echo "... src/parser/parser.i"
+	@echo "... src/parser/parser.s"
 	@echo "... src/semantic_analyzer/semantic_analyzer.o"
 	@echo "... src/semantic_analyzer/semantic_analyzer.i"
 	@echo "... src/semantic_analyzer/semantic_analyzer.s"

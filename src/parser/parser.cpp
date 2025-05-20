@@ -82,7 +82,7 @@
 #include "common/log/log.hpp"//日志系统
 #include "common/setting/settings.hpp"//编译器设置
 #include "ast/ast.hpp"//抽象语法树定义
-#include "yacc_pascal.hpp"//bison生成的头文件
+#include "parser.hpp"//bison生成的头文件
 #include "lexer.hpp"//flex生成的头文件
 
 namespace {

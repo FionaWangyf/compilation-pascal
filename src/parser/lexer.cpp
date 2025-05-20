@@ -686,7 +686,7 @@ static const flex_int32_t yy_rule_can_match_eol[68] =
 
 #include "ast/ast.hpp"
 #include "common/log/log.hpp"
-#include "yacc_pascal.hpp"
+#include "parser.hpp"
 
 #define TABSIZE 4
 #ifndef register

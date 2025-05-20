@@ -40,7 +40,7 @@ while (0);
 
 #include "ast/ast.hpp"
 #include "common/log/log.hpp"
-#include "yacc_pascal.hpp"
+#include "parser.hpp"
 
 #define TABSIZE 4
 #ifndef register
