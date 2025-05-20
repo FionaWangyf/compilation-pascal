@@ -11,7 +11,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(AST_SOURCE_FILES
-    ../../src/ast/stmt.cpp
+    ../../src/ast/ast.cpp
 )
 
 set(LOG_SOURCE_FILES
@@ -20,7 +20,7 @@ set(LOG_SOURCE_FILES
 )
 
 set(YACC_OUTPUTS
-    ../../src/parser/lex_pascal.cpp
+    ../../src/parser/lexer.cpp
     ../../src/parser/yacc_pascal.cpp
 )
 

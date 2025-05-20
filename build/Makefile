@@ -147,32 +147,32 @@ BISON_TEST/fast:
 	$(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/build
 .PHONY : BISON_TEST/fast
 
-src/ast/stmt.o: src/ast/stmt.cpp.o
+src/ast/ast.o: src/ast/ast.cpp.o
 
-.PHONY : src/ast/stmt.o
+.PHONY : src/ast/ast.o
 
 # target to build an object file
-src/ast/stmt.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt.cpp.o
-.PHONY : src/ast/stmt.cpp.o
+src/ast/ast.cpp.o:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/ast.cpp.o
+.PHONY : src/ast/ast.cpp.o
 
-src/ast/stmt.i: src/ast/stmt.cpp.i
+src/ast/ast.i: src/ast/ast.cpp.i
 
-.PHONY : src/ast/stmt.i
+.PHONY : src/ast/ast.i
 
 # target to preprocess a source file
-src/ast/stmt.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt.cpp.i
-.PHONY : src/ast/stmt.cpp.i
+src/ast/ast.cpp.i:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/ast.cpp.i
+.PHONY : src/ast/ast.cpp.i
 
-src/ast/stmt.s: src/ast/stmt.cpp.s
+src/ast/ast.s: src/ast/ast.cpp.s
 
-.PHONY : src/ast/stmt.s
+.PHONY : src/ast/ast.s
 
 # target to generate assembly for a file
-src/ast/stmt.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/stmt.cpp.s
-.PHONY : src/ast/stmt.cpp.s
+src/ast/ast.cpp.s:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/ast/ast.cpp.s
+.PHONY : src/ast/ast.cpp.s
 
 src/code_generator/code_generator.o: src/code_generator/code_generator.cpp.o
 
@@ -282,32 +282,32 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
-src/parser/lex_pascal.o: src/parser/lex_pascal.cpp.o
+src/parser/lexer.o: src/parser/lexer.cpp.o
 
-.PHONY : src/parser/lex_pascal.o
+.PHONY : src/parser/lexer.o
 
 # target to build an object file
-src/parser/lex_pascal.cpp.o:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.o
-.PHONY : src/parser/lex_pascal.cpp.o
+src/parser/lexer.cpp.o:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lexer.cpp.o
+.PHONY : src/parser/lexer.cpp.o
 
-src/parser/lex_pascal.i: src/parser/lex_pascal.cpp.i
+src/parser/lexer.i: src/parser/lexer.cpp.i
 
-.PHONY : src/parser/lex_pascal.i
+.PHONY : src/parser/lexer.i
 
 # target to preprocess a source file
-src/parser/lex_pascal.cpp.i:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.i
-.PHONY : src/parser/lex_pascal.cpp.i
+src/parser/lexer.cpp.i:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lexer.cpp.i
+.PHONY : src/parser/lexer.cpp.i
 
-src/parser/lex_pascal.s: src/parser/lex_pascal.cpp.s
+src/parser/lexer.s: src/parser/lexer.cpp.s
 
-.PHONY : src/parser/lex_pascal.s
+.PHONY : src/parser/lexer.s
 
 # target to generate assembly for a file
-src/parser/lex_pascal.cpp.s:
-	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lex_pascal.cpp.s
-.PHONY : src/parser/lex_pascal.cpp.s
+src/parser/lexer.cpp.s:
+	$(MAKE) -f CMakeFiles/pascc.dir/build.make CMakeFiles/pascc.dir/src/parser/lexer.cpp.s
+.PHONY : src/parser/lexer.cpp.s
 
 src/parser/yacc_pascal.o: src/parser/yacc_pascal.cpp.o
 
@@ -401,9 +401,9 @@ help:
 	@echo "... test"
 	@echo "... pascc"
 	@echo "... BISON_TEST"
-	@echo "... src/ast/stmt.o"
-	@echo "... src/ast/stmt.i"
-	@echo "... src/ast/stmt.s"
+	@echo "... src/ast/ast.o"
+	@echo "... src/ast/ast.i"
+	@echo "... src/ast/ast.s"
 	@echo "... src/code_generator/code_generator.o"
 	@echo "... src/code_generator/code_generator.i"
 	@echo "... src/code_generator/code_generator.s"
@@ -416,9 +416,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/parser/lex_pascal.o"
-	@echo "... src/parser/lex_pascal.i"
-	@echo "... src/parser/lex_pascal.s"
+	@echo "... src/parser/lexer.o"
+	@echo "... src/parser/lexer.i"
+	@echo "... src/parser/lexer.s"
 	@echo "... src/parser/yacc_pascal.o"
 	@echo "... src/parser/yacc_pascal.i"
 	@echo "... src/parser/yacc_pascal.s"

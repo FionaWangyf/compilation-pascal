@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Volumes/TSD302/program/Pascal_compiler_v4/compilation-pascal/test_set/01_var_defn2'
+relocations:     []
+...

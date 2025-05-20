@@ -11,9 +11,9 @@
 #include <iostream>
 #include "common/log/log.hpp"//日志系统
 #include "common/setting/settings.hpp"//编译器设置
-#include "ast/stmt.hpp"//抽象语法树定义
+#include "ast/ast.hpp"//抽象语法树定义
 #include "yacc_pascal.hpp"//bison生成的头文件
-#include "lex_pascal.hpp"//flex生成的头文件
+#include "lexer.hpp"//flex生成的头文件
 
 namespace {
     bool syntaxErrorFlag = false; //标记是否发生语法错误

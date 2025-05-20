@@ -1,6 +1,6 @@
-#line 1 "lex_pascal.cpp"
+#line 1 "lexer.cpp"
 /*
-这里的代码会被复制到lex_pascal.cpp的最开始位置
+这里的代码会被复制到lexer.cpp的最开始位置
 定义yy_size_t的原因是因为flex生成的代码，会使用yy_size_t与其他类型的数字
 做比较，导致编译报警
 */
@@ -8,11 +8,11 @@
 #define YY_TYPEDEF_YY_SIZE_T
 typedef int yy_size_t;
 
-/* 参考生成的lex_pascal.cpp代码，这个宏定义会放在每次运行yylex()最开始的地方 */
+/* 参考生成的lexer.cpp代码，这个宏定义会放在每次运行yylex()最开始的地方 */
 #define YY_USER_INIT                                         \
   yycolumn = 0;
 
-/* 参考生成的lex_pascal.cpp代码，这个宏定义会放在解析一个token之后，也可以在网上找到大量的参考资料 */
+/* 参考生成的lexer.cpp代码，这个宏定义会放在解析一个token之后，也可以在网上找到大量的参考资料 */
 /* 我们在这里设置当前解析的token的位置信息，这样在yacc中就可以使用这些信息了 */
 #define YY_USER_ACTION                                       \
 do {                                                         \
@@ -23,7 +23,7 @@ do {                                                         \
 }                                                            \
 while (0);
 
-#line 26 "lex_pascal.cpp"
+#line 26 "lexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -670,11 +670,11 @@ static const flex_int32_t yy_rule_can_match_eol[68] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "lex_pascal.l"
+#line 1 "lexer.l"
 /*顶部代码*/
 
 /*c代码部分，包含必要的头文件、宏定义和辅助函数*/
-#line 32 "lex_pascal.l"
+#line 32 "lexer.l"
 #include<cstring>
 #include<cstdio>
 /**
@@ -684,7 +684,7 @@ static const flex_int32_t yy_rule_can_match_eol[68] =
  * 第三个部分还是C代码，flex 会复制此段代码
  */
 
-#include "ast/stmt.hpp"
+#include "ast/ast.hpp"
 #include "common/log/log.hpp"
 #include "yacc_pascal.hpp"
 
@@ -708,11 +708,11 @@ char *strdup_tolower(const char *s) {
     return d;
 }
 
-#line 711 "lex_pascal.cpp"
+#line 711 "lexer.cpp"
 /* Prevent the need for linking with -lfl */
 #define YY_NO_INPUT 1
 /* 不区分大小写 */
-#line 715 "lex_pascal.cpp"
+#line 715 "lexer.cpp"
 
 #define INITIAL 0
 
@@ -994,9 +994,9 @@ YY_DECL
 		}
 
 	{
-#line 100 "lex_pascal.l"
+#line 100 "lexer.l"
 
-#line 999 "lex_pascal.cpp"
+#line 999 "lexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1067,247 +1067,247 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 101 "lex_pascal.l"
+#line 101 "lexer.l"
 RETURN_TOKEN(PROGRAM);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 102 "lex_pascal.l"
+#line 102 "lexer.l"
 RETURN_TOKEN(CONST);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 103 "lex_pascal.l"
+#line 103 "lexer.l"
 RETURN_TOKEN(TYPE);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 104 "lex_pascal.l"
+#line 104 "lexer.l"
 RETURN_TOKEN(RECORD);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 105 "lex_pascal.l"
+#line 105 "lexer.l"
 RETURN_TOKEN(ARRAY);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 106 "lex_pascal.l"
+#line 106 "lexer.l"
 RETURN_TOKEN(OF);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 107 "lex_pascal.l"
+#line 107 "lexer.l"
 RETURN_TOKEN(VAR);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 108 "lex_pascal.l"
+#line 108 "lexer.l"
 RETURN_TOKEN(FUNCTION);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 109 "lex_pascal.l"
+#line 109 "lexer.l"
 RETURN_TOKEN(PROCEDURE);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 110 "lex_pascal.l"
+#line 110 "lexer.l"
 RETURN_TOKEN(BEGIN_TOKEN);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 111 "lex_pascal.l"
+#line 111 "lexer.l"
 RETURN_TOKEN(END);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 112 "lex_pascal.l"
+#line 112 "lexer.l"
 RETURN_TOKEN(IF);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 113 "lex_pascal.l"
+#line 113 "lexer.l"
 RETURN_TOKEN(THEN);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 114 "lex_pascal.l"
+#line 114 "lexer.l"
 RETURN_TOKEN(ELSE);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 115 "lex_pascal.l"
+#line 115 "lexer.l"
 RETURN_TOKEN(CASE);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 116 "lex_pascal.l"
+#line 116 "lexer.l"
 RETURN_TOKEN(WHILE);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 117 "lex_pascal.l"
+#line 117 "lexer.l"
 RETURN_TOKEN(REPEAT);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 118 "lex_pascal.l"
+#line 118 "lexer.l"
 RETURN_TOKEN(UNTIL);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 119 "lex_pascal.l"
+#line 119 "lexer.l"
 RETURN_TOKEN(FOR);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 120 "lex_pascal.l"
+#line 120 "lexer.l"
 RETURN_TOKEN(TO);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 121 "lex_pascal.l"
+#line 121 "lexer.l"
 RETURN_TOKEN(DOWNTO);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 122 "lex_pascal.l"
+#line 122 "lexer.l"
 RETURN_TOKEN(DO);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 123 "lex_pascal.l"
+#line 123 "lexer.l"
 RETURN_TOKEN(READ);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 124 "lex_pascal.l"
+#line 124 "lexer.l"
 RETURN_TOKEN(READLN);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 125 "lex_pascal.l"
+#line 125 "lexer.l"
 RETURN_TOKEN(BREAK);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 126 "lex_pascal.l"
+#line 126 "lexer.l"
 RETURN_TOKEN(CONTINUE);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 127 "lex_pascal.l"
+#line 127 "lexer.l"
 RETURN_TOKEN(WRITE);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 128 "lex_pascal.l"
+#line 128 "lexer.l"
 RETURN_TOKEN(WRITELN);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 129 "lex_pascal.l"
+#line 129 "lexer.l"
 RETURN_TOKEN(CHAR_KW);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 130 "lex_pascal.l"
+#line 130 "lexer.l"
 RETURN_TOKEN(INTEGER_KW);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 131 "lex_pascal.l"
+#line 131 "lexer.l"
 RETURN_TOKEN(REAL_KW);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 132 "lex_pascal.l"
+#line 132 "lexer.l"
 RETURN_TOKEN(BOOLEAN_KW);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 134 "lex_pascal.l"
+#line 134 "lexer.l"
 yylval->boolean = true;  return BOOLEAN;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 135 "lex_pascal.l"
+#line 135 "lexer.l"
 yylval->boolean = false;  return BOOLEAN;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 137 "lex_pascal.l"
+#line 137 "lexer.l"
 RETURN_TOKEN(NOT);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 139 "lex_pascal.l"
+#line 139 "lexer.l"
 RETURN_TOKEN(DIV);
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 140 "lex_pascal.l"
+#line 140 "lexer.l"
 RETURN_TOKEN(MOD);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 141 "lex_pascal.l"
+#line 141 "lexer.l"
 RETURN_TOKEN(AND);
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 143 "lex_pascal.l"
+#line 143 "lexer.l"
 RETURN_TOKEN(OR);
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 145 "lex_pascal.l"
+#line 145 "lexer.l"
 RETURN_TOKEN(NE);
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 146 "lex_pascal.l"
+#line 146 "lexer.l"
 RETURN_TOKEN(LE);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 147 "lex_pascal.l"
+#line 147 "lexer.l"
 RETURN_TOKEN(GE);
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 150 "lex_pascal.l"
+#line 150 "lexer.l"
 RETURN_TOKEN(ASSIGNOP);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 151 "lex_pascal.l"
+#line 151 "lexer.l"
 RETURN_TOKEN(IN);
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 153 "lex_pascal.l"
+#line 153 "lexer.l"
 RETURN_TOKEN(ORELSE);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 154 "lex_pascal.l"
+#line 154 "lexer.l"
 RETURN_TOKEN(ANDTHEN);
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 156 "lex_pascal.l"
+#line 156 "lexer.l"
 RETURN_TOKEN(DOUBLE_DOT);
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 158 "lex_pascal.l"
+#line 158 "lexer.l"
 RETURN_TOKEN(yytext[0]);
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 160 "lex_pascal.l"
+#line 160 "lexer.l"
 {
                     long val = atol(yytext);
                     if (val > 2147483647) { /* INT_MAX */
@@ -1319,12 +1319,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 169 "lex_pascal.l"
+#line 169 "lexer.l"
 yylval->real = strdup(yytext); RETURN_TOKEN(REAL);
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 171 "lex_pascal.l"
+#line 171 "lexer.l"
 {
                     yylval->real = strdup(yytext);
                     RETURN_TOKEN(REAL);
@@ -1332,12 +1332,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 176 "lex_pascal.l"
+#line 176 "lexer.l"
 yylval->charactor = yytext[1]; RETURN_TOKEN(CHAR);
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 178 "lex_pascal.l"
+#line 178 "lexer.l"
 {
                     if (strlen(yytext) > 255) {
                         LOG_DEBUG("标识符过长: %s", yytext);
@@ -1349,85 +1349,85 @@ YY_RULE_SETUP
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 186 "lex_pascal.l"
+#line 186 "lexer.l"
 // ignore comments
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 187 "lex_pascal.l"
+#line 187 "lexer.l"
 // ignore comments
 	YY_BREAK
 case 56:
 /* rule 56 can match eol */
 YY_RULE_SETUP
-#line 188 "lex_pascal.l"
+#line 188 "lexer.l"
 // ignore comments
 	YY_BREAK
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 189 "lex_pascal.l"
+#line 189 "lexer.l"
 // ignore comments
 	YY_BREAK
 case 58:
 /* rule 58 can match eol */
 YY_RULE_SETUP
-#line 191 "lex_pascal.l"
+#line 191 "lexer.l"
 {
                         LOG_DEBUG("未闭合的注释: %s", yytext);
                     }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 195 "lex_pascal.l"
+#line 195 "lexer.l"
 /* ignore whitespace */
 	YY_BREAK
 case 60:
 /* rule 60 can match eol */
 YY_RULE_SETUP
-#line 196 "lex_pascal.l"
+#line 196 "lexer.l"
 /* ignore whitespace */
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 197 "lex_pascal.l"
+#line 197 "lexer.l"
 /* ignore whitespace */
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 198 "lex_pascal.l"
+#line 198 "lexer.l"
 /* ignore whitespace */
 	YY_BREAK
 case 63:
 /* rule 63 can match eol */
 YY_RULE_SETUP
-#line 200 "lex_pascal.l"
+#line 200 "lexer.l"
 yylval->string = strdup(yytext); RETURN_TOKEN(STRING);
 	YY_BREAK
 case 64:
 /* rule 64 can match eol */
 YY_RULE_SETUP
-#line 201 "lex_pascal.l"
+#line 201 "lexer.l"
 yylval->string = strdup(yytext); RETURN_TOKEN(STRING);
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 203 "lex_pascal.l"
+#line 203 "lexer.l"
 {
                     LOG_DEBUG("非法字符: '%c' (ASCII: %d)", yytext[0], (int)yytext[0]);
                 }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 207 "lex_pascal.l"
+#line 207 "lexer.l"
 /* ignore other characters */
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 208 "lex_pascal.l"
+#line 208 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1430 "lex_pascal.cpp"
+#line 1430 "lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2589,7 +2589,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 208 "lex_pascal.l"
+#line 208 "lexer.l"
 
 
 void scan_string(const char *str, yyscan_t scanner) {

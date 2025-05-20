@@ -2,9 +2,9 @@
 #define yyHEADER_H 1
 #define yyIN_HEADER 1
 
-#line 5 "lex_pascal.hpp"
+#line 5 "lexer.hpp"
 /*
-这里的代码会被复制到lex_pascal.cpp的最开始位置
+这里的代码会被复制到lexer.cpp的最开始位置
 定义yy_size_t的原因是因为flex生成的代码，会使用yy_size_t与其他类型的数字
 做比较，导致编译报警
 */
@@ -12,11 +12,11 @@
 #define YY_TYPEDEF_YY_SIZE_T
 typedef int yy_size_t;
 
-/* 参考生成的lex_pascal.cpp代码，这个宏定义会放在每次运行yylex()最开始的地方 */
+/* 参考生成的lexer.cpp代码，这个宏定义会放在每次运行yylex()最开始的地方 */
 #define YY_USER_INIT                                         \
   yycolumn = 0;
 
-/* 参考生成的lex_pascal.cpp代码，这个宏定义会放在解析一个token之后，也可以在网上找到大量的参考资料 */
+/* 参考生成的lexer.cpp代码，这个宏定义会放在解析一个token之后，也可以在网上找到大量的参考资料 */
 /* 我们在这里设置当前解析的token的位置信息，这样在yacc中就可以使用这些信息了 */
 #define YY_USER_ACTION                                       \
 do {                                                         \
@@ -27,7 +27,7 @@ do {                                                         \
 }                                                            \
 while (0);
 
-#line 30 "lex_pascal.hpp"
+#line 30 "lexer.hpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -542,9 +542,9 @@ extern int yylex \
 #undef yyTABLES_NAME
 #endif
 
-#line 208 "lex_pascal.l"
+#line 208 "lexer.l"
 
 
-#line 548 "lex_pascal.hpp"
+#line 548 "lexer.hpp"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */

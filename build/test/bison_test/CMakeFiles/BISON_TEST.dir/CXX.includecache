@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-../src/ast/stmt.hpp
+../src/ast/ast.hpp
 algorithm
 -
 memory
@@ -48,11 +48,11 @@ condition_variable
 string
 -
 
-/src/src/ast/stmt.cpp
+/src/src/ast/ast.cpp
 ast/visitor.hpp
 /src/src/ast/ast/visitor.hpp
-ast/stmt.hpp
-/src/src/ast/ast/stmt.hpp
+ast/ast.hpp
+/src/src/ast/ast/ast.hpp
 
 /src/src/common/log/log.cpp
 common/log/log.hpp
@@ -86,7 +86,7 @@ unistd.h
 cstring
 -
 
-/src/src/parser/lex_pascal.cpp
+/src/src/parser/lexer.cpp
 stdio.h
 -
 string.h
@@ -101,8 +101,8 @@ cstring
 -
 cstdio
 -
-ast/stmt.hpp
-/src/src/parser/ast/stmt.hpp
+ast/ast.hpp
+/src/src/parser/ast/ast.hpp
 common/log/log.hpp
 /src/src/parser/common/log/log.hpp
 yacc_pascal.hpp
@@ -110,7 +110,7 @@ yacc_pascal.hpp
 unistd.h
 -
 
-/src/src/parser/lex_pascal.hpp
+/src/src/parser/lexer.hpp
 stdio.h
 -
 string.h
@@ -145,12 +145,12 @@ common/log/log.hpp
 /src/src/parser/common/log/log.hpp
 common/setting/settings.hpp
 /src/src/parser/common/setting/settings.hpp
-ast/stmt.hpp
-/src/src/parser/ast/stmt.hpp
+ast/ast.hpp
+/src/src/parser/ast/ast.hpp
 yacc_pascal.hpp
 /src/src/parser/yacc_pascal.hpp
-lex_pascal.hpp
-/src/src/parser/lex_pascal.hpp
+lexer.hpp
+/src/src/parser/lexer.hpp
 yacc_pascal.hpp
 /src/src/parser/yacc_pascal.hpp
 limits.h
@@ -177,8 +177,8 @@ stdio.h
 /src/src/parser/yacc_pascal.hpp
 
 /src/test/bison_test/ASTPrettyPrinter.hpp
-ast/stmt.hpp
-/src/test/bison_test/ast/stmt.hpp
+ast/ast.hpp
+/src/test/bison_test/ast/ast.hpp
 iostream
 -
 string
@@ -203,8 +203,8 @@ sstream
 -
 vector
 -
-ast/stmt.hpp
-/src/test/bison_test/ast/stmt.hpp
+ast/ast.hpp
+/src/test/bison_test/ast/ast.hpp
 common/log/log.hpp
 /src/test/bison_test/common/log/log.hpp
 ASTPrettyPrinter.hpp

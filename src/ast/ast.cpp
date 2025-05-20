@@ -1,5 +1,5 @@
 #include "ast/visitor.hpp"
-#include "ast/stmt.hpp"
+#include "ast/ast.hpp"
 
 // 简化的访问者模式实现
 // 使用宏减少重复代码

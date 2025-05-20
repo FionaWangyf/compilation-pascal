@@ -136,32 +136,32 @@ BISON_TEST/fast:
 	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/build
 .PHONY : BISON_TEST/fast
 
-__/__/src/ast/stmt.o: __/__/src/ast/stmt.cpp.o
+__/__/src/ast/ast.o: __/__/src/ast/ast.cpp.o
 
-.PHONY : __/__/src/ast/stmt.o
+.PHONY : __/__/src/ast/ast.o
 
 # target to build an object file
-__/__/src/ast/stmt.cpp.o:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o
-.PHONY : __/__/src/ast/stmt.cpp.o
+__/__/src/ast/ast.cpp.o:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o
+.PHONY : __/__/src/ast/ast.cpp.o
 
-__/__/src/ast/stmt.i: __/__/src/ast/stmt.cpp.i
+__/__/src/ast/ast.i: __/__/src/ast/ast.cpp.i
 
-.PHONY : __/__/src/ast/stmt.i
+.PHONY : __/__/src/ast/ast.i
 
 # target to preprocess a source file
-__/__/src/ast/stmt.cpp.i:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.i
-.PHONY : __/__/src/ast/stmt.cpp.i
+__/__/src/ast/ast.cpp.i:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.i
+.PHONY : __/__/src/ast/ast.cpp.i
 
-__/__/src/ast/stmt.s: __/__/src/ast/stmt.cpp.s
+__/__/src/ast/ast.s: __/__/src/ast/ast.cpp.s
 
-.PHONY : __/__/src/ast/stmt.s
+.PHONY : __/__/src/ast/ast.s
 
 # target to generate assembly for a file
-__/__/src/ast/stmt.cpp.s:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s
-.PHONY : __/__/src/ast/stmt.cpp.s
+__/__/src/ast/ast.cpp.s:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.s
+.PHONY : __/__/src/ast/ast.cpp.s
 
 __/__/src/common/log/log.o: __/__/src/common/log/log.cpp.o
 
@@ -217,32 +217,32 @@ __/__/src/common/setting/settings.cpp.s:
 	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.s
 .PHONY : __/__/src/common/setting/settings.cpp.s
 
-__/__/src/parser/lex_pascal.o: __/__/src/parser/lex_pascal.cpp.o
+__/__/src/parser/lexer.o: __/__/src/parser/lexer.cpp.o
 
-.PHONY : __/__/src/parser/lex_pascal.o
+.PHONY : __/__/src/parser/lexer.o
 
 # target to build an object file
-__/__/src/parser/lex_pascal.cpp.o:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o
-.PHONY : __/__/src/parser/lex_pascal.cpp.o
+__/__/src/parser/lexer.cpp.o:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o
+.PHONY : __/__/src/parser/lexer.cpp.o
 
-__/__/src/parser/lex_pascal.i: __/__/src/parser/lex_pascal.cpp.i
+__/__/src/parser/lexer.i: __/__/src/parser/lexer.cpp.i
 
-.PHONY : __/__/src/parser/lex_pascal.i
+.PHONY : __/__/src/parser/lexer.i
 
 # target to preprocess a source file
-__/__/src/parser/lex_pascal.cpp.i:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.i
-.PHONY : __/__/src/parser/lex_pascal.cpp.i
+__/__/src/parser/lexer.cpp.i:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.i
+.PHONY : __/__/src/parser/lexer.cpp.i
 
-__/__/src/parser/lex_pascal.s: __/__/src/parser/lex_pascal.cpp.s
+__/__/src/parser/lexer.s: __/__/src/parser/lexer.cpp.s
 
-.PHONY : __/__/src/parser/lex_pascal.s
+.PHONY : __/__/src/parser/lexer.s
 
 # target to generate assembly for a file
-__/__/src/parser/lex_pascal.cpp.s:
-	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.s
-.PHONY : __/__/src/parser/lex_pascal.cpp.s
+__/__/src/parser/lexer.cpp.s:
+	cd /src/build && $(MAKE) -f test/bison_test/CMakeFiles/BISON_TEST.dir/build.make test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.s
+.PHONY : __/__/src/parser/lexer.cpp.s
 
 __/__/src/parser/yacc_pascal.o: __/__/src/parser/yacc_pascal.cpp.o
 
@@ -308,18 +308,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... test"
 	@echo "... BISON_TEST"
-	@echo "... __/__/src/ast/stmt.o"
-	@echo "... __/__/src/ast/stmt.i"
-	@echo "... __/__/src/ast/stmt.s"
+	@echo "... __/__/src/ast/ast.o"
+	@echo "... __/__/src/ast/ast.i"
+	@echo "... __/__/src/ast/ast.s"
 	@echo "... __/__/src/common/log/log.o"
 	@echo "... __/__/src/common/log/log.i"
 	@echo "... __/__/src/common/log/log.s"
 	@echo "... __/__/src/common/setting/settings.o"
 	@echo "... __/__/src/common/setting/settings.i"
 	@echo "... __/__/src/common/setting/settings.s"
-	@echo "... __/__/src/parser/lex_pascal.o"
-	@echo "... __/__/src/parser/lex_pascal.i"
-	@echo "... __/__/src/parser/lex_pascal.s"
+	@echo "... __/__/src/parser/lexer.o"
+	@echo "... __/__/src/parser/lexer.i"
+	@echo "... __/__/src/parser/lexer.s"
 	@echo "... __/__/src/parser/yacc_pascal.o"
 	@echo "... __/__/src/parser/yacc_pascal.i"
 	@echo "... __/__/src/parser/yacc_pascal.s"

@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 
-#include "ast/stmt.hpp"
+#include "ast/ast.hpp"
 #include "common/log/log.hpp"
 #include "ASTPrettyPrinter.hpp"
 

@@ -70,18 +70,18 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/main.cpp.s"
 	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/test/bison_test/main.cpp -o CMakeFiles/BISON_TEST.dir/main.cpp.s
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o: ../src/parser/lex_pascal.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o"
-	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o -c /src/src/parser/lex_pascal.cpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o: ../src/parser/lexer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o"
+	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o -c /src/src/parser/lexer.cpp
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.i"
-	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/parser/lex_pascal.cpp > CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.i
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.i"
+	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/parser/lexer.cpp > CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.i
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.s"
-	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/lex_pascal.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.s
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.s"
+	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/lexer.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.s
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o: ../src/parser/yacc_pascal.cpp
@@ -96,18 +96,18 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.s: cm
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.s"
 	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/parser/yacc_pascal.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.s
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o: ../src/ast/stmt.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o"
-	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o -c /src/src/ast/stmt.cpp
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o: ../src/ast/ast.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/src/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o"
+	cd /src/build/test/bison_test && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o -c /src/src/ast/ast.cpp
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.i"
-	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ast/stmt.cpp > CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.i
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.i"
+	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /src/src/ast/ast.cpp > CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.i
 
-test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s"
-	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/stmt.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.s
+test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.s"
+	cd /src/build/test/bison_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /src/src/ast/ast.cpp -o CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.s
 
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o: test/bison_test/CMakeFiles/BISON_TEST.dir/flags.make
 test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o: ../src/common/log/log.cpp
@@ -138,9 +138,9 @@ test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.
 # Object files for target BISON_TEST
 BISON_TEST_OBJECTS = \
 "CMakeFiles/BISON_TEST.dir/main.cpp.o" \
-"CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o" \
+"CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o" \
-"CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o" \
+"CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o" \
 "CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o"
 
@@ -148,9 +148,9 @@ BISON_TEST_OBJECTS = \
 BISON_TEST_EXTERNAL_OBJECTS =
 
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/main.cpp.o
-../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lex_pascal.cpp.o
+../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/lexer.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/parser/yacc_pascal.cpp.o
-../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/stmt.cpp.o
+../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/ast/ast.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/log/log.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/__/__/src/common/setting/settings.cpp.o
 ../bin/BISON_TEST: test/bison_test/CMakeFiles/BISON_TEST.dir/build.make

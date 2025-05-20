@@ -6,7 +6,7 @@
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
-#include "ast/stmt.hpp"
+#include "ast/ast.hpp"
 #include "ast/visitor.hpp"
 #include "semantic_analyzer/semantic_analyzer.hpp"
 

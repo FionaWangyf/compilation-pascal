@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast/stmt.hpp"
+#include "ast/ast.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>

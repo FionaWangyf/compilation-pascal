@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-../src/ast/stmt.hpp
+../src/ast/ast.hpp
 algorithm
 -
 memory
@@ -35,8 +35,8 @@ unordered_map
 -
 unordered_set
 -
-ast/stmt.hpp
-../src/code_generator/ast/stmt.hpp
+ast/ast.hpp
+../src/code_generator/ast/ast.hpp
 ast/visitor.hpp
 ../src/code_generator/ast/visitor.hpp
 semantic_analyzer/semantic_analyzer.hpp
@@ -79,18 +79,18 @@ memory
 -
 vector
 -
-ast/stmt.hpp
-../src/semantic_analyzer/ast/stmt.hpp
+ast/ast.hpp
+../src/semantic_analyzer/ast/ast.hpp
 ast/visitor.hpp
 ../src/semantic_analyzer/ast/visitor.hpp
 
-/src/src/ast/stmt.cpp
+/src/src/ast/ast.cpp
 ast/visitor.hpp
 /src/src/ast/ast/visitor.hpp
-ast/stmt.hpp
-/src/src/ast/ast/stmt.hpp
+ast/ast.hpp
+/src/src/ast/ast/ast.hpp
 
-/src/src/ast/stmt.hpp
+/src/src/ast/ast.hpp
 algorithm
 -
 memory
@@ -127,8 +127,8 @@ unordered_map
 -
 unordered_set
 -
-ast/stmt.hpp
-/src/src/code_generator/ast/stmt.hpp
+ast/ast.hpp
+/src/src/code_generator/ast/ast.hpp
 ast/visitor.hpp
 /src/src/code_generator/ast/visitor.hpp
 semantic_analyzer/semantic_analyzer.hpp
@@ -213,8 +213,8 @@ vector
 -
 common/log/log.hpp
 /src/src/common/log/log.hpp
-ast/stmt.hpp
-/src/src/ast/stmt.hpp
+ast/ast.hpp
+/src/src/ast/ast.hpp
 common/setting/settings.hpp
 /src/src/common/setting/settings.hpp
 semantic_analyzer/semantic_analyzer.hpp
@@ -224,7 +224,7 @@ code_generator/code_generator.hpp
 parser/yacc_pascal.hpp
 /src/src/parser/yacc_pascal.hpp
 
-/src/src/parser/lex_pascal.cpp
+/src/src/parser/lexer.cpp
 stdio.h
 -
 string.h
@@ -239,8 +239,8 @@ cstring
 -
 cstdio
 -
-ast/stmt.hpp
-/src/src/parser/ast/stmt.hpp
+ast/ast.hpp
+/src/src/parser/ast/ast.hpp
 common/log/log.hpp
 /src/src/parser/common/log/log.hpp
 yacc_pascal.hpp
@@ -248,7 +248,7 @@ yacc_pascal.hpp
 unistd.h
 -
 
-/src/src/parser/lex_pascal.hpp
+/src/src/parser/lexer.hpp
 stdio.h
 -
 string.h
@@ -283,12 +283,12 @@ common/log/log.hpp
 /src/src/parser/common/log/log.hpp
 common/setting/settings.hpp
 /src/src/parser/common/setting/settings.hpp
-ast/stmt.hpp
-/src/src/parser/ast/stmt.hpp
+ast/ast.hpp
+/src/src/parser/ast/ast.hpp
 yacc_pascal.hpp
 /src/src/parser/yacc_pascal.hpp
-lex_pascal.hpp
-/src/src/parser/lex_pascal.hpp
+lexer.hpp
+/src/src/parser/lexer.hpp
 yacc_pascal.hpp
 /src/src/parser/yacc_pascal.hpp
 limits.h
@@ -333,8 +333,8 @@ memory
 -
 vector
 -
-ast/stmt.hpp
-/src/src/semantic_analyzer/ast/stmt.hpp
+ast/ast.hpp
+/src/src/semantic_analyzer/ast/ast.hpp
 ast/visitor.hpp
 /src/src/semantic_analyzer/ast/visitor.hpp
 

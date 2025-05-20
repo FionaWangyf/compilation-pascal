@@ -5,6 +5,6 @@ var
 begin
   a := 3;
   b := 5;
-  a := 5;
+  a := a*-b;
   write(a + b);
 end.

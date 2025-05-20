@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <vector>
-#include "ast/stmt.hpp"
+#include "ast/ast.hpp"
 #include "ast/visitor.hpp"
 
 namespace semantic {
