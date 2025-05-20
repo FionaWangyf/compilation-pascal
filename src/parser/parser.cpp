@@ -396,7 +396,7 @@ void resetSyntaxError() {
 int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan_t scanner, const char *msg);
 
 
-#line 400 "yacc_pascal.cpp"
+#line 400 "parser.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -419,7 +419,7 @@ int yyerror(YYLTYPE *llocp, const char *code_str, ProgramNode ** program, yyscan
 #  endif
 # endif
 
-#include "yacc_pascal.hpp"
+#include "parser.hpp"
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -1564,67 +1564,67 @@ yydestruct (const char *yymsg,
     case YYSYMBOL_IDENTIFIER: /* IDENTIFIER  */
 #line 536 "parser.y"
             { free(((*yyvaluep).string)); }
-#line 1568 "yacc_pascal.cpp"
+#line 1568 "parser.cpp"
         break;
 
     case YYSYMBOL_INTEGER: /* INTEGER  */
 #line 534 "parser.y"
             {}
-#line 1574 "yacc_pascal.cpp"
+#line 1574 "parser.cpp"
         break;
 
     case YYSYMBOL_BOOLEAN: /* BOOLEAN  */
 #line 534 "parser.y"
             {}
-#line 1580 "yacc_pascal.cpp"
+#line 1580 "parser.cpp"
         break;
 
     case YYSYMBOL_REAL: /* REAL  */
 #line 536 "parser.y"
             { free(((*yyvaluep).real)); }
-#line 1586 "yacc_pascal.cpp"
+#line 1586 "parser.cpp"
         break;
 
     case YYSYMBOL_CHAR: /* CHAR  */
 #line 534 "parser.y"
             {}
-#line 1592 "yacc_pascal.cpp"
+#line 1592 "parser.cpp"
         break;
 
     case YYSYMBOL_STRING: /* STRING  */
 #line 536 "parser.y"
             { free(((*yyvaluep).string)); }
-#line 1598 "yacc_pascal.cpp"
+#line 1598 "parser.cpp"
         break;
 
     case YYSYMBOL_programstruct: /* programstruct  */
 #line 534 "parser.y"
             {}
-#line 1604 "yacc_pascal.cpp"
+#line 1604 "parser.cpp"
         break;
 
     case YYSYMBOL_program_head: /* program_head  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).program_head); }
-#line 1610 "yacc_pascal.cpp"
+#line 1610 "parser.cpp"
         break;
 
     case YYSYMBOL_program_body: /* program_body  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).program_body); }
-#line 1616 "yacc_pascal.cpp"
+#line 1616 "parser.cpp"
         break;
 
     case YYSYMBOL_idlist: /* idlist  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).id_list); }
-#line 1622 "yacc_pascal.cpp"
+#line 1622 "parser.cpp"
         break;
 
     case YYSYMBOL_const_declarations: /* const_declarations  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).const_decls); }
-#line 1628 "yacc_pascal.cpp"
+#line 1628 "parser.cpp"
         break;
 
     case YYSYMBOL_const_declaration: /* const_declaration  */
@@ -1638,13 +1638,13 @@ yydestruct (const char *yymsg,
         delete ((*yyvaluep).kv_pair_list);
     }
 }
-#line 1642 "yacc_pascal.cpp"
+#line 1642 "parser.cpp"
         break;
 
     case YYSYMBOL_const_value: /* const_value  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).value); }
-#line 1648 "yacc_pascal.cpp"
+#line 1648 "parser.cpp"
         break;
 
     case YYSYMBOL_var_declarations: /* var_declarations  */
@@ -1657,7 +1657,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1661 "yacc_pascal.cpp"
+#line 1661 "parser.cpp"
         break;
 
     case YYSYMBOL_var_declaration: /* var_declaration  */
@@ -1670,19 +1670,19 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1674 "yacc_pascal.cpp"
+#line 1674 "parser.cpp"
         break;
 
     case YYSYMBOL_type: /* type  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1680 "yacc_pascal.cpp"
+#line 1680 "parser.cpp"
         break;
 
     case YYSYMBOL_basic_type: /* basic_type  */
 #line 534 "parser.y"
             {}
-#line 1686 "yacc_pascal.cpp"
+#line 1686 "parser.cpp"
         break;
 
     case YYSYMBOL_period_list: /* period_list  */
@@ -1695,7 +1695,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).period_list);
 }
-#line 1699 "yacc_pascal.cpp"
+#line 1699 "parser.cpp"
         break;
 
     case YYSYMBOL_subprogram_declarations: /* subprogram_declarations  */
@@ -1708,19 +1708,19 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).func_decl_list);
 }
-#line 1712 "yacc_pascal.cpp"
+#line 1712 "parser.cpp"
         break;
 
     case YYSYMBOL_subprogram: /* subprogram  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).func_decl); }
-#line 1718 "yacc_pascal.cpp"
+#line 1718 "parser.cpp"
         break;
 
     case YYSYMBOL_subprogram_head: /* subprogram_head  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).func_head); }
-#line 1724 "yacc_pascal.cpp"
+#line 1724 "parser.cpp"
         break;
 
     case YYSYMBOL_formal_parameter: /* formal_parameter  */
@@ -1733,7 +1733,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1737 "yacc_pascal.cpp"
+#line 1737 "parser.cpp"
         break;
 
     case YYSYMBOL_parameter_list: /* parameter_list  */
@@ -1746,31 +1746,31 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).var_decls);
 }
-#line 1750 "yacc_pascal.cpp"
+#line 1750 "parser.cpp"
         break;
 
     case YYSYMBOL_parameter: /* parameter  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1756 "yacc_pascal.cpp"
+#line 1756 "parser.cpp"
         break;
 
     case YYSYMBOL_var_parameter: /* var_parameter  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1762 "yacc_pascal.cpp"
+#line 1762 "parser.cpp"
         break;
 
     case YYSYMBOL_value_parameter: /* value_parameter  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).var_decl); }
-#line 1768 "yacc_pascal.cpp"
+#line 1768 "parser.cpp"
         break;
 
     case YYSYMBOL_subprogram_body: /* subprogram_body  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).func_body); }
-#line 1774 "yacc_pascal.cpp"
+#line 1774 "parser.cpp"
         break;
 
     case YYSYMBOL_compound_statement: /* compound_statement  */
@@ -1783,7 +1783,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1787 "yacc_pascal.cpp"
+#line 1787 "parser.cpp"
         break;
 
     case YYSYMBOL_statement_list: /* statement_list  */
@@ -1796,7 +1796,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1800 "yacc_pascal.cpp"
+#line 1800 "parser.cpp"
         break;
 
     case YYSYMBOL_statement: /* statement  */
@@ -1809,7 +1809,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1813 "yacc_pascal.cpp"
+#line 1813 "parser.cpp"
         break;
 
     case YYSYMBOL_variable_list: /* variable_list  */
@@ -1822,13 +1822,13 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).lval_list);
 }
-#line 1826 "yacc_pascal.cpp"
+#line 1826 "parser.cpp"
         break;
 
     case YYSYMBOL_variable: /* variable  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).lval); }
-#line 1832 "yacc_pascal.cpp"
+#line 1832 "parser.cpp"
         break;
 
     case YYSYMBOL_id_varpart: /* id_varpart  */
@@ -1841,13 +1841,13 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).expr_list);
 }
-#line 1845 "yacc_pascal.cpp"
+#line 1845 "parser.cpp"
         break;
 
     case YYSYMBOL_procedure_call: /* procedure_call  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).func_call_stmt); }
-#line 1851 "yacc_pascal.cpp"
+#line 1851 "parser.cpp"
         break;
 
     case YYSYMBOL_else_part: /* else_part  */
@@ -1860,7 +1860,7 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).stmt_list);
 }
-#line 1864 "yacc_pascal.cpp"
+#line 1864 "parser.cpp"
         break;
 
     case YYSYMBOL_expression_list: /* expression_list  */
@@ -1873,49 +1873,49 @@ yydestruct (const char *yymsg,
     }
     delete ((*yyvaluep).expr_list);
 }
-#line 1877 "yacc_pascal.cpp"
+#line 1877 "parser.cpp"
         break;
 
     case YYSYMBOL_expression: /* expression  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).expr); }
-#line 1883 "yacc_pascal.cpp"
+#line 1883 "parser.cpp"
         break;
 
     case YYSYMBOL_simple_expression: /* simple_expression  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).add_expr); }
-#line 1889 "yacc_pascal.cpp"
+#line 1889 "parser.cpp"
         break;
 
     case YYSYMBOL_term: /* term  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).mul_expr); }
-#line 1895 "yacc_pascal.cpp"
+#line 1895 "parser.cpp"
         break;
 
     case YYSYMBOL_factor: /* factor  */
 #line 558 "parser.y"
             { delete ((*yyvaluep).unary_expr); }
-#line 1901 "yacc_pascal.cpp"
+#line 1901 "parser.cpp"
         break;
 
     case YYSYMBOL_addop: /* addop  */
 #line 534 "parser.y"
             {}
-#line 1907 "yacc_pascal.cpp"
+#line 1907 "parser.cpp"
         break;
 
     case YYSYMBOL_relop: /* relop  */
 #line 534 "parser.y"
             {}
-#line 1913 "yacc_pascal.cpp"
+#line 1913 "parser.cpp"
         break;
 
     case YYSYMBOL_mulop: /* mulop  */
 #line 534 "parser.y"
             {}
-#line 1919 "yacc_pascal.cpp"
+#line 1919 "parser.cpp"
         break;
 
       default:
@@ -2014,7 +2014,7 @@ YYLTYPE yylloc = yyloc_default;
     *program = nullptr;//初始化程序AST根节点为空指针
 }
 
-#line 2018 "yacc_pascal.cpp"
+#line 2018 "parser.cpp"
 
   yylsp[0] = yylloc;
   goto yysetstate;
@@ -2236,7 +2236,7 @@ yyreduce:
         *program = programStruct;//将构建的AST根节点存储到输出参数中
         (yyval.program_struct) = nullptr; // 防止报错
     }
-#line 2240 "yacc_pascal.cpp"
+#line 2240 "parser.cpp"
     break;
 
   case 3: /* programstruct: error ';' program_body '.'  */
@@ -2247,7 +2247,7 @@ yyreduce:
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' program_body '.'");
     }
-#line 2251 "yacc_pascal.cpp"
+#line 2251 "parser.cpp"
     break;
 
   case 4: /* programstruct: program_head ';' error  */
@@ -2258,7 +2258,7 @@ yyreduce:
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> program_head ';' error");
     }
-#line 2262 "yacc_pascal.cpp"
+#line 2262 "parser.cpp"
     break;
 
   case 5: /* programstruct: error ';' error  */
@@ -2268,7 +2268,7 @@ yyreduce:
         (yyval.program_struct) = nullptr;
         GRAMMAR_ERROR("programstruct -> error ';' error");
     }
-#line 2272 "yacc_pascal.cpp"
+#line 2272 "parser.cpp"
     break;
 
   case 6: /* program_head: PROGRAM IDENTIFIER '(' idlist ')'  */
@@ -2284,7 +2284,7 @@ yyreduce:
         free((yyvsp[-3].string));   // 释放标识符字符串（程序名称）内存
         GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER '(' idlist ')'");  // 记录语法跟踪日志
     }
-#line 2288 "yacc_pascal.cpp"
+#line 2288 "parser.cpp"
     break;
 
   case 7: /* program_head: PROGRAM IDENTIFIER  */
@@ -2297,7 +2297,7 @@ yyreduce:
         GRAMMAR_TRACE("program_head -> PROGRAM IDENTIFIER");  // 记录语法跟踪日志
         free((yyvsp[0].string));  // 释放标识符字符串（程序名称）内存
     }
-#line 2301 "yacc_pascal.cpp"
+#line 2301 "parser.cpp"
     break;
 
   case 8: /* program_head: PROGRAM error  */
@@ -2307,7 +2307,7 @@ yyreduce:
         GRAMMAR_ERROR("program_head -> PROGRAM error");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2311 "yacc_pascal.cpp"
+#line 2311 "parser.cpp"
     break;
 
   case 9: /* program_body: const_declarations var_declarations subprogram_declarations compound_statement  */
@@ -2364,7 +2364,7 @@ yyreduce:
         // 记录语法追踪日志
         GRAMMAR_TRACE("program_body -> const_declarations var_declarations subprogram_declarations compound_statement");
     }
-#line 2368 "yacc_pascal.cpp"
+#line 2368 "parser.cpp"
     break;
 
   case 10: /* program_body: error_recovery const_declarations var_declarations subprogram_declarations compound_statement  */
@@ -2414,7 +2414,7 @@ yyreduce:
         // 记录语法追踪日志
         GRAMMAR_TRACE("program_body -> error_recovery const_declarations var_declarations subprogram_declarations compound_statement");
     }
-#line 2418 "yacc_pascal.cpp"
+#line 2418 "parser.cpp"
     break;
 
   case 11: /* idlist: IDENTIFIER  */
@@ -2427,7 +2427,7 @@ yyreduce:
         GRAMMAR_TRACE("idlist -> IDENTIFIER");  // 记录语法跟踪日志
         free((yyvsp[0].string));  // 释放标识符字符串内存（已复制到向量中）
     }
-#line 2431 "yacc_pascal.cpp"
+#line 2431 "parser.cpp"
     break;
 
   case 12: /* idlist: idlist ',' IDENTIFIER  */
@@ -2440,7 +2440,7 @@ yyreduce:
         GRAMMAR_TRACE("idlist -> idlist ',' IDENTIFIER");  // 记录语法跟踪日志
         free((yyvsp[0].string));  // 释放新标识符的字符串内存
     }
-#line 2444 "yacc_pascal.cpp"
+#line 2444 "parser.cpp"
     break;
 
   case 13: /* const_declarations: %empty  */
@@ -2450,7 +2450,7 @@ yyreduce:
         (yyval.const_decls) = nullptr;  // 返回空指针，表示没有常量声明
         GRAMMAR_TRACE("const_declarations -> empty");  // 记录语法跟踪日志
     }
-#line 2454 "yacc_pascal.cpp"
+#line 2454 "parser.cpp"
     break;
 
   case 14: /* const_declarations: CONST const_declaration ';'  */
@@ -2478,7 +2478,7 @@ yyreduce:
         
         GRAMMAR_TRACE("const_declarations -> CONST const_declaration ';' const_declarations");  // 记录语法跟踪日志
     }
-#line 2482 "yacc_pascal.cpp"
+#line 2482 "parser.cpp"
     break;
 
   case 15: /* const_declarations: CONST error ';'  */
@@ -2488,7 +2488,7 @@ yyreduce:
         GRAMMAR_ERROR("const_declarations -> CONST error ;");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2492 "yacc_pascal.cpp"
+#line 2492 "parser.cpp"
     break;
 
   case 16: /* const_declaration: IDENTIFIER '=' const_value  */
@@ -2502,7 +2502,7 @@ yyreduce:
         free((yyvsp[-2].string));  // 释放标识符字符串（已复制到键值对中）
         (yyval.kv_pair_list) = constDecls;  // 设置返回值为构建的常量声明列表
     }
-#line 2506 "yacc_pascal.cpp"
+#line 2506 "parser.cpp"
     break;
 
   case 17: /* const_declaration: const_declaration ';' IDENTIFIER '=' const_value  */
@@ -2514,7 +2514,7 @@ yyreduce:
         free((yyvsp[-2].string));  // 释放标识符字符串
         (yyval.kv_pair_list) = (yyvsp[-4].kv_pair_list);  // 返回更新后的常量声明列表
     }
-#line 2518 "yacc_pascal.cpp"
+#line 2518 "parser.cpp"
     break;
 
   case 18: /* const_declaration: error ';' IDENTIFIER '=' const_value  */
@@ -2527,7 +2527,7 @@ yyreduce:
         GRAMMAR_ERROR("const_declaration -> error ';' IDENTIFIER = const_value");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2531 "yacc_pascal.cpp"
+#line 2531 "parser.cpp"
     break;
 
   case 19: /* const_value: INTEGER  */
@@ -2535,7 +2535,7 @@ yyreduce:
                {  // 匹配整数，如 "42"
         (yyval.value) = ValueFactory::makeInteger((yyvsp[0].number));  // 使用工厂方法创建整数值对象
     }
-#line 2539 "yacc_pascal.cpp"
+#line 2539 "parser.cpp"
     break;
 
   case 20: /* const_value: '+' INTEGER  */
@@ -2543,7 +2543,7 @@ yyreduce:
                    {  // 匹配带正号的整数，如 "+42"
         (yyval.value) = ValueFactory::makeInteger((yyvsp[0].number));  // 创建整数值对象（正号不改变值）
     }
-#line 2547 "yacc_pascal.cpp"
+#line 2547 "parser.cpp"
     break;
 
   case 21: /* const_value: '-' INTEGER  */
@@ -2551,7 +2551,7 @@ yyreduce:
                    {  // 匹配带负号的整数，如 "-42"
         (yyval.value) = ValueFactory::makeInteger(-(yyvsp[0].number));  // 创建负整数值对象（对值取负）
     }
-#line 2555 "yacc_pascal.cpp"
+#line 2555 "parser.cpp"
     break;
 
   case 22: /* const_value: REAL  */
@@ -2560,7 +2560,7 @@ yyreduce:
         (yyval.value) = ValueFactory::makeReal((yyvsp[0].real));  // 创建实数值对象
         free((yyvsp[0].real));  // 释放实数字符串（已在值对象中复制）
     }
-#line 2564 "yacc_pascal.cpp"
+#line 2564 "parser.cpp"
     break;
 
   case 23: /* const_value: '+' REAL  */
@@ -2569,7 +2569,7 @@ yyreduce:
         (yyval.value) = ValueFactory::makeReal((yyvsp[0].real));  // 创建实数值对象（正号不改变值）
         free((yyvsp[0].real));  // 释放实数字符串
     }
-#line 2573 "yacc_pascal.cpp"
+#line 2573 "parser.cpp"
     break;
 
   case 24: /* const_value: '-' REAL  */
@@ -2582,7 +2582,7 @@ yyreduce:
         free((yyvsp[0].real));  // 释放实数字符串
         (yyval.value) = value;  // 返回修改后的值对象
     }
-#line 2586 "yacc_pascal.cpp"
+#line 2586 "parser.cpp"
     break;
 
   case 25: /* const_value: CHAR  */
@@ -2591,7 +2591,7 @@ yyreduce:
         (yyval.value) = ValueFactory::makeChar((yyvsp[0].charactor));  // 创建字符值对象
         GRAMMAR_TRACE("const_value -> CHAR, value: %c");  // 记录语法跟踪日志（注意：缺少参数）
     }
-#line 2595 "yacc_pascal.cpp"
+#line 2595 "parser.cpp"
     break;
 
   case 26: /* const_value: STRING  */
@@ -2600,7 +2600,7 @@ yyreduce:
         (yyval.value) = ValueFactory::makeString((yyvsp[0].string));  // 创建字符串值对象
         free((yyvsp[0].string));  // 释放字符串（已在值对象中复制）
     }
-#line 2604 "yacc_pascal.cpp"
+#line 2604 "parser.cpp"
     break;
 
   case 27: /* var_declarations: %empty  */
@@ -2609,7 +2609,7 @@ yyreduce:
         (yyval.var_decls) = nullptr;  // 返回空指针，表示没有变量声明
         GRAMMAR_TRACE("var_declarations -> empty");  // 记录语法跟踪日志
     }
-#line 2613 "yacc_pascal.cpp"
+#line 2613 "parser.cpp"
     break;
 
   case 28: /* var_declarations: VAR var_declaration ';'  */
@@ -2619,7 +2619,7 @@ yyreduce:
         (yyval.var_decls) = (yyvsp[-1].var_decls);  // 直接返回var_declaration的结果（变量声明列表）
         GRAMMAR_TRACE("var_declarations -> VAR var_declaration ';'");  // 记录语法跟踪日志
     }
-#line 2623 "yacc_pascal.cpp"
+#line 2623 "parser.cpp"
     break;
 
   case 29: /* var_declarations: VAR error ';'  */
@@ -2629,7 +2629,7 @@ yyreduce:
         GRAMMAR_ERROR("var_declarations -> VAR error ;");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2633 "yacc_pascal.cpp"
+#line 2633 "parser.cpp"
     break;
 
   case 30: /* var_declaration: idlist ':' type  */
@@ -2654,7 +2654,7 @@ yyreduce:
         
         GRAMMAR_TRACE("var_declaration -> idlist ':' type");  // 记录语法跟踪日志
     }
-#line 2658 "yacc_pascal.cpp"
+#line 2658 "parser.cpp"
     break;
 
   case 31: /* var_declaration: var_declaration ';' idlist ':' type  */
@@ -2678,7 +2678,7 @@ yyreduce:
         
         GRAMMAR_TRACE("var_declaration -> var_declaration ';' idlist ':' type");  // 记录语法跟踪日志
     }
-#line 2682 "yacc_pascal.cpp"
+#line 2682 "parser.cpp"
     break;
 
   case 32: /* var_declaration: error ';' idlist ':' type  */
@@ -2691,7 +2691,7 @@ yyreduce:
         GRAMMAR_ERROR("var_declaration -> error ';' idlist ':' type");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2695 "yacc_pascal.cpp"
+#line 2695 "parser.cpp"
     break;
 
   case 33: /* type: basic_type  */
@@ -2705,7 +2705,7 @@ yyreduce:
         (yyval.var_decl) = typeStmt;  // 返回创建的类型对象
         GRAMMAR_TRACE("type -> basic_type");  // 记录语法跟踪日志
     }
-#line 2709 "yacc_pascal.cpp"
+#line 2709 "parser.cpp"
     break;
 
   case 34: /* type: ARRAY '[' period_list ']' OF basic_type  */
@@ -2725,7 +2725,7 @@ yyreduce:
         (yyval.var_decl) = typeStmt;  // 返回创建的类型对象
         GRAMMAR_TRACE("type -> ARRAY '[' period_list ']' OF basic_type");  // 记录语法跟踪日志
     }
-#line 2729 "yacc_pascal.cpp"
+#line 2729 "parser.cpp"
     break;
 
   case 35: /* basic_type: INTEGER_KW  */
@@ -2734,7 +2734,7 @@ yyreduce:
         (yyval.basic_type) = BasicType::INT;  // 返回整数类型枚举值
         GRAMMAR_TRACE("basic_type -> INTEGER_KW");  // 记录语法跟踪日志
     }
-#line 2738 "yacc_pascal.cpp"
+#line 2738 "parser.cpp"
     break;
 
   case 36: /* basic_type: REAL_KW  */
@@ -2743,7 +2743,7 @@ yyreduce:
         (yyval.basic_type) = BasicType::REAL;  // 返回实数类型枚举值
         GRAMMAR_TRACE("basic_type -> REAL_KW");  // 记录语法跟踪日志
     }
-#line 2747 "yacc_pascal.cpp"
+#line 2747 "parser.cpp"
     break;
 
   case 37: /* basic_type: BOOLEAN_KW  */
@@ -2752,7 +2752,7 @@ yyreduce:
         (yyval.basic_type) = BasicType::BOOLEAN;  // 返回布尔类型枚举值
         GRAMMAR_TRACE("basic_type -> BOOLEAN_KW");  // 记录语法跟踪日志
     }
-#line 2756 "yacc_pascal.cpp"
+#line 2756 "parser.cpp"
     break;
 
   case 38: /* basic_type: CHAR_KW  */
@@ -2761,7 +2761,7 @@ yyreduce:
         (yyval.basic_type) = BasicType::CHAR;  // 返回字符类型枚举值
         GRAMMAR_TRACE("basic_type -> CHAR_KW");  // 记录语法跟踪日志
     }
-#line 2765 "yacc_pascal.cpp"
+#line 2765 "parser.cpp"
     break;
 
   case 39: /* period_list: INTEGER DOUBLE_DOT INTEGER  */
@@ -2777,7 +2777,7 @@ yyreduce:
         (yyval.period_list) = periodList;  // 返回范围列表
         GRAMMAR_TRACE("period_list -> INTEGER '..' INTEGER");  // 记录语法跟踪日志
     }
-#line 2781 "yacc_pascal.cpp"
+#line 2781 "parser.cpp"
     break;
 
   case 40: /* period_list: period_list ',' INTEGER DOUBLE_DOT INTEGER  */
@@ -2792,7 +2792,7 @@ yyreduce:
         
         GRAMMAR_TRACE("period_list -> period_list ',' INTEGER '..' INTEGER");  // 记录语法跟踪日志
     }
-#line 2796 "yacc_pascal.cpp"
+#line 2796 "parser.cpp"
     break;
 
   case 41: /* subprogram_declarations: %empty  */
@@ -2801,7 +2801,7 @@ yyreduce:
         (yyval.func_decl_list) = nullptr;  // 返回空指针，表示没有子程序声明
         GRAMMAR_TRACE("subprogram_declarations -> empty");  // 记录语法跟踪日志
     }
-#line 2805 "yacc_pascal.cpp"
+#line 2805 "parser.cpp"
     break;
 
   case 42: /* subprogram_declarations: subprogram_declarations subprogram ';'  */
@@ -2820,7 +2820,7 @@ yyreduce:
         
         GRAMMAR_TRACE("subprogram_declarations -> subprogram_declarations subprogram ';'");  // 记录语法跟踪日志
     }
-#line 2824 "yacc_pascal.cpp"
+#line 2824 "parser.cpp"
     break;
 
   case 43: /* subprogram: subprogram_head ';' subprogram_body  */
@@ -2835,7 +2835,7 @@ yyreduce:
         (yyval.func_decl) = subprogram;  // 返回创建的子程序声明节点
         GRAMMAR_TRACE("subprogram -> subprogram_head ';' subprogram_body");  // 记录语法跟踪日志
     }
-#line 2839 "yacc_pascal.cpp"
+#line 2839 "parser.cpp"
     break;
 
   case 44: /* subprogram_head: PROCEDURE IDENTIFIER formal_parameter  */
@@ -2859,7 +2859,7 @@ yyreduce:
         free((yyvsp[-1].string));  // 释放函数名称字符串
         GRAMMAR_TRACE("subprogram_head -> PROCEDURE IDENTIFIER formal_parameter");  // 记录语法跟踪日志
     }
-#line 2863 "yacc_pascal.cpp"
+#line 2863 "parser.cpp"
     break;
 
   case 45: /* subprogram_head: FUNCTION IDENTIFIER formal_parameter ':' basic_type  */
@@ -2883,7 +2883,7 @@ yyreduce:
         free((yyvsp[-3].string));  // 释放函数名称字符串
         GRAMMAR_TRACE("subprogram_head -> FUNCTION IDENTIFIER formal_parameter ':' basic_type");  // 记录语法跟踪日志
     }
-#line 2887 "yacc_pascal.cpp"
+#line 2887 "parser.cpp"
     break;
 
   case 46: /* subprogram_head: FUNCTION error  */
@@ -2893,7 +2893,7 @@ yyreduce:
         GRAMMAR_ERROR("subprogram_head -> FUNCTION error");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2897 "yacc_pascal.cpp"
+#line 2897 "parser.cpp"
     break;
 
   case 47: /* subprogram_head: PROCEDURE error  */
@@ -2903,7 +2903,7 @@ yyreduce:
         GRAMMAR_ERROR("subprogram_head -> PROCEDURE error");  // 记录语法错误日志
         yyerrok;  // 告诉Bison错误已恢复，可以继续解析
     }
-#line 2907 "yacc_pascal.cpp"
+#line 2907 "parser.cpp"
     break;
 
   case 48: /* formal_parameter: %empty  */
@@ -2912,7 +2912,7 @@ yyreduce:
         (yyval.var_decls) = nullptr;  // 返回空指针，表示没有参数列表
         GRAMMAR_TRACE("formal_parameter -> empty");  // 记录语法跟踪日志
     }
-#line 2916 "yacc_pascal.cpp"
+#line 2916 "parser.cpp"
     break;
 
   case 49: /* formal_parameter: '(' parameter_list ')'  */
@@ -2922,7 +2922,7 @@ yyreduce:
         (yyval.var_decls) = (yyvsp[-1].var_decls);  // 直接返回parameter_list的结果
         GRAMMAR_TRACE("formal_parameter -> '(' parameter_list ')'");  // 记录语法跟踪日志
     }
-#line 2926 "yacc_pascal.cpp"
+#line 2926 "parser.cpp"
     break;
 
   case 50: /* parameter_list: %empty  */
@@ -2931,7 +2931,7 @@ yyreduce:
         (yyval.var_decls) = nullptr;  // 返回空指针，表示没有参数
         GRAMMAR_TRACE("parameter_list -> empty");  // 记录语法跟踪日志
     }
-#line 2935 "yacc_pascal.cpp"
+#line 2935 "parser.cpp"
     break;
 
   case 51: /* parameter_list: parameter  */
@@ -2943,7 +2943,7 @@ yyreduce:
         (yyval.var_decls) = paramList;  // 返回参数列表
         GRAMMAR_TRACE("parameter_list -> parameter");  // 记录语法跟踪日志
     }
-#line 2947 "yacc_pascal.cpp"
+#line 2947 "parser.cpp"
     break;
 
   case 52: /* parameter_list: parameter_list ';' parameter  */
@@ -2954,7 +2954,7 @@ yyreduce:
         
         GRAMMAR_TRACE("parameter_list -> parameter_list ';' parameter");  // 记录语法跟踪日志
     }
-#line 2958 "yacc_pascal.cpp"
+#line 2958 "parser.cpp"
     break;
 
   case 53: /* parameter: var_parameter  */
@@ -2965,7 +2965,7 @@ yyreduce:
         
         GRAMMAR_TRACE("parameter -> var_parameter"); // 记录语法跟踪信息到日志
     }
-#line 2969 "yacc_pascal.cpp"
+#line 2969 "parser.cpp"
     break;
 
   case 54: /* parameter: value_parameter  */
@@ -2976,7 +2976,7 @@ yyreduce:
         
         GRAMMAR_TRACE("parameter -> value_parameter"); // 记录语法跟踪信息到日志
     }
-#line 2980 "yacc_pascal.cpp"
+#line 2980 "parser.cpp"
     break;
 
   case 55: /* var_parameter: VAR value_parameter  */
@@ -2985,7 +2985,7 @@ yyreduce:
         (yyval.var_decl) = (yyvsp[0].var_decl);  // 将value_parameter创建的节点作为当前规则的结果
         GRAMMAR_TRACE("var_parameter -> VAR value_parameter");  // 记录语法规则应用的跟踪日志
     }
-#line 2989 "yacc_pascal.cpp"
+#line 2989 "parser.cpp"
     break;
 
   case 56: /* value_parameter: idlist ':' basic_type  */
@@ -3003,7 +3003,7 @@ yyreduce:
         
         GRAMMAR_TRACE("value_parameter -> idlist ':' basic_type");  // 记录语法规则应用的跟踪日志
     }
-#line 3007 "yacc_pascal.cpp"
+#line 3007 "parser.cpp"
     break;
 
   case 57: /* subprogram_body: const_declarations var_declarations compound_statement  */
@@ -3036,7 +3036,7 @@ yyreduce:
        (yyval.func_body) = funcBody;  // 返回构建完成的函数体节点
        GRAMMAR_TRACE("subprogram_body -> const_declarations var_declarations compound_statement");  // 记录语法解析跟踪信息
    }
-#line 3040 "yacc_pascal.cpp"
+#line 3040 "parser.cpp"
     break;
 
   case 58: /* compound_statement: BEGIN_TOKEN statement_list END  */
@@ -3048,7 +3048,7 @@ yyreduce:
        
        GRAMMAR_TRACE("compound_statement -> BEGIN_TOKEN statement_list END");  // 记录语法解析跟踪信息
    }
-#line 3052 "yacc_pascal.cpp"
+#line 3052 "parser.cpp"
     break;
 
   case 59: /* statement_list: statement  */
@@ -3058,7 +3058,7 @@ yyreduce:
                  // 如果statement返回nullptr（空语句），则语句列表也为空
        GRAMMAR_TRACE("statement_list -> statement");  // 记录语法解析跟踪信息
    }
-#line 3062 "yacc_pascal.cpp"
+#line 3062 "parser.cpp"
     break;
 
   case 60: /* statement_list: statement_list ';' statement  */
@@ -3085,7 +3085,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement_list -> statement_list ';' statement");  // 记录语法解析跟踪信息
    }
-#line 3089 "yacc_pascal.cpp"
+#line 3089 "parser.cpp"
     break;
 
   case 61: /* statement_list: error ';' statement  */
@@ -3102,7 +3102,7 @@ yyreduce:
        GRAMMAR_ERROR("statement_list -> error ';' statement");  // 记录语法错误信息
        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
    }
-#line 3106 "yacc_pascal.cpp"
+#line 3106 "parser.cpp"
     break;
 
   case 62: /* statement_list: statement_list ';' error  */
@@ -3119,7 +3119,7 @@ yyreduce:
        GRAMMAR_ERROR("statement_list -> statement_list ';' error");  // 记录语法错误信息
        yyerrok;  // 告诉Bison错误已恢复，可以继续解析
    }
-#line 3123 "yacc_pascal.cpp"
+#line 3123 "parser.cpp"
     break;
 
   case 63: /* statement: %empty  */
@@ -3128,7 +3128,7 @@ yyreduce:
        (yyval.stmt_list) = nullptr;  // 返回空指针表示没有语句
        GRAMMAR_TRACE("statement -> empty");  // 记录语法解析跟踪信息
    }
-#line 3132 "yacc_pascal.cpp"
+#line 3132 "parser.cpp"
     break;
 
   case 64: /* statement: variable ASSIGNOP expression  */
@@ -3145,7 +3145,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement -> variable ASSIGNOP expression");  // 记录语法解析跟踪信息
    }
-#line 3149 "yacc_pascal.cpp"
+#line 3149 "parser.cpp"
     break;
 
   case 65: /* statement: procedure_call  */
@@ -3157,7 +3157,7 @@ yyreduce:
        (yyval.stmt_list) = stmtList;  // 返回包含过程调用的列表
        GRAMMAR_TRACE("statement -> procedure_call");  // 记录语法解析跟踪信息
    }
-#line 3161 "yacc_pascal.cpp"
+#line 3161 "parser.cpp"
     break;
 
   case 66: /* statement: compound_statement  */
@@ -3166,7 +3166,7 @@ yyreduce:
        (yyval.stmt_list) = (yyvsp[0].stmt_list);  // 直接返回复合语句规则的结果
        GRAMMAR_TRACE("statement -> compound_statement");  // 记录语法解析跟踪信息
    }
-#line 3170 "yacc_pascal.cpp"
+#line 3170 "parser.cpp"
     break;
 
   case 67: /* statement: WHILE expression DO statement  */
@@ -3190,7 +3190,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement -> WHILE expression DO statement");  // 记录语法解析跟踪信息
    }
-#line 3194 "yacc_pascal.cpp"
+#line 3194 "parser.cpp"
     break;
 
   case 68: /* statement: IF expression THEN statement else_part  */
@@ -3222,7 +3222,7 @@ yyreduce:
         (yyval.stmt_list) = stmtList;  // 返回包含if语句的列表
         GRAMMAR_TRACE("statement -> IF expression THEN statement else_part");  // 记录语法解析跟踪信息
     }
-#line 3226 "yacc_pascal.cpp"
+#line 3226 "parser.cpp"
     break;
 
   case 69: /* statement: FOR IDENTIFIER ASSIGNOP expression TO expression DO statement  */
@@ -3249,7 +3249,7 @@ yyreduce:
        (yyval.stmt_list) = stmtList;  // 返回包含for语句的列表
        GRAMMAR_TRACE("statement -> FOR IDENTIFIER ASSIGNOP expression TO expression DO statement");  // 记录语法解析跟踪信息
    }
-#line 3253 "yacc_pascal.cpp"
+#line 3253 "parser.cpp"
     break;
 
   case 70: /* statement: READ '(' variable_list ')'  */
@@ -3269,7 +3269,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement -> READ '(' variable_list ')'");  // 记录语法解析跟踪信息
    }
-#line 3273 "yacc_pascal.cpp"
+#line 3273 "parser.cpp"
     break;
 
   case 71: /* statement: WRITE '(' expression_list ')'  */
@@ -3291,7 +3291,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement -> WRITE '(' expression_list ')'");  // 记录语法解析跟踪信息
    }
-#line 3295 "yacc_pascal.cpp"
+#line 3295 "parser.cpp"
     break;
 
   case 72: /* statement: BREAK  */
@@ -3305,7 +3305,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement -> BREAK");  // 记录语法解析跟踪信息
    }
-#line 3309 "yacc_pascal.cpp"
+#line 3309 "parser.cpp"
     break;
 
   case 73: /* statement: CONTINUE  */
@@ -3319,7 +3319,7 @@ yyreduce:
        
        GRAMMAR_TRACE("statement -> CONTINUE");  // 记录语法解析跟踪信息
    }
-#line 3323 "yacc_pascal.cpp"
+#line 3323 "parser.cpp"
     break;
 
   case 74: /* variable_list: variable  */
@@ -3333,7 +3333,7 @@ yyreduce:
        
        GRAMMAR_TRACE("variable_list -> variable");  // 记录语法解析跟踪信息
    }
-#line 3337 "yacc_pascal.cpp"
+#line 3337 "parser.cpp"
     break;
 
   case 75: /* variable_list: variable_list ',' variable  */
@@ -3348,7 +3348,7 @@ yyreduce:
        (yyval.lval_list) = (yyvsp[-2].lval_list);  // 返回更新后的变量列表
        GRAMMAR_TRACE("variable_list -> variable_list ',' variable");  // 记录语法解析跟踪信息
    }
-#line 3352 "yacc_pascal.cpp"
+#line 3352 "parser.cpp"
     break;
 
   case 76: /* variable_list: error ',' variable  */
@@ -3359,7 +3359,7 @@ yyreduce:
        
        GRAMMAR_ERROR("variable_list -> error ',' variable");  // 记录语法错误信息
    }
-#line 3363 "yacc_pascal.cpp"
+#line 3363 "parser.cpp"
     break;
 
   case 77: /* variable: IDENTIFIER id_varpart  */
@@ -3383,7 +3383,7 @@ yyreduce:
        
        GRAMMAR_TRACE("variable -> IDENTIFIER id_varpart");  // 记录语法解析跟踪信息
    }
-#line 3387 "yacc_pascal.cpp"
+#line 3387 "parser.cpp"
     break;
 
   case 78: /* id_varpart: %empty  */
@@ -3392,7 +3392,7 @@ yyreduce:
         (yyval.expr_list) = nullptr;  // 返回空指针，表示没有数组下标
         GRAMMAR_TRACE("id_varpart -> empty");  // 记录语法解析跟踪信息
     }
-#line 3396 "yacc_pascal.cpp"
+#line 3396 "parser.cpp"
     break;
 
   case 79: /* id_varpart: '[' expression_list ']'  */
@@ -3408,7 +3408,7 @@ yyreduce:
         
         GRAMMAR_TRACE("id_varpart -> '[' expression_list ']'");  // 记录语法解析跟踪信息
     }
-#line 3412 "yacc_pascal.cpp"
+#line 3412 "parser.cpp"
     break;
 
   case 80: /* procedure_call: IDENTIFIER  */
@@ -3423,7 +3423,7 @@ yyreduce:
        
        GRAMMAR_TRACE("procedure_call -> IDENTIFIER");  // 记录语法解析跟踪信息
    }
-#line 3427 "yacc_pascal.cpp"
+#line 3427 "parser.cpp"
     break;
 
   case 81: /* procedure_call: IDENTIFIER '(' expression_list ')'  */
@@ -3447,7 +3447,7 @@ yyreduce:
        
        GRAMMAR_TRACE("procedure_call -> IDENTIFIER '(' expression_list ')'");  // 记录语法解析跟踪信息
    }
-#line 3451 "yacc_pascal.cpp"
+#line 3451 "parser.cpp"
     break;
 
   case 82: /* else_part: %empty  */
@@ -3456,7 +3456,7 @@ yyreduce:
         (yyval.stmt_list) = nullptr;  // 返回空指针表示没有else分支
         GRAMMAR_TRACE("else_part -> empty");  // 记录语法解析跟踪信息
     }
-#line 3460 "yacc_pascal.cpp"
+#line 3460 "parser.cpp"
     break;
 
   case 83: /* else_part: ELSE statement  */
@@ -3465,7 +3465,7 @@ yyreduce:
         (yyval.stmt_list) = (yyvsp[0].stmt_list);  // 直接返回else分支中的语句列表
         GRAMMAR_TRACE("else_part -> ELSE statement");  // 记录语法解析跟踪信息
     }
-#line 3469 "yacc_pascal.cpp"
+#line 3469 "parser.cpp"
     break;
 
   case 84: /* expression_list: %empty  */
@@ -3474,7 +3474,7 @@ yyreduce:
        (yyval.expr_list) = nullptr;  // 返回空指针，表示空列表
        GRAMMAR_TRACE("expression_list -> empty");  // 记录语法解析跟踪信息
    }
-#line 3478 "yacc_pascal.cpp"
+#line 3478 "parser.cpp"
     break;
 
   case 85: /* expression_list: expression  */
@@ -3488,7 +3488,7 @@ yyreduce:
        
        GRAMMAR_TRACE("expression_list -> expression");  // 记录语法解析跟踪信息
    }
-#line 3492 "yacc_pascal.cpp"
+#line 3492 "parser.cpp"
     break;
 
   case 86: /* expression_list: expression_list ',' expression  */
@@ -3501,7 +3501,7 @@ yyreduce:
        
        GRAMMAR_TRACE("expression_list -> expression_list ',' expression");  // 记录语法解析跟踪信息
    }
-#line 3505 "yacc_pascal.cpp"
+#line 3505 "parser.cpp"
     break;
 
   case 87: /* expression: simple_expression  */
@@ -3513,7 +3513,7 @@ yyreduce:
        
        GRAMMAR_TRACE("expression -> simple_expression");  // 记录语法解析跟踪信息
    }
-#line 3517 "yacc_pascal.cpp"
+#line 3517 "parser.cpp"
     break;
 
   case 88: /* expression: expression relop simple_expression  */
@@ -3532,7 +3532,7 @@ yyreduce:
        GRAMMAR_TRACE("expression -> simple_expression relop simple_expression");  // 记录语法解析跟踪信息
                                                                                  // 注意：跟踪信息不准确，应为"expression relop simple_expression"
    }
-#line 3536 "yacc_pascal.cpp"
+#line 3536 "parser.cpp"
     break;
 
   case 89: /* simple_expression: term  */
@@ -3544,7 +3544,7 @@ yyreduce:
        
        GRAMMAR_TRACE("simple_expression -> term");  // 记录语法解析跟踪信息
    }
-#line 3548 "yacc_pascal.cpp"
+#line 3548 "parser.cpp"
     break;
 
   case 90: /* simple_expression: simple_expression addop term  */
@@ -3563,7 +3563,7 @@ yyreduce:
        GRAMMAR_TRACE("simple_expression -> simple_expression %lld term\n");  // 记录语法解析跟踪信息
                                                                              // 注意：跟踪信息中有格式化问题，应使用运算符符号而非%lld
    }
-#line 3567 "yacc_pascal.cpp"
+#line 3567 "parser.cpp"
     break;
 
   case 91: /* term: factor  */
@@ -3575,7 +3575,7 @@ yyreduce:
        
        GRAMMAR_TRACE("term -> factor");  // 记录语法解析跟踪信息
    }
-#line 3579 "yacc_pascal.cpp"
+#line 3579 "parser.cpp"
     break;
 
   case 92: /* term: term mulop factor  */
@@ -3593,7 +3593,7 @@ yyreduce:
        (yyval.mul_expr) = mulExpr;  // 返回更新后的项节点
        GRAMMAR_TRACE("term -> term mulop factor");  // 记录语法解析跟踪信息
    }
-#line 3597 "yacc_pascal.cpp"
+#line 3597 "parser.cpp"
     break;
 
   case 93: /* factor: INTEGER  */
@@ -3610,7 +3610,7 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> INTEGER");  // 记录语法解析跟踪信息
    }
-#line 3614 "yacc_pascal.cpp"
+#line 3614 "parser.cpp"
     break;
 
   case 94: /* factor: REAL  */
@@ -3632,7 +3632,7 @@ yyreduce:
        
        GRAMMAR_TRACE("factor -> REAL");  // 记录语法解析跟踪信息
    }
-#line 3636 "yacc_pascal.cpp"
+#line 3636 "parser.cpp"
     break;
 
   case 95: /* factor: BOOLEAN  */
@@ -3651,7 +3651,7 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> BOOLEAN");  // 记录语法解析跟踪信息
    }
-#line 3655 "yacc_pascal.cpp"
+#line 3655 "parser.cpp"
     break;
 
   case 96: /* factor: CHAR  */
@@ -3669,7 +3669,7 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> CHAR");  // 记录语法解析跟踪信息
    }
-#line 3673 "yacc_pascal.cpp"
+#line 3673 "parser.cpp"
     break;
 
   case 97: /* factor: variable  */
@@ -3685,7 +3685,7 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> variable");  // 记录语法解析跟踪信息
    }
-#line 3689 "yacc_pascal.cpp"
+#line 3689 "parser.cpp"
     break;
 
   case 98: /* factor: '(' expression ')'  */
@@ -3699,7 +3699,7 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回创建的一元表达式节点
        GRAMMAR_TRACE("factor -> '(' expression ')'");  // 记录语法解析跟踪信息
    }
-#line 3703 "yacc_pascal.cpp"
+#line 3703 "parser.cpp"
     break;
 
   case 99: /* factor: IDENTIFIER '(' expression_list ')'  */
@@ -3726,7 +3726,7 @@ yyreduce:
        
        GRAMMAR_TRACE("factor -> IDENTIFIER '(' expression_list ')'");  // 记录语法解析跟踪信息
    }
-#line 3730 "yacc_pascal.cpp"
+#line 3730 "parser.cpp"
     break;
 
   case 100: /* factor: NOT factor  */
@@ -3740,7 +3740,7 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回更新后的一元表达式节点
        GRAMMAR_TRACE("factor -> NOT factor");  // 记录语法解析跟踪信息
    }
-#line 3744 "yacc_pascal.cpp"
+#line 3744 "parser.cpp"
     break;
 
   case 101: /* factor: '+' factor  */
@@ -3751,7 +3751,7 @@ yyreduce:
        
        GRAMMAR_TRACE("factor -> '+' factor");  // 记录语法解析跟踪信息
    }
-#line 3755 "yacc_pascal.cpp"
+#line 3755 "parser.cpp"
     break;
 
   case 102: /* factor: '-' factor  */
@@ -3765,103 +3765,103 @@ yyreduce:
        (yyval.unary_expr) = unaryExpr;  // 返回更新后的一元表达式节点
        GRAMMAR_TRACE("factor -> '-' factor");  // 记录语法解析跟踪信息
    }
-#line 3769 "yacc_pascal.cpp"
+#line 3769 "parser.cpp"
     break;
 
   case 103: /* addop: '+'  */
 #line 1943 "parser.y"
          { (yyval.number) = 0; }
-#line 3775 "yacc_pascal.cpp"
+#line 3775 "parser.cpp"
     break;
 
   case 104: /* addop: '-'  */
 #line 1944 "parser.y"
          { (yyval.number) = 1; }
-#line 3781 "yacc_pascal.cpp"
+#line 3781 "parser.cpp"
     break;
 
   case 105: /* addop: OR  */
 #line 1945 "parser.y"
          { (yyval.number) = 2; }
-#line 3787 "yacc_pascal.cpp"
+#line 3787 "parser.cpp"
     break;
 
   case 106: /* relop: '='  */
 #line 1950 "parser.y"
          { (yyval.number) = 0; }
-#line 3793 "yacc_pascal.cpp"
+#line 3793 "parser.cpp"
     break;
 
   case 107: /* relop: NE  */
 #line 1951 "parser.y"
          { (yyval.number) = 1; }
-#line 3799 "yacc_pascal.cpp"
+#line 3799 "parser.cpp"
     break;
 
   case 108: /* relop: '<'  */
 #line 1952 "parser.y"
          { (yyval.number) = 2; }
-#line 3805 "yacc_pascal.cpp"
+#line 3805 "parser.cpp"
     break;
 
   case 109: /* relop: LE  */
 #line 1953 "parser.y"
          { (yyval.number) = 3; }
-#line 3811 "yacc_pascal.cpp"
+#line 3811 "parser.cpp"
     break;
 
   case 110: /* relop: '>'  */
 #line 1954 "parser.y"
          { (yyval.number) = 4; }
-#line 3817 "yacc_pascal.cpp"
+#line 3817 "parser.cpp"
     break;
 
   case 111: /* relop: GE  */
 #line 1955 "parser.y"
          { (yyval.number) = 5; }
-#line 3823 "yacc_pascal.cpp"
+#line 3823 "parser.cpp"
     break;
 
   case 112: /* relop: IN  */
 #line 1956 "parser.y"
          { (yyval.number) = 6; }
-#line 3829 "yacc_pascal.cpp"
+#line 3829 "parser.cpp"
     break;
 
   case 113: /* mulop: '*'  */
 #line 1961 "parser.y"
              { (yyval.number) = 0; }
-#line 3835 "yacc_pascal.cpp"
+#line 3835 "parser.cpp"
     break;
 
   case 114: /* mulop: '/'  */
 #line 1962 "parser.y"
              { (yyval.number) = 1; }
-#line 3841 "yacc_pascal.cpp"
+#line 3841 "parser.cpp"
     break;
 
   case 115: /* mulop: DIV  */
 #line 1963 "parser.y"
              { (yyval.number) = 1; }
-#line 3847 "yacc_pascal.cpp"
+#line 3847 "parser.cpp"
     break;
 
   case 116: /* mulop: MOD  */
 #line 1964 "parser.y"
              { (yyval.number) = 2; }
-#line 3853 "yacc_pascal.cpp"
+#line 3853 "parser.cpp"
     break;
 
   case 117: /* mulop: AND  */
 #line 1965 "parser.y"
              { (yyval.number) = 3; }
-#line 3859 "yacc_pascal.cpp"
+#line 3859 "parser.cpp"
     break;
 
   case 118: /* mulop: ANDTHEN  */
 #line 1966 "parser.y"
              { (yyval.number) = 4; }
-#line 3865 "yacc_pascal.cpp"
+#line 3865 "parser.cpp"
     break;
 
   case 119: /* error_recovery: error ';'  */
@@ -3869,11 +3869,11 @@ yyreduce:
                  {// 匹配从错误标记到分号的任何内容
         yyerrok;
     }
-#line 3873 "yacc_pascal.cpp"
+#line 3873 "parser.cpp"
     break;
 
 
-#line 3877 "yacc_pascal.cpp"
+#line 3877 "parser.cpp"
 
       default: break;
     }

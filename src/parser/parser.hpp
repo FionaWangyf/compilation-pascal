@@ -35,8 +35,8 @@
    especially those whose name start with YY_ or yy_.  They are
    private implementation details that can be changed or removed.  */
 
-#ifndef YY_YY_YACC_PASCAL_HPP_INCLUDED
-# define YY_YY_YACC_PASCAL_HPP_INCLUDED
+#ifndef YY_YY_PARSER_HPP_INCLUDED
+# define YY_YY_PARSER_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 1
@@ -176,7 +176,7 @@ union YYSTYPE
     char                                            charactor;        /* 字符值 */
     int                                             token;            /* 令牌值，用于某些特殊情况 */
 
-#line 180 "yacc_pascal.hpp"
+#line 180 "parser.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -204,4 +204,4 @@ struct YYLTYPE
 int yyparse (const char * code_str, ProgramNode ** program, void * scanner);
 
 
-#endif /* !YY_YY_YACC_PASCAL_HPP_INCLUDED  */
+#endif /* !YY_YY_PARSER_HPP_INCLUDED  */
